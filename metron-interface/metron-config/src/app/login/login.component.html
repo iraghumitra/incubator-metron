@@ -18,14 +18,14 @@
       <img class="logo-img-card" src="assets/images/logo.png" />
 
       <label class="label"> USERNAME </label>
-      <input class="form-control" [(ngModel)]="user" required autofocus>
+      <input class="form-control" [(ngModel)]="user" (keyup.enter)="login()" required autofocus>
 
       <label class="label"> PASSWORD </label>
-      <input type="password"  class="form-control" [(ngModel)]="password" required>
+      <input type="password"  class="form-control" [(ngModel)]="password" (keyup.enter)="login()" required>
 
       <div class="my-1" style="color:#a94442">
         {{loginFailure}}
         <button class="btn btn-primary pull-right" type="submit" (click)="login()">LOG IN</button>
       </div>
   </div>
-</div><
+</div>

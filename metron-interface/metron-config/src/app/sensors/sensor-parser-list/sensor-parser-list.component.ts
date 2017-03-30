@@ -98,6 +98,9 @@ export class SensorParserListComponent implements OnInit {
       case 'latency':
       case 'throughput':
         this.sensors.sort((obj1: SensorParserConfigHistory, obj2: SensorParserConfigHistory) => {
+          if (!obj1[$event.sortBy] || !obj1[$event.sortBy]) {
+            return 0;
+          }
           if ($event.sortOrder === Sort.ASC) {
             return obj1[$event.sortBy].localeCompare(obj2[$event.sortBy]);
           }
