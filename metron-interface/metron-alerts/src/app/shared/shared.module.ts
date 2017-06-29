@@ -35,7 +35,7 @@ import { ColumnNameTranslatePipe } from './pipes/column-name-translate.pipe';
     NavContentDirective,
     CenterEllipsesPipe,
     AlertSearchDirective,
-    ColumnNameTranslatePipe
+    ColumnNameTranslatePipe,
   ],
   exports:  [
     CommonModule,

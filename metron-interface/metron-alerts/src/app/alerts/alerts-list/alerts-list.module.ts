@@ -9,9 +9,10 @@ import {ListGroupModule} from '../../shared/list-group/list-grup.module';
 import {CollapseModule} from '../../shared/collapse/collapse.module';
 import {MetronTablePaginationModule} from '../../shared/metron-table/metron-table-pagination/metron-table-pagination.module';
 import {ConfigureRowsModule} from '../configure-rows/configure-rows.module';
+import {GroupByModule} from '../../shared/group-by/group-by.module';
 
 @NgModule({
-    imports: [routing, SharedModule, ConfigureRowsModule, MetronSorterModule, MetronTablePaginationModule,
+    imports: [routing, SharedModule, ConfigureRowsModule, GroupByModule, MetronSorterModule, MetronTablePaginationModule,
                 ListGroupModule, CollapseModule],
     exports: [],
     declarations: [AlertsListComponent],

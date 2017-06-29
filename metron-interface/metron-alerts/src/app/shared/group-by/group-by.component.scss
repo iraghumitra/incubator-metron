@@ -1,0 +1,86 @@
+@import "../../../variables";
+
+.wrapper {
+  //display: table;
+}
+.container {
+  //display: table-cell;
+  //background-color: rgba(255, 255, 255, 0.2);
+  //width: 50%;
+}
+.container:nth-child(odd) {
+  //background-color: rgba(0, 0, 0, 0.2);
+}
+/*
+ * note that styling gu-mirror directly is a bad practice because it's too generic.
+ * you're better off giving the draggable elements a unique class and styling that directly!
+ */
+.container .group-by-items,
+.gu-mirror {
+  margin: 0 10px;
+  padding: 5px 10px;
+  background: $mine-shaft-6;
+  border: 1px solid $mine-shaft-7;
+  border-radius: 2px;
+  transition: opacity 0.4s ease-in-out;
+}
+
+//.container .group-by-items.gu-transit {
+//  background: #3D3D3D;
+//  border: 1px solid #4D4D4D;
+//  color: #B2B2B2;
+//}
+
+.container .group-by-items {
+  cursor: move;
+  cursor: grab;
+  cursor: -moz-grab;
+  cursor: -webkit-grab;
+}
+.gu-mirror {
+  cursor: grabbing;
+  cursor: -moz-grabbing;
+  cursor: -webkit-grabbing;
+}
+.container .ex-moved {
+  //background-color: #e74c3c;
+}
+.container.ex-over {
+  //background-color: rgba(255, 255, 255, 0.3);
+}
+
+.handle {
+  //padding: 0 5px;
+  //margin-right: 5px;
+  //background-color: rgba(0, 0, 0, 0.4);
+  cursor: move;
+}
+nested-repeat-example .container span {
+  display: block;
+  //padding: 8px;
+}
+
+.container {
+  display: flex;
+  width: 100%;
+  flex-wrap: wrap;
+  text-align: center;
+  //font-size: 20px;
+}
+
+.group-by-items {
+  width: 115px;
+  height: 50px;
+
+  .count {
+    line-height: 1;
+    color: $silver;
+    font-size: 20px;
+  }
+
+  .name {
+    font-size: 12px;
+    color: $gothic;
+  }
+
+}
