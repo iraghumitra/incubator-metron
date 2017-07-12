@@ -26,6 +26,7 @@
     "core-js": "^2.4.1",
     "font-awesome": "^4.7.0",
     "rxjs": "^5.1.0",
+    "sly": "darsain/sly.git#19c40feb057b110c098e06df9f9bde9f31de96e2",
     "web-animations-js": "^2.2.2",
     "zone.js": "^0.8.4"
   },

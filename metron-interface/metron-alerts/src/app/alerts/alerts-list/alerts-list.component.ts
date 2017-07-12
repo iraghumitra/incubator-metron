@@ -84,19 +84,7 @@ export class AlertsListComponent implements OnInit {
     let availableWidth = document.documentElement.clientWidth - (200 + (15 * 3)); /* screenwidth - (navPaneWidth + (paddings))*/
     availableWidth = availableWidth - (55 + 25 + 25); /* availableWidth - (score + colunSelectIcon +selectCheckbox )*/
     let tWidth = 0;
-    this.alertsColumnsToDisplay =  this.alertsColumns.filter(colMetaData => {
-      if (colMetaData.type.toUpperCase() === 'DATE') {
-        tWidth += 140;
-      } else if (colMetaData.type.toUpperCase() === 'IP') {
-        tWidth += 120;
-      } else if (colMetaData.type.toUpperCase() === 'BOOLEAN') {
-        tWidth += 50;
-      } else {
-        tWidth += 130;
-      }
-
-      return tWidth < availableWidth;
-    });
+    this.alertsColumnsToDisplay =  this.alertsColumns;
   }
 
   formatValue(column: ColumnMetadata, returnValue: string) {
