@@ -37,7 +37,7 @@ export class MetronTableScrollComponent implements OnInit, OnChanges {
         smart: 1,
         mouseDragging: true,
         startAt: 0,
-        scrollBy: 0,
+        scrollBy: 200,
         speed: 300,
         dragHandle: 1,
         clickBar: 1,
