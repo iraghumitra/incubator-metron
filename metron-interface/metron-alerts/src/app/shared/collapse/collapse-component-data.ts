@@ -16,20 +16,17 @@
  * limitations under the License.
  */
 
-package org.apache.metron.common.field.transformation;
+export class CollapseComponentDataItems {
+  name: string;
+  count: number;
 
-import org.apache.metron.stellar.dsl.Context;
+  constructor(name: string, count?: number) {
+    this.name = name;
+    this.count = count;
+  }
+}
 
-import java.io.Serializable;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-
-public interface FieldTransformation extends Serializable {
-  Map<String, Object> map( Map<String, Object> input
-                         , List<String> outputField
-                         , LinkedHashMap<String, Object> fieldMappingConfig
-                         , Context context
-                         , Map<String, Object>... sensorConfig
-                         );
+export class CollapseComponentData {
+  groupName: string;
+  groupItems: CollapseComponentDataItems[] = [];
 }

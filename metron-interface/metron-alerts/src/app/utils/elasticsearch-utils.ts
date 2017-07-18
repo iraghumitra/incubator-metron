@@ -20,6 +20,8 @@ import {AlertsSearchResponse} from '../model/alerts-search-response';
 
 export class ElasticsearchUtils {
 
+  public static excludeIndexName = 'kibana';
+
   private static createColumMetaData(properties: any, columnMetadata: ColumnMetadata[], seen: string[]) {
      try {
        let columnNames = Object.keys(properties);
@@ -27,7 +29,7 @@ export class ElasticsearchUtils {
          if (seen.indexOf(columnName) === -1) {
            seen.push(columnName);
            columnMetadata.push(
-             new ColumnMetadata(columnName, (properties[columnName].type ? properties[columnName].type.toUpperCase() : ''))
+             new ColumnMetadata(columnName, (properties[columnName].type ? properties[columnName].type : ''))
            );
          }
        }
@@ -40,7 +42,7 @@ export class ElasticsearchUtils {
     let seen: string[] = [];
 
     for (let index in response.metadata.indices) {
-      if (index.startsWith('bro') || index.startsWith('bro') || index.startsWith('bro')) {
+      if (!index.endsWith(ElasticsearchUtils.excludeIndexName)) {
         let mappings = response.metadata.indices[index].mappings;
         for (let type of Object.keys(mappings)) {
           ElasticsearchUtils.createColumMetaData(response.metadata.indices[index].mappings[type].properties, columnMetadata, seen);
