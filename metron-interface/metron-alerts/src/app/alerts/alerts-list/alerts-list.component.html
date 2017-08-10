@@ -36,7 +36,7 @@
     </div>
     <div class="mrow">
         <div class="col-md-9 px-0">
-            <span class="col-form-label-lg"> Alerts ({{alerts.length}} of {{pagingData.total}}) </span>
+            <span class="col-form-label-lg"> Alerts ({{alertsSearchResponse.results.length}} of {{pagingData.total}}) </span>
         </div>
         <div class="col-md-3 px-0">
             <div class="pull-right" style="position: relative; display: block;">
@@ -64,13 +64,13 @@
 
 <div class="container-fluid nav-content">
     <div class="row">
-        <div class="col-sm-12 pl-0">
-            <app-group-by> </app-group-by>
+        <div class="col-sm-12 pl-0 mb-3">
+            <app-group-by [aggregations]="alertsSearchResponse.aggregations" [aggregationsWithValues]="alertsSearchResponse.aggregations" (aggregationsChange)="onAggregate($event)"> </app-group-by>
         </div>
 
         <div class="col-sm-12 pl-0">
             <div class="table-wrapper">
-                <table class="table table-sm" metron-config-table [data]="alerts" [cellSelectable]="true" (onSort)="onSort($event)" style="white-space: nowrap;" (window:resize)="onResize()" #table>
+                <table class="table table-sm" metron-config-table [data]="alertsSearchResponse.results" [cellSelectable]="true" (onSort)="onSort($event)" style="white-space: nowrap;" (window:resize)="onResize()" #table>
                     <thead>
                     <tr>
                         <th style="width:55px"> <metron-config-sorter [type]="'number'" [sortBy]="threatScoreFieldName"> Score </metron-config-sorter> </th>
@@ -80,7 +80,7 @@
                     </tr>
                     </thead>
                     <tbody>
-                    <tr *ngFor="let alert of alerts" (click)="showDetails($event, alert)" [ngClass]="{'selected' : selectedAlerts.indexOf(alert) != -1}">
+                    <tr *ngFor="let alert of alertsSearchResponse.results" (click)="showDetails($event, alert)" [ngClass]="{'selected' : selectedAlerts.indexOf(alert) != -1}">
                         <td (click)="onAddFilter(threatScoreFieldName, alert._source[threatScoreFieldName])">
                             <div appAlertSeverity [severity]="alert._source[threatScoreFieldName]"> <a> {{ alert._source[threatScoreFieldName] ? alert._source[threatScoreFieldName] : '-' }} </a> </div>
                         </td>

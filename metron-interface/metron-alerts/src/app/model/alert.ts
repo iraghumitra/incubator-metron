@@ -1,3 +1,29 @@
+
+export class AlertAggregationGroup {
+  name: string;
+  enabled: boolean;
+  aggregations: AlertAggregation[];
+
+  constructor(name:string, aggregations:AlertAggregation[] = []) {
+    this.name = name;
+    this.enabled = false;
+    this.aggregations = aggregations;
+  }
+}
+
+export class AlertAggregation {
+  count: number;
+  key: string;
+  aggregations: AlertAggregation[];
+
+
+  constructor(count:number, key:string, aggregations:AlertAggregation[] = []) {
+    this.count = count;
+    this.key = key;
+    this.aggregations = aggregations;
+  }
+}
+
 export class Alert {
   _index: string;
   _type: string;

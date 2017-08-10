@@ -59,4 +59,7 @@ export abstract class DataSource {
   abstract saveRecentSearch(saveSearch: SaveSearch): Observable<{}>
   abstract saveSearch(saveSearch: SaveSearch): Observable<{}>
   abstract updateSearch(saveSearch: SaveSearch): Observable<{}>
+
+  // Calls to get valid group by columns
+  abstract getNonUniqueColumnNames(): Observable<ColumnMetadata[]>
 }

@@ -47,12 +47,18 @@ export class ElasticSearchLocalstorageImpl extends DataSource {
     new ColumnMetadata('alert_status', 'string')
   ];
 
-  getAlerts(searchRequest: SearchRequest): Observable<AlertsSearchResponse> {
-    let url = '/search/*,-*' + ElasticsearchUtils.excludeIndexName + '/_search';
-    let request: any  = JSON.parse(JSON.stringify(searchRequest));
-    request.query = { query_string: { query: searchRequest.query } };
+  private uniqueColumnValuesColumnMetadata = [
+    new ColumnMetadata('source:type', 'string'),
+    new ColumnMetadata('ip_src_addr', 'ip'),
+    new ColumnMetadata('enrichments:geo:ip_dst_addr:country', 'string'),
+    new ColumnMetadata('ip_dst_addr', 'ip'),
+    new ColumnMetadata('host', 'string'),
+    new ColumnMetadata('username', 'string'),
+  ];
 
-    return this.http.post(url, request, new RequestOptions({headers: new Headers(this.defaultHeaders)}))
+  getAlerts(searchRequest: SearchRequest): Observable<AlertsSearchResponse> {
+    let url = '/search/*,' + ElasticsearchUtils.excludeIndexName + '/_search';
+    return this.http.post(url, ElasticsearchUtils.getSearchRequest(searchRequest), new RequestOptions({headers: new Headers(this.defaultHeaders)}))
       .map(HttpUtil.extractData)
       .map(ElasticsearchUtils.extractAlertsData)
       .catch(HttpUtil.handleError)
@@ -289,6 +295,13 @@ export class ElasticSearchLocalstorageImpl extends DataSource {
       observer.next({});
       observer.complete();
 
+    });
+  }
+
+  getNonUniqueColumnNames(): Observable<ColumnMetadata[]> {
+    return Observable.create(observer => {
+      observer.next(this.uniqueColumnValuesColumnMetadata);
+      observer.complete();
     });
   }
 }

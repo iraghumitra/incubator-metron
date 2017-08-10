@@ -2,7 +2,7 @@ import {Component, OnInit, ViewChild, ElementRef} from '@angular/core';
 import {Router, NavigationStart} from '@angular/router';
 import {Observable, Subscription} from 'rxjs/Rx';
 
-import {Alert} from '../../model/alert';
+import {Alert, AlertAggregationGroup} from '../../model/alert';
 import {AlertService} from '../../service/alert.service';
 import {QueryBuilder} from './query-builder';
 import {ConfigureTableService} from '../../service/configure-table.service';
@@ -32,7 +32,7 @@ export class AlertsListComponent implements OnInit {
   alertsColumns: ColumnMetadata[] = [];
   alertsColumnsToDisplay: ColumnMetadata[] = [];
   selectedAlerts: Alert[] = [];
-  alerts: any[] = [];
+  alertsSearchResponse: AlertsSearchResponse = new AlertsSearchResponse();
   colNumberTimerId: number;
   refreshInterval = RefreshInterval.ONE_MIN;
   refreshTimer: Subscription;
@@ -46,6 +46,7 @@ export class AlertsListComponent implements OnInit {
   pagingData = new Pagination();
   tableMetaData = new TableMetadata();
   queryBuilder: QueryBuilder = new QueryBuilder();
+  defaultAggregationsGroups: AlertAggregationGroup[] = [];
 
   constructor(private router: Router,
               private alertsService: AlertService,
@@ -112,10 +113,18 @@ export class AlertsListComponent implements OnInit {
   getAlertColumnNames(resetPaginationForSearch: boolean) {
     Observable.forkJoin(
       this.configureTableService.getTableMetadata(),
-      this.clusterMetaDataService.getDefaultColumns()
+      this.clusterMetaDataService.getDefaultColumns(),
+      this.clusterMetaDataService.getNonUniqueColumnNames()
     ).subscribe((response: any) => {
-      this.prepareData(response[0], response[1], resetPaginationForSearch);
+      this.prepareData(response[0], response[1], response[2], resetPaginationForSearch);
     });
+  }
+
+  prepareAggregations(alertsColumns: ColumnMetadata[], nonUniqueColumns: ColumnMetadata[]) {
+    let groupByColNamesToDisplay = nonUniqueColumns.filter(col1 => alertsColumns.findIndex(col2 => { return (col1.name === col2.name); })  !== -1);
+
+    this.defaultAggregationsGroups = groupByColNamesToDisplay.map(col => new AlertAggregationGroup(col.name));
+    this.queryBuilder.setAggregations(groupByColNamesToDisplay.map(col => [col.name]));
   }
 
   getCollapseComponentData(data: any) {
@@ -129,8 +138,8 @@ export class AlertsListComponent implements OnInit {
     };
   }
 
-  getColumnNamesForQuery() {
-    let fieldNames = this.alertsColumns.map(columnMetadata => columnMetadata.name);
+  getColumnNamesForQuery(alertsColumns: ColumnMetadata[]) {
+    let fieldNames = alertsColumns.map(columnMetadata => columnMetadata.name);
     fieldNames = fieldNames.filter(name => !(name === '_id' || name === 'alert_status'));
     fieldNames.push(this.threatScoreFieldName);
     return fieldNames;
@@ -221,19 +230,37 @@ export class AlertsListComponent implements OnInit {
     this.search();
   }
 
+  onAggregate(alertAggregationGroups: AlertAggregationGroup[]) {
+    let nestedAggregate: string[] = [];
+    let aggregate: string[][] = [];
+
+    alertAggregationGroups.map(alertAggregationGroup => {
+      if (alertAggregationGroup.enabled) {
+        nestedAggregate.push(alertAggregationGroup.name);
+      } else {
+        aggregate.push([alertAggregationGroup.name]);
+      }
+    });
+
+    aggregate.unshift(nestedAggregate);
+
+    this.queryBuilder.setAggregations(aggregate);
+  }
+
   prepareColumnData(configuredColumns: ColumnMetadata[], defaultColumns: ColumnMetadata[]) {
     this.alertsColumns = (configuredColumns && configuredColumns.length > 0) ? configuredColumns : defaultColumns;
-    this.queryBuilder.setFields(this.getColumnNamesForQuery());
+    this.queryBuilder.setFields(this.getColumnNamesForQuery(this.alertsColumns));
     this.calcColumnsToDisplay();
   }
 
-  prepareData(tableMetaData: TableMetadata, defaultColumns: ColumnMetadata[], resetPagination: boolean) {
+  prepareData(tableMetaData: TableMetadata, defaultColumns: ColumnMetadata[], nonUniqueColumns: ColumnMetadata[], resetPagination: boolean) {
     this.tableMetaData = tableMetaData;
     this.pagingData.size = this.tableMetaData.size;
     this.refreshInterval = this.tableMetaData.refreshInterval;
 
     this.updateConfigRowsSettings();
     this.prepareColumnData(tableMetaData.tableColumns, defaultColumns);
+    this.prepareAggregations(this.alertsColumns, nonUniqueColumns);
 
     this.search(resetPagination);
   }
@@ -277,7 +304,7 @@ export class AlertsListComponent implements OnInit {
   selectAllRows($event) {
     this.selectedAlerts = [];
     if ($event.target.checked) {
-      this.selectedAlerts = this.alerts;
+      this.selectedAlerts = this.alertsSearchResponse.results;
     }
   }
 
@@ -319,7 +346,7 @@ export class AlertsListComponent implements OnInit {
   }
 
   setData(results: AlertsSearchResponse) {
-    this.alerts = results.results;
+    this.alertsSearchResponse = results;
     this.pagingData.total = results.total;
   }
 

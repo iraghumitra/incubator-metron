@@ -35,4 +35,8 @@ export class ClusterMetaDataService {
   getColumnMetaData(): Observable<ColumnMetadata[]> {
     return this.dataSource.getAllFieldNames();
   }
+
+  getNonUniqueColumnNames(): Observable<ColumnMetadata[]> {
+    return this.dataSource.getNonUniqueColumnNames();
+  }
 }

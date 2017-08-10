@@ -4,4 +4,5 @@ export class SearchRequest {
   from = 0;
   size = 15;
   sort: {}[] = [{ timestamp: {order : 'desc', ignore_unmapped: true, unmapped_type: 'date'} }];
+  aggregations: string[][];
 }

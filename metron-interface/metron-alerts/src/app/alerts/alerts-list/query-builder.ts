@@ -101,6 +101,10 @@ export class QueryBuilder {
     this.onSearchChange();
   }
 
+  setAggregations(aggregations: string[][]) {
+    this.searchRequest.aggregations = aggregations;
+  }
+
   setFields(fieldNames: string[]) {
       this.searchRequest._source = fieldNames;
   }
