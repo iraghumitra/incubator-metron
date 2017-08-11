@@ -53,3 +53,95 @@
   opacity: 0.3;
   cursor: default;
 }
+
+.filter {
+  input {
+    padding: 2px;
+  }
+
+  &:after {
+    font-family: "FontAwesome";
+    font-style: normal;
+    font-size: 14px;
+    content: '\F057';
+    position: absolute;
+    right: 25px;
+    top: 4px;
+    color: $dove-grey;
+  }
+}
+
+.ellipses {
+  padding-right: 10px;
+
+  span {
+    margin-right: 15px;
+    float: right;
+  }
+  span:after {
+    font-family: "FontAwesome";
+    font-style: normal;
+    font-size: 14px;
+    content: '\F142';
+    color: $dove-grey;
+  }
+}
+
+.fontawesome-checkbox ~ label {
+  margin: 0px 12px 0px 8px;
+}
+
+input {
+  font-size: 12px;
+  height: 32px;
+  width: 75%;
+}
+
+.selected {
+  thead {
+    th {
+      font-size: 15px;
+      margin-bottom: 15px;
+      padding-left: 0px;
+      border-bottom: 1px solid $dove-grey-2;
+    }
+  }
+
+  tbody {
+    tr {
+      cursor: move;
+      cursor: grab;
+      cursor: -moz-grab;
+      cursor: -webkit-grab;
+      border-bottom: 1px solid $tundora-1;
+      background: $tiber;
+
+      td {
+        padding: 5px 0px 6px 0px;
+        line-height: 1.8;
+      }
+    }
+  }
+}
+
+.available {
+  thead {
+    th {
+      font-size: 15px;
+      padding-left: 0px;
+      border-bottom: 1px solid $dove-grey-2;
+    }
+  }
+}
+
+.container .group-by-items {
+
+}
+
+.gu-mirror {
+  display: none;
+}
+
+.handle {
+  cursor: move;
+}

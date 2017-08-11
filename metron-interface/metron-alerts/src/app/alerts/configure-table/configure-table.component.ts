@@ -24,6 +24,7 @@ import {ClusterMetaDataService} from '../../service/cluster-metadata.service';
 import {ColumnMetadata} from '../../model/column-metadata';
 import {ColumnNamesService} from '../../service/column-names.service';
 import {ColumnNames} from '../../model/column-names';
+import {DragulaService} from 'ng2-dragula/index';
 
 export enum AlertState {
   NEW, OPEN, ESCALATE, DISMISS, RESOLVE
@@ -49,10 +50,13 @@ export class ColumnMetadataWrapper {
 
 export class ConfigureTableComponent implements OnInit {
 
+  backgroundColor = '#0C3B43';
+  border = '2px solid #1B596C';
   allColumns: ColumnMetadataWrapper[] = [];
+  configuredColumns: ColumnMetadataWrapper[] = [];
 
   constructor(private router: Router, private activatedRoute: ActivatedRoute, private configureTableService: ConfigureTableService,
-              private clusterMetaDataService: ClusterMetaDataService, private columnNamesService: ColumnNamesService) { }
+              private clusterMetaDataService: ClusterMetaDataService, private columnNamesService: ColumnNamesService, private dragulaService: DragulaService) { }
 
   goBack() {
     this.router.navigateByUrl('/alerts-list');
@@ -85,7 +89,23 @@ export class ConfigureTableComponent implements OnInit {
     ).subscribe((response: any) => {
       this.prepareData(response[0], response[1], response[2].tableColumns);
     });
+
+    this.setTransitStyle();
   }
+
+  private setTransitStyle() {
+    this.dragulaService.drag.subscribe(value => {
+      value[1].style.background = this.backgroundColor;
+      value[1].style.border = this.border;
+    });
+
+    this.dragulaService.dragend.subscribe(value => {
+      value[1].style.background = '';
+      value[1].style.border = '';
+      value[1].style.textAlign = '';
+    })
+  }
+
 
   onSelectDeselectAll($event) {
     let checked = $event.target.checked;
@@ -94,32 +114,44 @@ export class ConfigureTableComponent implements OnInit {
 
   /* Slight variation of insertion sort with bucketing the items in the display order*/
   prepareData(defaultColumns: ColumnMetadata[], allColumns: ColumnMetadata[], savedColumns: ColumnMetadata[]) {
-    let configuredColumns: ColumnMetadata[] = (savedColumns && savedColumns.length > 0) ?  savedColumns : defaultColumns;
-    let configuredColumnNames: string[] = configuredColumns.map((mData: ColumnMetadata) => mData.name);
+    let tConfiguredColumns = (savedColumns && savedColumns.length > 0) ?  savedColumns : defaultColumns;
 
-    allColumns = allColumns.filter((mData: ColumnMetadata) => configuredColumnNames.indexOf(mData.name) === -1);
+    this.configuredColumns = tConfiguredColumns.map(mData => {
+      return new ColumnMetadataWrapper(mData, true, ColumnNamesService.columnNameToDisplayValueMap[mData.name]);
+    });
+
+    let configuredColumnNames: string[] = this.configuredColumns.map((mData: ColumnMetadataWrapper) => mData.columnMetadata.name);
+    // allColumns = allColumns.filter((mData: ColumnMetadata) => configuredColumnNames.indexOf(mData.name) === -1);
     allColumns = allColumns.sort((mData1: ColumnMetadata, mData2: ColumnMetadata) => { return mData1.name.localeCompare(mData2.name); });
 
-    let sortedConfiguredColumns = JSON.parse(JSON.stringify(configuredColumns));
-    sortedConfiguredColumns = sortedConfiguredColumns.sort((mData1: ColumnMetadata, mData2: ColumnMetadata) => {
-                                                                return mData1.name.localeCompare(mData2.name);
-                                                          });
-
-    while (configuredColumns.length > 0 ) {
-      let columnMetadata = sortedConfiguredColumns.shift();
-
-      let index = this.indexOf(columnMetadata, configuredColumns);
-      let itemsToInsert: any[] = configuredColumns.splice(0, index + 1);
-
-
-      let indexInAll = this.indexToInsert(columnMetadata, allColumns, configuredColumnNames);
-      allColumns.splice.apply(allColumns, [indexInAll, 0].concat(itemsToInsert));
-    }
-
     this.allColumns = allColumns.map(mData => {
-      return new ColumnMetadataWrapper(mData, configuredColumnNames.indexOf(mData.name) > -1,
-                                        ColumnNamesService.columnNameToDisplayValueMap[mData.name]);
-      });
+        return new ColumnMetadataWrapper(mData, configuredColumnNames.indexOf(mData.name) > -1,
+                                          ColumnNamesService.columnNameToDisplayValueMap[mData.name]);
+        });
+
+    // let configuredColumnNames: string[] = this.configuredColumns.map((mData: ColumnMetadata) => mData.name);
+    //
+    //
+    // let sortedConfiguredColumns = JSON.parse(JSON.stringify(this.configuredColumns));
+    // sortedConfiguredColumns = sortedConfiguredColumns.sort((mData1: ColumnMetadata, mData2: ColumnMetadata) => {
+    //                                                             return mData1.name.localeCompare(mData2.name);
+    //                                                       });
+    //
+    // while (this.configuredColumns.length > 0 ) {
+    //   let columnMetadata = sortedConfiguredColumns.shift();
+    //
+    //   let index = this.indexOf(columnMetadata, this.configuredColumns);
+    //   let itemsToInsert: any[] = this.configuredColumns.splice(0, index + 1);
+    //
+    //
+    //   let indexInAll = this.indexToInsert(columnMetadata, allColumns, configuredColumnNames);
+    //   allColumns.splice.apply(allColumns, [indexInAll, 0].concat(itemsToInsert));
+    // }
+    //
+    // this.allColumns = allColumns.map(mData => {
+    //   return new ColumnMetadataWrapper(mData, configuredColumnNames.indexOf(mData.name) > -1,
+    //                                     ColumnNamesService.columnNameToDisplayValueMap[mData.name]);
+    //   });
   }
 
   postSave() {
