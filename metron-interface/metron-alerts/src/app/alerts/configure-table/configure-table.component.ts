@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 import { Component, OnInit } from '@angular/core';
-import {Router, ActivatedRoute} from '@angular/router';
+import {Router} from '@angular/router';
 import {Observable} from 'rxjs/Rx';
 
 import {ConfigureTableService} from '../../service/configure-table.service';
@@ -50,13 +50,17 @@ export class ColumnMetadataWrapper {
 
 export class ConfigureTableComponent implements OnInit {
 
+  filterName = '';
   backgroundColor = '#0C3B43';
   border = '2px solid #1B596C';
   allColumns: ColumnMetadataWrapper[] = [];
   configuredColumns: ColumnMetadataWrapper[] = [];
 
-  constructor(private router: Router, private activatedRoute: ActivatedRoute, private configureTableService: ConfigureTableService,
-              private clusterMetaDataService: ClusterMetaDataService, private columnNamesService: ColumnNamesService, private dragulaService: DragulaService) { }
+  constructor(private router: Router,
+              private configureTableService: ConfigureTableService,
+              private clusterMetaDataService: ClusterMetaDataService,
+              private columnNamesService: ColumnNamesService,
+              private dragulaService: DragulaService) { }
 
   goBack() {
     this.router.navigateByUrl('/alerts-list');
@@ -91,6 +95,10 @@ export class ConfigureTableComponent implements OnInit {
     });
 
     this.setTransitStyle();
+
+    this.dragulaService.drop.subscribe(data => {
+      console.log(data);
+    });
   }
 
   private setTransitStyle() {
@@ -121,13 +129,12 @@ export class ConfigureTableComponent implements OnInit {
     });
 
     let configuredColumnNames: string[] = this.configuredColumns.map((mData: ColumnMetadataWrapper) => mData.columnMetadata.name);
-    // allColumns = allColumns.filter((mData: ColumnMetadata) => configuredColumnNames.indexOf(mData.name) === -1);
-    allColumns = allColumns.sort((mData1: ColumnMetadata, mData2: ColumnMetadata) => { return mData1.name.localeCompare(mData2.name); });
 
     this.allColumns = allColumns.map(mData => {
         return new ColumnMetadataWrapper(mData, configuredColumnNames.indexOf(mData.name) > -1,
                                           ColumnNamesService.columnNameToDisplayValueMap[mData.name]);
         });
+    this.allColumns = this.sortColumnMetaDataWrapper(this.allColumns);
 
     // let configuredColumnNames: string[] = this.configuredColumns.map((mData: ColumnMetadata) => mData.name);
     //
@@ -152,6 +159,12 @@ export class ConfigureTableComponent implements OnInit {
     //   return new ColumnMetadataWrapper(mData, configuredColumnNames.indexOf(mData.name) > -1,
     //                                     ColumnNamesService.columnNameToDisplayValueMap[mData.name]);
     //   });
+  }
+
+  sortColumnMetaDataWrapper(columns:ColumnMetadataWrapper[]) {
+    return columns.sort((mData1:ColumnMetadataWrapper, mData2:ColumnMetadataWrapper) => {
+      return mData1.columnMetadata.name.localeCompare(mData2.columnMetadata.name);
+    });
   }
 
   postSave() {
@@ -186,21 +199,42 @@ export class ConfigureTableComponent implements OnInit {
     });
   }
 
-  selectColumn(columns: ColumnMetadataWrapper) {
+  toggleColumnSelection(columns: ColumnMetadataWrapper) {
     columns.selected = !columns.selected;
+    if (columns.selected) {
+      let index = -1;
+      this.allColumns.forEach((col: ColumnMetadataWrapper, tIndex: number) => {
+        if (col.columnMetadata.name === columns.columnMetadata.name) {
+          index = tIndex;
+        }
+      });
+      this.allColumns.splice(index, 1);
+      this.configuredColumns.push(columns);
+    } else {
+      let index = -1;
+      this.configuredColumns.forEach((col: ColumnMetadataWrapper, tIndex: number) => {
+        if (col.columnMetadata.name === columns.columnMetadata.name) {
+          index = tIndex;
+        }
+      });
+      this.configuredColumns.splice(index, 1);
+      this.allColumns.push(columns);
+      this.allColumns = this.sortColumnMetaDataWrapper(this.allColumns);
+    }
+
   }
 
-  swapUp(index: number) {
-    if (index > 0) {
-      [this.allColumns[index], this.allColumns[index - 1]] = [this.allColumns[index - 1], this.allColumns[index]];
-    }
-  }
-
-  swapDown(index: number) {
-    if (index + 1 < this.allColumns.length) {
-      [this.allColumns[index], this.allColumns[index + 1]] = [this.allColumns[index + 1], this.allColumns[index]];
-    }
-  }
+  // swapUp(index: number) {
+  //   if (index > 0) {
+  //     [this.allColumns[index], this.allColumns[index - 1]] = [this.allColumns[index - 1], this.allColumns[index]];
+  //   }
+  // }
+  //
+  // swapDown(index: number) {
+  //   if (index + 1 < this.allColumns.length) {
+  //     [this.allColumns[index], this.allColumns[index + 1]] = [this.allColumns[index + 1], this.allColumns[index]];
+  //   }
+  // }
 }
 
 

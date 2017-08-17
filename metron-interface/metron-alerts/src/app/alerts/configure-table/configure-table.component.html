@@ -22,11 +22,11 @@
 
     <div class="row mb-3">
       <div class="col filter">
-        <input class="input w-100" placeholder="Filter list">
+        <input class="input w-100" placeholder="Filter list" [(ngModel)]="filterName">
       </div>
     </div>
 
-    <table class="table selected">
+    <table *ngIf="filterName.length === 0" class="table selected">
       <thead>
       <tr>
         <th class="title"> SELECTED </th>
@@ -37,7 +37,7 @@
       <tbody [dragula]='"selected"'>
         <tr *ngFor="let columns of configuredColumns">
           <td>
-            <input #selectColName id="select-deselect-{{ columns.columnMetadata.name }}" class="fontawesome-checkbox" type="checkbox" [checked]="columns.selected" (click)="selectColumn(columns)">
+            <input #selectColName id="select-deselect-{{ columns.columnMetadata.name }}" class="fontawesome-checkbox" type="checkbox" [checked]="columns.selected" (click)="toggleColumnSelection(columns)">
             <label for="select-deselect-{{ columns.columnMetadata.name }}"></label>
             <span> {{ columns.columnMetadata.name | centerEllipses:24  }} </span>
           </td>
@@ -55,14 +55,16 @@
       </tr>
       </thead>
       <tbody [dragula]='"selected"'>
-      <tr *ngFor="let columns of allColumns">
-        <td>
-          <input #selectColName id="select-avail-deselect-{{ columns.columnMetadata.name }}" class="fontawesome-checkbox" type="checkbox" [checked]="columns.selected" (click)="selectColumn(columns)">
-          <label for="select-avail-deselect-{{ columns.columnMetadata.name }}"></label>
-          <span> {{ columns.columnMetadata.name | centerEllipses:70  }} </span>
-        </td>
-        <td class="text-uppercase"> {{ columns.columnMetadata.type }} </td>
-      </tr>
+        <ng-container *ngFor="let columns of allColumns">
+          <tr *ngIf="this.filterName.length === 0 || columns.columnMetadata.name.indexOf(this.filterName) !== -1">
+            <td>
+              <input #selectColName id="select-avail-deselect-{{ columns.columnMetadata.name }}" class="fontawesome-checkbox" type="checkbox" [checked]="columns.selected" (click)="toggleColumnSelection(columns)">
+              <label for="select-avail-deselect-{{ columns.columnMetadata.name }}"></label>
+              <span> {{ columns.columnMetadata.name | centerEllipses:70  }} </span>
+            </td>
+            <td class="text-uppercase"> {{ columns.columnMetadata.type }} </td>
+          </tr>
+        </ng-container>
       </tbody>
     </table>
 
