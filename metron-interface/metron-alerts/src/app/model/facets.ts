@@ -15,11 +15,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-export const NUM_SAVED_SEARCH = 10;
-export const ALERTS_RECENT_SEARCH = 'metron-alerts-recent-saved-search';
-export const ALERTS_SAVED_SEARCH = 'metron-alerts-saved-search';
-export const ALERTS_TABLE_METADATA = 'metron-alerts-table-metadata';
-export const ALERTS_COLUMN_NAMES = 'metron-alerts-column-names';
-
-export var DEFAULT_FACETS = ['source:type', 'ip_src_addr', 'ip_dst_addr', 'host', 'enrichments:geo:ip_dst_addr:country'];
-export var DEFAULT_GROUPS = ['source:type', 'ip_src_addr', 'ip_dst_addr', 'host', 'enrichments:geo:ip_dst_addr:country'];
+export class Facets {
+  [key:string]: {
+    [key:string]:number
+  }
+}

@@ -50,6 +50,7 @@ export class AlertsListComponent implements OnInit, OnDestroy {
   alertsColumnsToDisplay: ColumnMetadata[] = [];
   selectedAlerts: Alert[] = [];
   alerts: any[] = [];
+  alertsSearchResponse: AlertsSearchResponse = new AlertsSearchResponse();
   colNumberTimerId: number;
   refreshInterval = RefreshInterval.ONE_MIN;
   refreshTimer: Subscription;
@@ -208,6 +209,10 @@ export class AlertsListComponent implements OnInit, OnDestroy {
     this.search();
   }
 
+  onGroupsChange(groups: string[]) {
+    this.queryBuilder.setGroupby(groups)
+  }
+  
   onPageChange() {
     this.queryBuilder.setFromAndSize(this.pagingData.from, this.pagingData.size);
     this.search(false);
@@ -332,6 +337,7 @@ export class AlertsListComponent implements OnInit, OnDestroy {
   }
 
   setData(results: AlertsSearchResponse) {
+    this.alertsSearchResponse = results;
     this.alerts = results.results;
     this.pagingData.total = results.total;
   }

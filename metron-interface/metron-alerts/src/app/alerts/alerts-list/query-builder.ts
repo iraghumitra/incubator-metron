@@ -111,6 +111,10 @@ export class QueryBuilder {
     this.searchRequest.size = size;
   }
 
+  setGroupby(groups: string[]) {
+    this.searchRequest.groupByFields = groups;
+  }
+
   setSort(sortBy: string, order: string) {
     let sortField = new SortField();
     sortField.field = sortBy;

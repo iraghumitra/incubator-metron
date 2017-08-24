@@ -36,7 +36,7 @@
     </div>
     <div class="mrow">
         <div class="col-md-9 px-0">
-            <span class="col-form-label-lg"> Alerts ({{alerts.length}} of {{pagingData.total}}) </span>
+            <!--<span class="col-form-label-lg"> Alerts ({{alerts.length}} of {{pagingData.total}}) </span>-->
         </div>
         <div class="col-md-3 px-0">
             <div class="pull-right" style="position: relative; display: block;">
@@ -64,6 +64,9 @@
 
 <div class="container-fluid nav-content">
     <div class="row">
+        <div class="col-sm-12 pl-0">
+            <app-group-by [facets]="alertsSearchResponse.facetCounts" (groupsChange)="onGroupsChange($event)"> </app-group-by>
+        </div>
         <div class="col-sm-12 pl-0">
             <div class="table-wrapper">
                 <table class="table table-sm" metron-config-table [data]="alerts" [cellSelectable]="true" (onSort)="onSort($event)" style="white-space: nowrap;" (window:resize)="onResize()" #table>
