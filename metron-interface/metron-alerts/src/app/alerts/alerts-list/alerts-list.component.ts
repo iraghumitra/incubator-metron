@@ -49,7 +49,7 @@ export class AlertsListComponent implements OnInit, OnDestroy {
   alertsColumns: ColumnMetadata[] = [];
   alertsColumnsToDisplay: ColumnMetadata[] = [];
   selectedAlerts: Alert[] = [];
-  alerts: any[] = [];
+  alerts: Alert[] = [];
   alertsSearchResponse: AlertsSearchResponse = new AlertsSearchResponse();
   colNumberTimerId: number;
   refreshInterval = RefreshInterval.ONE_MIN;
@@ -117,16 +117,6 @@ export class AlertsListComponent implements OnInit, OnDestroy {
     });
   }
 
-  formatValue(column: ColumnMetadata, returnValue: string) {
-    try {
-      if (column.name.endsWith(':ts') || column.name.endsWith('timestamp')) {
-        returnValue = new Date(parseInt(returnValue, 10)).toISOString().replace('T', ' ').slice(0, 19);
-      }
-    } catch (e) {}
-
-    return returnValue;
-  }
-
   getAlertColumnNames(resetPaginationForSearch: boolean) {
     Observable.forkJoin(
       this.configureTableService.getTableMetadata(),
@@ -154,29 +144,6 @@ export class AlertsListComponent implements OnInit, OnDestroy {
     return fieldNames;
   }
 
-  getValue(alert: Alert, column: ColumnMetadata, formatData: boolean) {
-    let returnValue = '';
-    try {
-      switch (column.name) {
-        case 'id':
-          returnValue = alert[column.name];
-          break;
-        case 'alert_status':
-          returnValue = 'NEW';
-          break;
-        default:
-          returnValue = alert.source[column.name];
-          break;
-      }
-    } catch (e) {}
-
-    if (formatData) {
-      returnValue = this.formatValue(column, returnValue);
-    }
-
-    return returnValue;
-  }
-
   ngOnDestroy() {
     this.tryStopPolling();
   }
@@ -199,8 +166,9 @@ export class AlertsListComponent implements OnInit, OnDestroy {
     return false;
   }
 
-  onAddFilter(field: string, value: string) {
-    this.queryBuilder.addOrUpdateFilter(field, value);
+  onAddFilter(map: {}) {
+    let keys = Object.keys(map);
+    keys.forEach(key => { this.queryBuilder.addOrUpdateFilter(key, map[key]); });
     this.search();
   }
 
@@ -209,8 +177,8 @@ export class AlertsListComponent implements OnInit, OnDestroy {
     this.search();
   }
 
-  onGroupsChange(groups: string[]) {
-    this.queryBuilder.setGroupby(groups)
+  onGroupsChange(groups) {
+      
   }
   
   onPageChange() {
@@ -292,13 +260,6 @@ export class AlertsListComponent implements OnInit, OnDestroy {
     this.tryStartPolling();
   }
 
-  selectAllRows($event) {
-    this.selectedAlerts = [];
-    if ($event.target.checked) {
-      this.selectedAlerts = this.alerts;
-    }
-  }
-
   search(resetPaginationParams = true, savedSearch?: SaveSearch) {
     this.selectedAlerts = [];
 
@@ -328,32 +289,14 @@ export class AlertsListComponent implements OnInit, OnDestroy {
     this.tryStartPolling();
   }
 
-  selectRow($event, alert: Alert) {
-    if ($event.target.checked) {
-      this.selectedAlerts.push(alert);
-    } else {
-      this.selectedAlerts.splice(this.selectedAlerts.indexOf(alert), 1);
-    }
-  }
-
   setData(results: AlertsSearchResponse) {
     this.alertsSearchResponse = results;
     this.alerts = results.results;
     this.pagingData.total = results.total;
   }
 
-  showConfigureTable() {
+  showDetails() {
     this.saveRefreshState();
-    this.router.navigateByUrl('/alerts-list(dialog:configure-table)');
-  }
-
-  showDetails($event, alert: Alert) {
-    if ($event.target.type !== 'checkbox' && $event.target.parentElement.firstChild.type !== 'checkbox' && $event.target.nodeName !== 'A') {
-      this.selectedAlerts = [];
-      this.selectedAlerts = [alert];
-      this.saveRefreshState();
-      this.router.navigateByUrl('/alerts-list(dialog:details/' + alert.source['source:type'] + '/' + alert.source.guid + ')');
-    }
   }
 
   saveRefreshState() {
