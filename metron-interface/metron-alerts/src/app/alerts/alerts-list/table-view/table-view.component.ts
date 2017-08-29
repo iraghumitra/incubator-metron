@@ -31,6 +31,8 @@ import {Alert} from '../../../model/alert';
 })
 export class TableViewComponent implements OnInit, OnChanges {
 
+  threatScoreFieldName = 'threat:triage:score';
+
   @Input() alerts = [];
   @Input() pagingData = new Pagination();
   @Input() selectedAlerts: Alert[] = [];

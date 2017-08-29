@@ -1,0 +1,165 @@
+/**
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+import { Component, OnInit, Input, OnChanges, SimpleChanges, ElementRef } from '@angular/core';
+import {Router} from '@angular/router';
+
+import {SearchResultGroup} from '../../../model/search-result-group';
+import {TableViewComponent} from '../table-view/table-view.component';
+import {AlertsSearchResponse} from '../../../model/alerts-search-response';
+import {QueryBuilder} from '../query-builder';
+import {AlertService} from '../../../service/alert.service';
+import {TreeGroupData} from './tree-group-data';
+
+@Component({
+  selector: 'app-tree-view',
+  templateUrl: './tree-view.component.html',
+  styleUrls: ['./tree-view.component.scss']
+})
+export class TreeViewComponent extends TableViewComponent implements OnInit, OnChanges {
+
+  groupKeys: string[] = [];
+  groupDFSMap: { [key:string]: TreeGroupData[]} = {};
+  @Input() searchResponse: AlertsSearchResponse;
+  @Input() queryBuilder: QueryBuilder;
+
+  constructor(router: Router,
+              private alertsService: AlertService) {
+    super(router);
+  }
+
+
+  collapseGroup(groupArray:TreeGroupData[], level:number, index:number) {
+    for (let i = index + 1; i < groupArray.length; i++) {
+      if (groupArray[i].level > (level)) {
+        groupArray[i].show = false;
+        groupArray[i].expand = false;
+      } else {
+        break;
+      }
+    }
+  }
+
+  createQuery(selectedGroup: TreeGroupData) {
+    let searchQuery = this.queryBuilder.generateSelect();
+    let groupQery = Object.keys(selectedGroup.groupQueryMap).map(key => {
+      return key.replace(/:/g, '\\:') +
+          ':' +
+          String(selectedGroup.groupQueryMap[key])
+          .replace(/[\*\+\-=~><\"\?^\${}\(\)\:\!\/[\]\\\s]/g, '\\$&') // replace single  special characters
+          .replace(/\|\|/g, '\\||') // replace ||
+          .replace(/\&\&/g, '\\&&'); // replace &&
+    }).join(' AND ');
+
+    groupQery += searchQuery === '*' ? '' : (' AND ' + searchQuery);
+    return groupQery;
+  }
+
+  expandGroup(groupArray:TreeGroupData[], level:number, index:number) {
+    for (let i = index + 1; i < groupArray.length; i++) {
+      if (groupArray[i].level === (level + 1)) {
+        groupArray[i].show = true;
+      } else {
+        break;
+      }
+    }
+  }
+
+  getAlerts(selectedGroup: TreeGroupData) {
+    selectedGroup.searchRequest.query = this.createQuery(selectedGroup);
+    selectedGroup.searchRequest.from = selectedGroup.pagingData.from;
+    selectedGroup.searchRequest.size = selectedGroup.pagingData.size;
+
+    this.search(selectedGroup);
+  }
+
+  groupExpandCollapse(groupArray: TreeGroupData[], level: number, index: number) {
+    let selectedGroup = groupArray[index];
+
+    if (selectedGroup.expand) {
+      this.collapseGroup(groupArray, level, index);
+    } else {
+      this.expandGroup(groupArray, level, index);
+    }
+
+    selectedGroup.expand = !selectedGroup.expand;
+
+    if (selectedGroup.groupQueryMap) {
+      this.getAlerts(selectedGroup);
+    }
+  }
+
+  groupPageChange(group: TreeGroupData) {
+    this.search(group);
+  }
+
+  ngOnChanges(changes: SimpleChanges) {
+    if(changes['searchResponse'] && changes['searchResponse'].currentValue &&
+        changes['searchResponse'].currentValue.groups && changes['searchResponse'].currentValue.groups.length > 0) {
+      this.parseTopLevelGroup();
+    }
+  }
+
+  ngOnInit() {
+  }
+
+  search(selectedGroup: TreeGroupData) {
+
+    this.alertsService.search(selectedGroup.searchRequest).subscribe(results => {
+      selectedGroup.response = results;
+      selectedGroup.pagingData.total = results.total;
+    }, error => {
+      // this.metronDialogBox.showConfirmationMessage(ElasticsearchUtils.extractESErrorMessage(error), DialogType.Error);
+    });
+  }
+
+  toggleTopLevelGroup(group: SearchResultGroup) {
+    let topLevelGroup = this.groupDFSMap[group.key][0];
+
+    if (topLevelGroup.groupQueryMap) {
+      topLevelGroup.show = true;
+      topLevelGroup.expand = true;
+      this.getAlerts(topLevelGroup);
+    }
+  }
+
+  parseSubGroups(group: SearchResultGroup, groupAsArray: TreeGroupData[],
+                 groupQueryMap: {[key: string]: string}, groupedBy: string, level: number) {
+    groupQueryMap[groupedBy] = group.key;
+
+    let treeGroupData = new TreeGroupData(group.key, group.total, level, level === 1);
+    groupAsArray.push(treeGroupData);
+
+    if (group.results) {
+      treeGroupData.groupQueryMap = JSON.parse(JSON.stringify(groupQueryMap));
+      return;
+    }
+
+    group.groups.forEach(subGroup => this.parseSubGroups(subGroup, groupAsArray, groupQueryMap, group.groupedBy, level+1));
+  }
+
+  parseTopLevelGroup() {
+    let groupedBy = this.searchResponse.groupedBy;
+    this.searchResponse.groups.forEach(group => {
+      let groupAsArray: TreeGroupData[] = [];
+      let groupQueryMap: {[key: string]: string} = {};
+      this.parseSubGroups(group, groupAsArray, groupQueryMap, groupedBy, 0);
+      this.groupDFSMap[group.key] = groupAsArray;
+    });
+  }
+}

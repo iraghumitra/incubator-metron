@@ -28,12 +28,13 @@ import {MetronTablePaginationModule} from '../../shared/metron-table/metron-tabl
 import {ConfigureRowsModule} from '../configure-rows/configure-rows.module';
 import {GroupByModule} from '../../shared/group-by/group-by.module';
 import {TableViewComponent} from './table-view/table-view.component';
+import {TreeViewComponent} from './tree-view/tree-view.component';
 
 @NgModule({
     imports: [routing, SharedModule, ConfigureRowsModule, MetronSorterModule, MetronTablePaginationModule,
                 ListGroupModule, CollapseModule, GroupByModule],
     exports: [AlertsListComponent],
-    declarations: [AlertsListComponent, TableViewComponent],
+    declarations: [AlertsListComponent, TableViewComponent, TreeViewComponent],
     providers: [AlertService],
 })
 export class AlertsListModule {

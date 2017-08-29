@@ -178,7 +178,8 @@ export class AlertsListComponent implements OnInit, OnDestroy {
   }
 
   onGroupsChange(groups) {
-      
+    this.queryBuilder.setGroupby(groups);
+    this.search(false);
   }
   
   onPageChange() {
@@ -291,7 +292,7 @@ export class AlertsListComponent implements OnInit, OnDestroy {
 
   setData(results: AlertsSearchResponse) {
     this.alertsSearchResponse = results;
-    this.alerts = results.results;
+    this.alerts = results.results ? results.results : [];
     this.pagingData.total = results.total;
   }
 

@@ -21,7 +21,8 @@ import {SearchResultGroup} from './search-result-group';
 
 export class AlertsSearchResponse {
   total = 0;
+  groupedBy: string;
   results: Alert[] = [];
   facetCounts: Facets;
-  groups: [SearchResultGroup];
+  groups: SearchResultGroup[];
 }

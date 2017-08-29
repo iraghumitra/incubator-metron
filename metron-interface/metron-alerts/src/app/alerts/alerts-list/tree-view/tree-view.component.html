@@ -1,0 +1,73 @@
+<div role="tablist" aria-multiselectable="true">
+  <div class="card" *ngFor="let group of searchResponse.groups; let i = index;">
+    <div class="card-header" role="tab" [attr.id]="'title-' + i">
+      <div class="hexagon" appAlertSeverityHexagon [severity]="group.score"> <span> {{ group.score }} </span> </div>
+      <div class="mrow">
+        <div class="col-3 text-light severity-padding"> <span class="title"> {{ group.key }} </span> </div>
+        <div class="col-2 text-light two-line"> <span class="text-dark"> ALERTS </span> <br> <span class="title"> {{ group.total }} </span> </div>
+        <div class="col-2 text-light"> </div>
+        <div class="col-2 text-light"> </div>
+        <div class="col-2 text-light"> </div>
+        <div class="col-1 text-right pr-4">
+            <a class="down-arrow" data-toggle="collapse" aria-expanded="false" [attr.href]="'#body-' + i" [attr.aria-controls]="'body-' + i" (click)="toggleTopLevelGroup(group)"> </a>
+        </div>
+      </div>
+    </div>
+    <div [attr.id]="'body-' + i" class="collapse" role="tabpanel" [attr.aria-labelledby]="'title-' + i">
+      <div class="card-block">
+        <div class="table-wrapper">
+          <table class="table table-sm" metron-config-table [data]="alerts" [cellSelectable]="true" (onSort)="sort($event)" style="white-space: nowrap;" (window:resize)="resize()" #table>
+            <thead>
+            <tr>
+              <th> </th>
+              <th class="table-score-col">
+                <metron-config-sorter [type]="'number'" [sortBy]="threatScoreFieldName"> Score </metron-config-sorter>
+              </th>
+              <th *ngFor="let column of alertsColumnsToDisplay" [id]="column.name">
+                <metron-config-sorter [type]="column.type" [sortBy]="column.name" title="{{column.name}}"> {{ column.name | columnNameTranslate | centerEllipses:15 }}</metron-config-sorter>
+              </th>
+              <th style="width:25px"><input id="select-deselect-all" class="fontawesome-checkbox" type="checkbox" (click)="selectAllRows($event)">
+                <label for="select-deselect-all"></label>
+              </th>
+            </tr>
+            </thead>
+            <tbody>
+              <ng-container *ngFor="let subGroup of groupDFSMap[group.key]; let i = index;">
+
+                <tr *ngIf="i !== 0" class="table-group-row" [ngClass]="{'d-none': !subGroup.show}" (click)="groupExpandCollapse(groupDFSMap[group.key], subGroup.level, i)">
+                  <td [attr.colspan]="alertsColumnsToDisplay.length + 3" [ngStyle]="{'padding-left.px': (16 * (subGroup.level -1))}">
+                    <span class="table-group-icon-col"> <i class="fa" aria-hidden="true" [ngClass]="{'fa-caret-down': subGroup.expand, 'fa-caret-right': !subGroup.expand}"></i> </span>
+                    <span class="score" appAlertSeverity [severity]="subGroup.score"> {{ subGroup.score }} </span>
+                    <span class="group-value"> <span class="text-light"> {{ subGroup.key }} </span> ({{ subGroup.total}})</span>
+                  </td>
+                </tr>
+
+                <tr *ngFor="let alert of subGroup.response.results" [ngClass]="{'selected' : selectedAlerts.indexOf(alert) != -1, 'd-none': !subGroup.expand || !subGroup.show}" (click)="showDetails($event, alert)">
+                  <td [attr.colspan]="2" [ngStyle]="{'padding-left.px': (16 * (subGroup.level -1)) + 23}" (click)="addFilter(threatScoreFieldName, alert.source[threatScoreFieldName])">
+                    <div appAlertSeverity [severity]="alert.source[threatScoreFieldName]">
+                      <a> {{ alert.source[threatScoreFieldName] ? alert.source[threatScoreFieldName] : '-' }}</a>
+                    </div>
+                  </td>
+                  <td *ngFor="let column of alertsColumnsToDisplay" #cell>
+                    <a title="{{getValue(alert, column, true)}}" style="color:#689AA9" (click)="addFilter(column.name, getValue(alert, column, false))">{{ getValue(alert, column, true) | centerEllipses:20:cell }}</a>
+                  </td>
+                  <td>
+                    <input id="{{ alert.id }}" class="fontawesome-checkbox" type="checkbox" name="{{alert.id}}" (click)="selectRow($event, alert)" [checked]="selectedAlerts.indexOf(alert) != -1">
+                    <label attr.for="{{ alert.id }}"></label>
+                  </td>
+                </tr>
+
+                <tr *ngIf="subGroup.response.results.length > 0" [ngClass]="{'d-none': !subGroup.expand || !subGroup.show}">
+                  <td [attr.colspan]="alertsColumnsToDisplay.length + 3" class="text-right">
+                    <metron-table-pagination [(pagingData)]="subGroup.pagingData" (pageChange)="groupPageChange(subGroup)"> </metron-table-pagination>
+                  </td>
+                </tr>
+
+              </ng-container>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

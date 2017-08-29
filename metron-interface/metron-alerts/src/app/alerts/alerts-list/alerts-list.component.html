@@ -36,7 +36,8 @@
     </div>
     <div class="mrow">
         <div class="col-md-9 px-0">
-            <span class="col-form-label-lg"> Alerts ({{alerts.length}} of {{pagingData.total}}) </span>
+            <span class="col-form-label-lg" *ngIf="alerts.length === 0"> Alerts ({{pagingData.total}}) </span>
+            <span class="col-form-label-lg" *ngIf="alerts.length !== 0"> Alerts ({{alerts.length}} of {{pagingData.total}}) </span>
         </div>
         <div class="col-md-3 px-0">
             <div class="pull-right" style="position: relative; display: block;">
@@ -64,18 +65,23 @@
 
 <div class="container-fluid nav-content">
     <div class="row">
-        <div class="col-sm-12 pl-0">
+        <div class="col-sm-12 pl-0 pb-3">
             <app-group-by [facets]="alertsSearchResponse.facetCounts" (groupsChange)="onGroupsChange($event)"> </app-group-by>
         </div>
         <div class="col-sm-12 pl-0">
-            <app-table-view [pagingData]="pagingData" [alerts]="alerts"
+            <app-table-view *ngIf="queryBuilder.searchRequest.groupByFields.length === 0"
                             [(selectedAlerts)]="selectedAlerts"
+                            [pagingData]="pagingData" [alerts]="alerts"
                             [alertsColumnsToDisplay]="alertsColumnsToDisplay"
                             (onResize)="onResize()"
                             (onSort)="onSort()"
                             (onPageChange)="onPageChange()"
                             (beforeShowDetails)="showDetails()"
                             (onAddFilter)="onAddFilter($event)"></app-table-view>
+            <app-tree-view *ngIf="queryBuilder.searchRequest.groupByFields.length !== 0"
+                           [searchResponse]="alertsSearchResponse"
+                           [queryBuilder]="queryBuilder"
+                           [alertsColumnsToDisplay]="alertsColumnsToDisplay"></app-tree-view>
         </div>
     </div>
 </div>

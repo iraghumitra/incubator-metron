@@ -18,35 +18,31 @@
 import { Directive, ElementRef, OnChanges, SimpleChanges, Input, OnInit } from '@angular/core';
 
 @Directive({
-  selector: '[appAlertSeverity]'
+  selector: '[appAlertSeverityHexagon]'
 })
-export class AlertSeverityDirective implements OnInit, OnChanges {
+export class AlertSeverityHexagonDirective {
 
   @Input() severity: number;
 
   constructor(private el: ElementRef) { }
 
   ngOnInit() {
-    this.setBorder(this.severity);
+    this.setColor(this.severity);
   }
 
   ngOnChanges(changes: SimpleChanges) {
     if (changes['severity'] && changes['severity'].currentValue) {
-      this.setBorder(this.severity);
+      this.setColor(this.severity);
     }
   }
 
-  private setBorder(severity: number) {
-
-    if ( severity > 69 ) {
-      this.el.nativeElement.style.borderLeft = '3px solid #D60A15';
-      this.el.nativeElement.style.paddingLeft = '5px';
-    } else if ( severity > 39 ) {
-      this.el.nativeElement.style.borderLeft = '3px solid #D6711D';
-      this.el.nativeElement.style.paddingLeft = '5px';
+  private setColor(severity: number) {
+    if ( severity > 100 ) {
+      this.el.nativeElement.classList.add('error');
+    } else if ( severity > 50 ) {
+      this.el.nativeElement.classList.add('warning');
     } else  {
-      this.el.nativeElement.style.borderLeft = '3px solid #AC9B5A';
-      this.el.nativeElement.style.paddingLeft = '5px';
+      this.el.nativeElement.classList.add('info');
     }
   }
 

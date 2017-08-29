@@ -22,7 +22,6 @@ export class GroupByComponent implements OnInit, OnChanges {
   constructor(private dragulaService: DragulaService) {}
 
   fireGroupsChange() {
-    console.log(this.data);
     let groupNames = this.data.map(groupBy => groupBy.name);
     let selectedGroupNames = [];
     this.data.reduce((selectedGroups, groupBy)=> {
