@@ -83,7 +83,14 @@ $group-height: 65px;
 
   .table-group-icon-col {
     width:5px;
-    padding: 0px 0px 0px 8px;
+    box-sizing: border-box;
+    padding: 6px 0px 7px 5px;
+    border: 1px solid transparent;
+
+    &:hover {
+      background: $eden-1;
+      border: 1px solid $blue-mine;
+    }
   }
 
   .table-score-col {

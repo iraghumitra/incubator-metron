@@ -4,6 +4,7 @@
         <div>
             <div class='container mx-0 px-0' [dragula]='"group-bag"' [dragulaModel]='data' [dragulaOptions]="{direction: 'horizontal', removeOnSpill: false}">
                 <div #dragEle class="group-by-items" *ngFor="let group of data" (click)="selectGroup(group)"
+                     data-animation="false" data-toggle="tooltip" data-placement="bottom" title="Drag to Sort"
                      [ngClass]="{'active': group.selected}">
                     <div class="count"> {{ group.count }}</div>
                     <div class="name"> {{ group.name | centerEllipses:15 }}</div>

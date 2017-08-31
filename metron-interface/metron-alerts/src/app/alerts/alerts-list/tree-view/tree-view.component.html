@@ -36,7 +36,9 @@
 
                 <tr *ngIf="i !== 0" class="table-group-row" [ngClass]="{'d-none': !subGroup.show}" (click)="groupExpandCollapse(groupDFSMap[group.key], subGroup.level, i)">
                   <td [attr.colspan]="alertsColumnsToDisplay.length + 3" [ngStyle]="{'padding-left.px': (16 * (subGroup.level -1))}">
-                    <span class="table-group-icon-col"> <i class="fa" aria-hidden="true" [ngClass]="{'fa-caret-down': subGroup.expand, 'fa-caret-right': !subGroup.expand}"></i> </span>
+                    <span class="table-group-icon-col" data-animation="false" data-toggle="tooltip" data-placement="bottom" title="Open Group">
+                      <i class="fa" aria-hidden="true" [ngClass]="{'fa-caret-down': subGroup.expand, 'fa-caret-right': !subGroup.expand}"></i>
+                    </span>
                     <span class="score" appAlertSeverity [severity]="subGroup.score"> {{ subGroup.score }} </span>
                     <span class="group-value"> <span class="text-light"> {{ subGroup.key }} </span> ({{ subGroup.total}})</span>
                   </td>

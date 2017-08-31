@@ -51,6 +51,11 @@
   cursor: grab;
   cursor: -moz-grab;
   cursor: -webkit-grab;
+
+  &:hover {
+    background: $eden-1;
+    border: 1px solid $blue-mine;
+  }
 }
 
 .gu-mirror {
