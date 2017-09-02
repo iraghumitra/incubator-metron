@@ -79,6 +79,7 @@
                             (beforeShowDetails)="showDetails()"
                             (onAddFilter)="onAddFilter($event)"></app-table-view>
             <app-tree-view *ngIf="queryBuilder.searchRequest.groupByFields.length !== 0"
+                           [pauseRefresh]="pauseRefresh"
                            [searchResponse]="alertsSearchResponse"
                            [queryBuilder]="queryBuilder"
                            [alertsColumnsToDisplay]="alertsColumnsToDisplay"></app-tree-view>

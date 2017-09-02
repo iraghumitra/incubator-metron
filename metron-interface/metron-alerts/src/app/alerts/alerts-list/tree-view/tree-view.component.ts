@@ -16,7 +16,8 @@
  * limitations under the License.
  */
 
-import { Component, OnInit, Input, OnChanges, SimpleChanges, ElementRef } from '@angular/core';
+import { Component, OnInit, Input, OnChanges, SimpleChanges, ElementRef, ViewChild } from '@angular/core';
+import {Subscription} from 'rxjs/Rx';
 import {Router} from '@angular/router';
 
 import {SearchResultGroup} from '../../../model/search-result-group';
@@ -34,9 +35,14 @@ import {TreeGroupData} from './tree-group-data';
 export class TreeViewComponent extends TableViewComponent implements OnInit, OnChanges {
 
   groupKeys: string[] = [];
+  groupByFields: string[] = [];
+  refreshTimers: Subscription[] = [];
   groupDFSMap: { [key:string]: TreeGroupData[]} = {};
   @Input() searchResponse: AlertsSearchResponse;
   @Input() queryBuilder: QueryBuilder;
+  @Input() pauseRefresh = false;
+
+  @ViewChild('root') root: ElementRef;
 
   constructor(router: Router,
               private alertsService: AlertService) {
@@ -108,6 +114,24 @@ export class TreeViewComponent extends TableViewComponent implements OnInit, OnC
     this.search(group);
   }
 
+  initMap() {
+    let groupByFields = this.queryBuilder.searchRequest.groupByFields;
+    if (JSON.stringify(this.groupByFields) !== JSON.stringify(groupByFields)) {
+      this.groupDFSMap = {};
+    }
+
+    this.groupByFields = groupByFields;
+  }
+
+  merge_map(newKeys: string[], oldKeys: string[]) {
+    let deleteKeys = oldKeys.filter(key => newKeys.indexOf(key) === -1);
+    deleteKeys.forEach(key => delete this.groupDFSMap);
+
+    if (!this.groupDFSMap) {
+      this.groupDFSMap = {};
+    }
+  }
+
   ngOnChanges(changes: SimpleChanges) {
     if(changes['searchResponse'] && changes['searchResponse'].currentValue &&
         changes['searchResponse'].currentValue.groups && changes['searchResponse'].currentValue.groups.length > 0) {
@@ -121,45 +145,97 @@ export class TreeViewComponent extends TableViewComponent implements OnInit, OnC
   search(selectedGroup: TreeGroupData) {
 
     this.alertsService.search(selectedGroup.searchRequest).subscribe(results => {
-      selectedGroup.response = results;
-      selectedGroup.pagingData.total = results.total;
+      this.setData(selectedGroup, results);
     }, error => {
       // this.metronDialogBox.showConfirmationMessage(ElasticsearchUtils.extractESErrorMessage(error), DialogType.Error);
     });
+
+    this.tryStartPolling(selectedGroup);
   }
 
-  toggleTopLevelGroup(group: SearchResultGroup) {
-    let topLevelGroup = this.groupDFSMap[group.key][0];
+  setData(selectedGroup: TreeGroupData, results: AlertsSearchResponse) {
+    selectedGroup.response = results;
+    selectedGroup.pagingData.total = results.total;
+  }
 
-    if (topLevelGroup.groupQueryMap) {
-      topLevelGroup.show = true;
-      topLevelGroup.expand = true;
-      this.getAlerts(topLevelGroup);
+  tryStartPolling(selectedGroup: TreeGroupData) {
+    if (!this.pauseRefresh) {
+      let refreshTimer = this.alertsService.pollSearch(selectedGroup.searchRequest).subscribe(results => {
+        this.setData(selectedGroup, results);
+      });
+
+      this.refreshTimers.push(refreshTimer);
     }
   }
 
-  parseSubGroups(group: SearchResultGroup, groupAsArray: TreeGroupData[],
+  tryStopPolling() {
+    if (this.refreshTimers && this.refreshTimers.length > 0) {
+      this.refreshTimers.forEach(refreshTimer => !refreshTimer.closed && refreshTimer.unsubscribe());
+    }
+  }
+
+  toggleTopLevelGroup(group: SearchResultGroup) {
+    if (this.groupDFSMap[group.key]) {
+      let topLevelGroup = this.groupDFSMap[group.key][0];
+      topLevelGroup.show = !topLevelGroup.show;
+      topLevelGroup.expand = !topLevelGroup.expand;
+
+      if (topLevelGroup.groupQueryMap) {
+        this.getAlerts(topLevelGroup);
+      }
+    }
+  }
+
+  parseSubGroups(group: SearchResultGroup, groupAsArray: TreeGroupData[], existingGroupAsArray: TreeGroupData[],
                  groupQueryMap: {[key: string]: string}, groupedBy: string, level: number) {
     groupQueryMap[groupedBy] = group.key;
+
 
     let treeGroupData = new TreeGroupData(group.key, group.total, level, level === 1);
     groupAsArray.push(treeGroupData);
 
+    if (existingGroupAsArray && existingGroupAsArray.length > 0) {
+      let existingItem = existingGroupAsArray.shift();
+      if (existingItem.key === treeGroupData.key) {
+        treeGroupData.expand = existingItem.expand;
+        treeGroupData.show = existingItem.show;
+      }
+    }
+
     if (group.results) {
       treeGroupData.groupQueryMap = JSON.parse(JSON.stringify(groupQueryMap));
+
+      if(treeGroupData.expand && treeGroupData.show && treeGroupData.groupQueryMap) {
+        this.getAlerts(treeGroupData);
+      }
+
       return;
     }
 
-    group.groups.forEach(subGroup => this.parseSubGroups(subGroup, groupAsArray, groupQueryMap, group.groupedBy, level+1));
+    group.groups.forEach(subGroup => this.parseSubGroups(subGroup, groupAsArray, existingGroupAsArray, groupQueryMap, group.groupedBy, level+1));
   }
 
   parseTopLevelGroup() {
+    let newKeys = [];
+    let oldKeys = Object.keys(this.groupDFSMap);
     let groupedBy = this.searchResponse.groupedBy;
+
+    this.root.nativeElement.style.minHeight = this.root.nativeElement.offsetHeight + 'px';
+
+    this.tryStopPolling();
+    this.initMap();
+
     this.searchResponse.groups.forEach(group => {
       let groupAsArray: TreeGroupData[] = [];
       let groupQueryMap: {[key: string]: string} = {};
-      this.parseSubGroups(group, groupAsArray, groupQueryMap, groupedBy, 0);
+      let existingGroupAsArray = this.groupDFSMap[group.key] ? JSON.parse(JSON.stringify(this.groupDFSMap[group.key])): [];
+
+      this.parseSubGroups(group, groupAsArray, existingGroupAsArray, groupQueryMap, groupedBy, 0);
+      newKeys.push(group.key);
       this.groupDFSMap[group.key] = groupAsArray;
     });
+
+    this.merge_map(newKeys, oldKeys);
   }
+
 }

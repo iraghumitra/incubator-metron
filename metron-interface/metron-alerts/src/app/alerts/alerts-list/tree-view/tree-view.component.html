@@ -1,4 +1,17 @@
-<div role="tablist" aria-multiselectable="true">
+<!--
+  Licensed to the Apache Software
+	Foundation (ASF) under one or more contributor license agreements. See the
+	NOTICE file distributed with this work for additional information regarding
+	copyright ownership. The ASF licenses this file to You under the Apache License,
+	Version 2.0 (the "License"); you may not use this file except in compliance
+	with the License. You may obtain a copy of the License at
+  http://www.apache.org/licenses/LICENSE-2.0
+  Unless required by applicable law or agreed to in writing, software distributed
+	under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES
+	OR CONDITIONS OF ANY KIND, either express or implied. See the License for
+  the specific language governing permissions and limitations under the License.
+-->
+<div #root role="tablist" aria-multiselectable="true">
   <div class="card" *ngFor="let group of searchResponse.groups; let i = index;">
     <div class="card-header" role="tab" [attr.id]="'title-' + i">
       <div class="hexagon" appAlertSeverityHexagon [severity]="group.score"> <span> {{ group.score }} </span> </div>
@@ -13,7 +26,7 @@
         </div>
       </div>
     </div>
-    <div [attr.id]="'body-' + i" class="collapse" role="tabpanel" [attr.aria-labelledby]="'title-' + i">
+    <div class="collapse" role="tabpanel"  [ngClass]="{'show': groupDFSMap[group.key] && groupDFSMap[group.key][0].expand}">
       <div class="card-block">
         <div class="table-wrapper">
           <table class="table table-sm" metron-config-table [data]="alerts" [cellSelectable]="true" (onSort)="sort($event)" style="white-space: nowrap;" (window:resize)="resize()" #table>
@@ -43,6 +56,8 @@
                     <span class="group-value"> <span class="text-light"> {{ subGroup.key }} </span> ({{ subGroup.total}})</span>
                   </td>
                 </tr>
+
+                <tr *ngIf="subGroup.groupQueryMap && subGroup.response.results === 0" style="height: 210px"> </tr>
 
                 <tr *ngFor="let alert of subGroup.response.results" [ngClass]="{'selected' : selectedAlerts.indexOf(alert) != -1, 'd-none': !subGroup.expand || !subGroup.show}" (click)="showDetails($event, alert)">
                   <td [attr.colspan]="2" [ngStyle]="{'padding-left.px': (16 * (subGroup.level -1)) + 23}" (click)="addFilter(threatScoreFieldName, alert.source[threatScoreFieldName])">

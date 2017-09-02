@@ -18,6 +18,7 @@
 import {SearchRequest} from '../../../model/search-request';
 import {AlertsSearchResponse} from '../../../model/alerts-search-response';
 import {Pagination} from '../../../model/pagination';
+import {Alert} from '../../../model/alert';
 
 // export class TreeGroupAndPagingData {
 //
