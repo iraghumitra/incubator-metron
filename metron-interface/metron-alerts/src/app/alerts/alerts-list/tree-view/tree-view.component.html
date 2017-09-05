@@ -12,32 +12,32 @@
   the specific language governing permissions and limitations under the License.
 -->
 <div #root role="tablist" aria-multiselectable="true" class="pl-1 full-height">
-  <div class="card" *ngFor="let group of searchResponse.groupResults; let i = index;">
+  <div class="card" *ngFor="let group of topGroups; let i = index;">
     <div class="card-header" role="tab" [attr.id]="'title-' + i">
-      <div class="hexagon" appAlertSeverityHexagon [severity]="group.score"> <span> {{ group.score }} </span> </div>
+      <div class="hexagon" appAlertSeverityHexagon [severity]="group.score">
+        <span *ngIf="group.score < 1000">{{ group.score }}</span>
+        <span *ngIf="group.score >= 1000">999<sup>+</sup></span>
+      </div>
       <div class="mrow">
-        <div class="col-3 text-light severity-padding"> <span class="title"> {{ group.key }} </span> </div>
-        <div class="col-2 text-light two-line"> <span class="text-dark"> ALERTS </span> <br> <span class="title"> {{ group.total }} </span> </div>
-        <div class="col-2 text-light"> </div>
-        <div class="col-2 text-light"> </div>
-        <div class="col-2 text-light"> </div>
+        <div class="col-5 text-light severity-padding"> <span class="title"> {{ group.key | centerEllipses:55 }} </span> </div>
+        <div class="col-6 text-light two-line"> <span class="text-dark"> ALERTS </span> <br> <span class="title"> {{ group.total }} </span> </div>
         <div class="col-1 text-right pr-4">
             <a class="down-arrow" data-toggle="collapse" aria-expanded="false" [attr.href]="'#body-' + i" [attr.aria-controls]="'body-' + i" (click)="toggleTopLevelGroup(group)"> </a>
         </div>
       </div>
     </div>
-    <div class="collapse" role="tabpanel"  [ngClass]="{'show': groupDFSMap[group.key] && groupDFSMap[group.key][0].expand}">
+    <div class="collapse" role="tabpanel"  [ngClass]="{'show': group.expand}">
       <div class="card-block">
         <div class="table-wrapper">
-          <table class="table table-sm" metron-config-table [data]="alerts" [cellSelectable]="true"  (onSort)="sortTreeSubGroup($event, groupDFSMap[group.key][0])" style="white-space: nowrap;" (window:resize)="resize()" #table>
+          <table class="table table-sm" metron-config-table [data]="alerts" [cellSelectable]="true"  (onSort)="sortTreeSubGroup($event, group)" style="white-space: nowrap;" (window:resize)="resize()" #table>
             <thead>
             <tr>
               <th> </th>
               <th class="table-score-col">
-                <metron-config-sorter [type]="'number'" [sortBy]="threatScoreFieldName" [sortOnCol]="groupSortMap[group.key].sortBy"  [sortOrder]="groupSortMap[group.key].sortOrder"> Score </metron-config-sorter>
+                <metron-config-sorter [type]="'number'" [sortBy]="threatScoreFieldName" [sortOnCol]="group.sortEvent.sortBy"  [sortOrder]="group.sortEvent.sortOrder"> Score </metron-config-sorter>
               </th>
               <th *ngFor="let column of alertsColumnsToDisplay" [id]="column.name">
-                <metron-config-sorter [type]="column.type" [sortBy]="column.name" title="{{column.name}}" [sortOnCol]="groupSortMap[group.key].sortBy"  [sortOrder]="groupSortMap[group.key].sortOrder"> {{ column.name | columnNameTranslate | centerEllipses:15 }}</metron-config-sorter>
+                <metron-config-sorter [type]="column.type" [sortBy]="column.name" title="{{column.name}}" [sortOnCol]="group.sortEvent.sortBy"  [sortOrder]="group.sortEvent.sortOrder"> {{ column.name | columnNameTranslate | centerEllipses:15 }}</metron-config-sorter>
               </th>
               <th style="width:25px"><input id="select-deselect-all" class="fontawesome-checkbox" type="checkbox" (click)="selectAllRows($event)">
                 <label for="select-deselect-all"></label>
@@ -45,9 +45,31 @@
             </tr>
             </thead>
             <tbody>
-              <ng-container *ngFor="let subGroup of groupDFSMap[group.key]; let i = index;">
+              <ng-container>
+                <tr  *ngFor="let alert of group.response.results"  [ngClass]="{'selected' : selectedAlerts.indexOf(alert) != -1, 'd-none': !group.expand || !group.show}" (click)="showDetails($event, alert)">
+                  <td [attr.colspan]="2" (click)="addFilter(threatScoreFieldName, alert.source[threatScoreFieldName])">
+                    <div appAlertSeverity [severity]="alert.source[threatScoreFieldName]">
+                      <a> {{ alert.source[threatScoreFieldName] ? alert.source[threatScoreFieldName] : '-' }}</a>
+                    </div>
+                  </td>
+                  <td *ngFor="let column of alertsColumnsToDisplay" #cell>
+                    <a title="{{getValue(alert, column, true)}}" style="color:#689AA9" (click)="addFilter(column.name, getValue(alert, column, false))">{{ getValue(alert, column, true) | centerEllipses:20:cell }}</a>
+                  </td>
+                  <td>
+                    <input id="{{ alert.id }}" class="fontawesome-checkbox" type="checkbox" name="{{alert.id}}" (click)="selectRow($event, alert)" [checked]="selectedAlerts.indexOf(alert) != -1">
+                    <label attr.for="{{ alert.id }}"></label>
+                  </td>
+                </tr>
 
-                <tr *ngIf="i !== 0" class="table-group-row" [ngClass]="{'d-none': !subGroup.show}" (click)="groupExpandCollapse(groupDFSMap[group.key], subGroup.level, i)">
+                <tr *ngIf="group.response.results.length > 0" [ngClass]="{'d-none': !group.expand || !group.show}">
+                  <td [attr.colspan]="alertsColumnsToDisplay.length + 3" class="text-right">
+                    <metron-table-pagination [(pagingData)]="group.pagingData" (pageChange)="groupPageChange(group)"> </metron-table-pagination>
+                  </td>
+                </tr>
+              </ng-container>
+              <ng-container *ngFor="let subGroup of group.treeSubGroups;let i = index">
+
+                <tr class="table-group-row" [ngClass]="{'d-none': !subGroup.show}" (click)="toggleSubGroups(group, subGroup, i)">
                   <td [attr.colspan]="alertsColumnsToDisplay.length + 3" [ngStyle]="{'padding-left.px': (16 * (subGroup.level -1))}">
                     <span class="table-group-icon-col" data-animation="false" data-toggle="tooltip" data-placement="bottom" title="Open Group">
                       <i class="fa" aria-hidden="true" [ngClass]="{'fa-caret-down': subGroup.expand, 'fa-caret-right': !subGroup.expand}"></i>

@@ -85,6 +85,7 @@
                 <app-tree-view *ngIf="queryBuilder.groupRequest.groups.length !== 0"
                                [groups]="queryBuilder.groupRequest.groups"
                                [pauseRefresh]="pauseRefresh"
+                               [refreshInterval]="refreshInterval"
                                [queryBuilder]="queryBuilder"
                                [alertsColumnsToDisplay]="alertsColumnsToDisplay"></app-tree-view>
             </div>

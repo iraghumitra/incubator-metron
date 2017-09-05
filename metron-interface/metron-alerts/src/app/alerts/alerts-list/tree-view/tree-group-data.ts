@@ -20,6 +20,8 @@ import {AlertsSearchResponse} from '../../../model/alerts-search-response';
 import {Pagination} from '../../../model/pagination';
 import {TREE_SUB_GROUP_SIZE} from '../../../utils/constants';
 import {SortField} from '../../../model/sort-field';
+import {SortEvent} from '../../../shared/metron-table/metron-table.directive';
+import {Sort} from '../../../utils/enums';
 
 export class TreeGroupData {
   key: string;
@@ -27,8 +29,11 @@ export class TreeGroupData {
   level: number;
   show: boolean;
   expand = false;
+  score: number;
 
   sortField: SortField;
+  sortEvent: SortEvent = { sortBy: '', type: '', sortOrder: Sort.ASC};
+  treeSubGroups: TreeGroupData[] = [];  
 
   groupQueryMap = null;
   searchRequest: SearchRequest = new SearchRequest();
@@ -36,9 +41,10 @@ export class TreeGroupData {
   pagingData: Pagination = new Pagination();
 
   
-  constructor(key:string, total:number, level:number, expand: boolean) {
+  constructor(key:string, total:number, score: number, level:number, expand: boolean) {
     this.key = key;
     this.total = total;
+    this.score = score;
     this.level = level;
     this.show = expand;
 
