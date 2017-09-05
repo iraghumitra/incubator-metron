@@ -27,5 +27,4 @@ export class SearchRequest {
   size: number;
   sort: SortField[];
   facetFields: string[] = Array.from(new Set(DEFAULT_FACETS.concat(DEFAULT_GROUPS)));
-  groupByFields: string[] = [];
 }

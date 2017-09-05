@@ -69,18 +69,18 @@
             <app-group-by [facets]="alertsSearchResponse.facetCounts" (groupsChange)="onGroupsChange($event)"> </app-group-by>
         </div>
         <div class="col-sm-12 pl-0">
-            <app-table-view *ngIf="queryBuilder.searchRequest.groupByFields.length === 0"
+            <app-table-view *ngIf="queryBuilder.groupRequest.groups.length === 0"
                             [(selectedAlerts)]="selectedAlerts"
                             [pagingData]="pagingData" [alerts]="alerts"
                             [alertsColumnsToDisplay]="alertsColumnsToDisplay"
                             (onResize)="onResize()"
-                            (onSort)="onSort()"
+                            (onSort)="onSort($event)"
                             (onPageChange)="onPageChange()"
                             (beforeShowDetails)="showDetails()"
                             (onAddFilter)="onAddFilter($event)"></app-table-view>
-            <app-tree-view *ngIf="queryBuilder.searchRequest.groupByFields.length !== 0"
+            <app-tree-view *ngIf="queryBuilder.groupRequest.groups.length !== 0"
+                           [groups]="queryBuilder.groupRequest.groups"
                            [pauseRefresh]="pauseRefresh"
-                           [searchResponse]="alertsSearchResponse"
                            [queryBuilder]="queryBuilder"
                            [alertsColumnsToDisplay]="alertsColumnsToDisplay"></app-tree-view>
         </div>

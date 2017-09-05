@@ -19,9 +19,12 @@ import {Filter} from '../../model/filter';
 import {ColumnNamesService} from '../../service/column-names.service';
 import {SearchRequest} from '../../model/search-request';
 import {SortField} from '../../model/sort-field';
+import {GroupRequest} from '../../model/group-request';
+import {Group} from '../../model/group';
 
 export class QueryBuilder {
   private _searchRequest = new SearchRequest();
+  private _groupRequest = new GroupRequest();
   private _query = '*';
   private _displayQuery = this._query;
   private _filters: Filter[] = [];
@@ -60,6 +63,11 @@ export class QueryBuilder {
   set searchRequest(value: SearchRequest) {
     this._searchRequest = value;
     this.query = this._searchRequest.query;
+  }
+
+  get groupRequest(): GroupRequest {
+    this._groupRequest.query = this.generateSelect();
+    return this._groupRequest;
   }
 
   addOrUpdateFilter(field: string, value: string) {
@@ -112,7 +120,7 @@ export class QueryBuilder {
   }
 
   setGroupby(groups: string[]) {
-    this.searchRequest.groupByFields = groups;
+    this.groupRequest.groups = groups.map(groupName => new Group(groupName));
   }
 
   setSort(sortBy: string, order: string) {
