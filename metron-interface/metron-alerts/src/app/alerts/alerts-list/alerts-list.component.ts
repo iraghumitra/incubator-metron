@@ -174,7 +174,9 @@ export class AlertsListComponent implements OnInit, OnDestroy {
 
   onConfigRowsChange() {
     this.alertsService.interval = this.refreshInterval;
-    this.search();
+    if (this.queryBuilder.groupRequest.groups.length === 0) {
+      this.search();
+    }
   }
 
   onGroupsChange(groups) {
