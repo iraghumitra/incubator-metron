@@ -18,19 +18,8 @@
 import {SearchRequest} from '../../../model/search-request';
 import {AlertsSearchResponse} from '../../../model/alerts-search-response';
 import {Pagination} from '../../../model/pagination';
-import {Alert} from '../../../model/alert';
-
-// export class TreeGroupAndPagingData {
-//
-//   treeGroupDataArray:  TreeGroupData[] = [];
-//
-//   constructor(treeGroupDataArray:TreeGroupData[]) {
-//     this.pagingData = new Pagination();
-//     this.treeGroupDataArray = treeGroupDataArray;
-//
-//
-//   }
-// }
+import {TREE_SUB_GROUP_SIZE} from '../../../utils/constants';
+import {SortField} from '../../../model/sort-field';
 
 export class TreeGroupData {
   key: string;
@@ -39,17 +28,20 @@ export class TreeGroupData {
   show: boolean;
   expand = false;
 
+  sortField: SortField;
+
   groupQueryMap = null;
   searchRequest: SearchRequest = new SearchRequest();
   response: AlertsSearchResponse = new AlertsSearchResponse();
   pagingData: Pagination = new Pagination();
 
+  
   constructor(key:string, total:number, level:number, expand: boolean) {
     this.key = key;
     this.total = total;
     this.level = level;
     this.show = expand;
 
-    this.pagingData.size = 5;
+    this.pagingData.size = TREE_SUB_GROUP_SIZE;
   }
 }
