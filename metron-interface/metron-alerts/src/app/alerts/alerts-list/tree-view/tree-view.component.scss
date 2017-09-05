@@ -108,3 +108,7 @@ $group-height: 65px;
     height: 35px;
   }
 }
+
+.full-height {
+  min-height: calc(100vh - 300px);
+}

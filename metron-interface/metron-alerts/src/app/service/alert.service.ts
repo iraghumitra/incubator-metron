@@ -17,7 +17,6 @@
  */
 import {Http, Headers, RequestOptions, Response} from '@angular/http';
 import {Injectable, NgZone} from '@angular/core';
-import {Headers, RequestOptions} from '@angular/http';
 import {Observable} from 'rxjs/Rx';
 import 'rxjs/add/observable/interval';
 import 'rxjs/add/operator/switchMap';

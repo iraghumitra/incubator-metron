@@ -11,7 +11,7 @@
 	OR CONDITIONS OF ANY KIND, either express or implied. See the License for
   the specific language governing permissions and limitations under the License.
 -->
-<div #root role="tablist" aria-multiselectable="true">
+<div #root role="tablist" aria-multiselectable="true" class="pl-1 full-height">
   <div class="card" *ngFor="let group of searchResponse.groupResults; let i = index;">
     <div class="card-header" role="tab" [attr.id]="'title-' + i">
       <div class="hexagon" appAlertSeverityHexagon [severity]="group.score"> <span> {{ group.score }} </span> </div>
