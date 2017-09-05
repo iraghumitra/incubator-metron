@@ -22,3 +22,8 @@ export const ALERTS_TABLE_METADATA = 'metron-alerts-table-metadata';
 export const ALERTS_COLUMN_NAMES = 'metron-alerts-column-names';
 
 export var DEFAULT_FACETS = ['source:type', 'ip_src_addr', 'ip_dst_addr', 'host', 'enrichments:geo:ip_dst_addr:country'];
+export var DEFAULT_GROUPS = ['source:type', 'ip_src_addr', 'ip_dst_addr', 'host', 'enrichments:geo:ip_dst_addr:country'];
+
+export var TREE_SUB_GROUP_SIZE = 5;
+
+
