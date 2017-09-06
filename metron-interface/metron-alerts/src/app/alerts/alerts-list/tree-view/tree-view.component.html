@@ -11,7 +11,7 @@
 	OR CONDITIONS OF ANY KIND, either express or implied. See the License for
   the specific language governing permissions and limitations under the License.
 -->
-<div #root role="tablist" aria-multiselectable="true" class="pl-1 full-height">
+<div role="tablist" aria-multiselectable="true" class="pl-1 full-height">
   <div class="card" *ngFor="let group of topGroups; let i = index;">
     <div class="card-header" role="tab" [attr.id]="'title-' + i">
       <div class="hexagon" appAlertSeverityHexagon [severity]="group.score">
@@ -22,7 +22,8 @@
         <div class="col-5 text-light severity-padding"> <span class="title"> {{ group.key | centerEllipses:55 }} </span> </div>
         <div class="col-6 text-light two-line"> <span class="text-dark"> ALERTS </span> <br> <span class="title"> {{ group.total }} </span> </div>
         <div class="col-1 text-right pr-4">
-            <a class="down-arrow" data-toggle="collapse" aria-expanded="false" [attr.href]="'#body-' + i" [attr.aria-controls]="'body-' + i" (click)="toggleTopLevelGroup(group)"> </a>
+            <span class="down-arrow" data-animation="false" data-toggle="tooltip" data-placement="left" title="Open Group"
+                   aria-expanded="false" [attr.href]="'#body-' + i" [attr.aria-controls]="'body-' + i" (click)="toggleTopLevelGroup(group)"> </span>
         </div>
       </div>
     </div>
@@ -61,7 +62,7 @@
                   </td>
                 </tr>
 
-                <tr *ngIf="group.response.results.length > 0" [ngClass]="{'d-none': !group.expand || !group.show}">
+                <tr *ngIf="group.response.results.length > 0" class="no-hover" [ngClass]="{'d-none': !group.expand || !group.show}">
                   <td [attr.colspan]="alertsColumnsToDisplay.length + 3" class="text-right">
                     <metron-table-pagination [(pagingData)]="group.pagingData" (pageChange)="groupPageChange(group)"> </metron-table-pagination>
                   </td>
@@ -94,7 +95,7 @@
                   </td>
                 </tr>
 
-                <tr *ngIf="subGroup.response.results.length > 0" [ngClass]="{'d-none': !subGroup.expand || !subGroup.show}">
+                <tr *ngIf="subGroup.response.results.length > 0" class="no-hover" [ngClass]="{'d-none': !subGroup.expand || !subGroup.show}">
                   <td [attr.colspan]="alertsColumnsToDisplay.length + 3" class="text-right">
                     <metron-table-pagination [(pagingData)]="subGroup.pagingData" (pageChange)="groupPageChange(subGroup)"> </metron-table-pagination>
                   </td>
