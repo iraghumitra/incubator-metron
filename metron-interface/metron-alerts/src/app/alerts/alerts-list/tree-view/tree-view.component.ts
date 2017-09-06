@@ -16,11 +16,10 @@
  * limitations under the License.
  */
 
-import { Component, OnInit, Input, OnChanges, SimpleChanges, ElementRef, ViewChild, OnDestroy } from '@angular/core';
+import { Component, OnInit, Input, OnChanges, SimpleChanges, OnDestroy } from '@angular/core';
 import {Subscription} from 'rxjs/Rx';
 import {Router} from '@angular/router';
 
-import {SearchResultGroup} from '../../../model/search-result-group';
 import {TableViewComponent} from '../table-view/table-view.component';
 import {AlertsSearchResponse} from '../../../model/alerts-search-response';
 import {QueryBuilder} from '../query-builder';
@@ -31,7 +30,6 @@ import {GroupResult} from '../../../model/group-result';
 import {Group} from '../../../model/group';
 import {SortField} from '../../../model/sort-field';
 import {Sort} from '../../../utils/enums';
-import {SortEvent} from '../../../shared/metron-table/metron-table.directive';
 
 @Component({
   selector: 'app-tree-view',
@@ -41,14 +39,9 @@ import {SortEvent} from '../../../shared/metron-table/metron-table.directive';
 
 export class TreeViewComponent extends TableViewComponent implements OnInit, OnChanges, OnDestroy {
 
-  groupKeys: string[] = [];
   groupByFields: string[] = [];
   groupPollingTimer: Subscription;
-  subGroupPollingTimersMap: {[key: string]: Subscription } = {};
-  // groupDFSMap: { [key:string]: TreeGroupData[]} = {};
   searchResponse: GroupResponse = new GroupResponse();
-
-
   topGroups: TreeGroupData[] = [];
   treeGroupSubscriptionMap: {[key: string]: TreeGroupData } = {};
 
@@ -57,19 +50,9 @@ export class TreeViewComponent extends TableViewComponent implements OnInit, OnC
   @Input() pauseRefresh = false;
   @Input() refreshInterval: number;
 
-  @ViewChild('root') root: ElementRef;
-
   constructor(router: Router,
               private alertsService: AlertService) {
     super(router);
-  }
-
-  checkGroupsAndGetData() {
-    let groupByFields = this.queryBuilder.groupRequest.groups.map(group => group.field);
-    if (JSON.stringify(this.groupByFields) !== JSON.stringify(groupByFields)) {
-      this.groupByFields = groupByFields;
-      this.getGroups();
-    }
   }
 
   collapseGroup(groupArray:TreeGroupData[], level:number, index:number) {
@@ -144,27 +127,6 @@ export class TreeViewComponent extends TableViewComponent implements OnInit, OnC
     this.parseTopLevelGroup();
   }
 
-  groupExpandCollapse(groupArray: TreeGroupData[], level: number, index: number) {
-    let selectedGroup = groupArray[index];
-
-    if (selectedGroup.expand) {
-      this.collapseGroup(groupArray, level, index);
-    } else {
-      this.expandGroup(groupArray, level, index);
-    }
-
-    selectedGroup.expand = !selectedGroup.expand;
-
-    if (selectedGroup.groupQueryMap) {
-      if (selectedGroup.expand) {
-        this.getAlerts(selectedGroup);
-        this.tryStartPolling(selectedGroup);
-      } else {
-        this.tryStopPolling(selectedGroup);
-      }
-    }
-  }
-
   groupPageChange(group: TreeGroupData) {
     this.getAlerts(group);
   }
@@ -183,7 +145,7 @@ export class TreeViewComponent extends TableViewComponent implements OnInit, OnC
     });
   }
 
-  private createTopGroupQueryMap(groupByFields:string, groupResult:GroupResult) {
+  createTopGroupQueryMap(groupByFields:string, groupResult:GroupResult) {
     let groupQueryMap = {};
     groupQueryMap[groupByFields] = groupResult.key;
     return groupQueryMap;
@@ -198,15 +160,6 @@ export class TreeViewComponent extends TableViewComponent implements OnInit, OnC
 
     this.groupByFields = groupByFields;
   }
-
-  // merge_map(newKeys: string[], oldKeys: string[]) {
-  //   let deleteKeys = oldKeys.filter(key => newKeys.indexOf(key) === -1);
-  //   deleteKeys.forEach(key => delete this.groupDFSMap);
-  //
-  //   if (!this.groupDFSMap) {
-  //     this.groupDFSMap = {};
-  //   }
-  // }
 
   ngOnChanges(changes: SimpleChanges) {
     if((changes['groups'] && changes['groups'].currentValue) ||
@@ -235,71 +188,6 @@ export class TreeViewComponent extends TableViewComponent implements OnInit, OnC
     selectedGroup.response.results = results.results;
     selectedGroup.pagingData.total = results.total;
   }
-
-
-  tryStartPolling(selectedGroup: TreeGroupData) {
-    // if (!this.pauseRefresh) {
-    //   let refreshTimer = this.alertsService.pollSearch(selectedGroup.searchRequest).subscribe(results => {
-    //     this.setData(selectedGroup, results);
-    //   });
-    //   this.addToPollingMap(selectedGroup, refreshTimer);
-    // }
-  }
-
-  addToPollingMap(selectedGroup:TreeGroupData, refreshTimer:Subscription) {
-    let queryKey = this.createQuery(selectedGroup);
-    if (!this.subGroupPollingTimersMap[queryKey]) {
-      this.subGroupPollingTimersMap[queryKey] = null;
-    }
-    this.subGroupPollingTimersMap[queryKey] = refreshTimer;
-  }
-
-  removeFromPollingMap(selectedGroup:TreeGroupData) {
-    let queryKey = this.createQuery(selectedGroup);
-    delete this.subGroupPollingTimersMap[queryKey];
-  }
-
-  tryStopPolling(selectedGroup: TreeGroupData) {
-    let refreshTimer = this.getTimer(selectedGroup);
-    if (refreshTimer && !refreshTimer.closed) {
-      refreshTimer.unsubscribe();
-      this.removeFromPollingMap(selectedGroup);
-    }
-  }
-
-  getTimer(selectedGroup:TreeGroupData) {
-    let queryKey = this.createQuery(selectedGroup);
-    let refreshTimer = this.subGroupPollingTimersMap[queryKey];
-    return refreshTimer;
-  }
-
-  tryStopAll() {
-    if (this.pauseRefresh) {
-
-      Object.keys(this.subGroupPollingTimersMap).forEach(query =>  {
-        let refreshTimer = this.subGroupPollingTimersMap[query];
-        if (!refreshTimer.closed) {
-          refreshTimer.unsubscribe();
-          delete this.subGroupPollingTimersMap[query];
-        }
-      });
-
-    }
-  }
-
-  tryStartAll() {
-    // if (!this.pauseRefresh) {
-    //   Object.keys(this.groupDFSMap).forEach(key => {
-    //     let treeGroupItems = this.groupDFSMap[key];
-    //     treeGroupItems.forEach(treeGroup => {
-    //       if (treeGroup.expand && treeGroup.show && treeGroup.groupQueryMap) {
-    //         this.tryStartPolling(treeGroup);
-    //       }
-    //     });
-    //   });
-    // }
-  }
-
 
   checkAndToSubscription(group: TreeGroupData) {
     if (group.groupQueryMap) {
@@ -373,13 +261,8 @@ export class TreeViewComponent extends TableViewComponent implements OnInit, OnC
   }
 
   parseTopLevelGroup() {
-    // let newKeys = [];
-    // let oldKeys = Object.keys(this.groupDFSMap);
     let groupedBy = this.searchResponse.groupedBy;
 
-    this.root.nativeElement.style.minHeight = this.root.nativeElement.offsetHeight + 'px';
-
-    this.tryStopAll();
     this.initMap();
 
     for (let i = 0; i < this.searchResponse.groupResults.length; i++) {
@@ -399,22 +282,6 @@ export class TreeViewComponent extends TableViewComponent implements OnInit, OnC
       }
     }
 
-
-
-    // this.searchResponse.groupResults.forEach(group => {
-    //   let groupAsArray: TreeGroupData[] = [];
-    //   let groupQueryMap: {[key: string]: string} = {};
-    //   let existingGroupAsArray = this.groupDFSMap[group.key] ? JSON.parse(JSON.stringify(this.groupDFSMap[group.key])): [];
-    //
-    //   this.parseSubGroups(group, groupAsArray, existingGroupAsArray, groupQueryMap, groupedBy, 0);
-    //   newKeys.push(group.key);
-    //
-    //   this.groupDFSMap[group.key] = groupAsArray;
-    //   this.groupSortMap[group.key] = this.groupSortMap[group.key] ? this.groupSortMap[group.key] : { sortBy : '',  type: '', sortOrder: Sort.ASC};
-    //
-    // });
-    //
-    // this.merge_map(newKeys, oldKeys);
   }
 
   sortTreeSubGroup($event, treeGroup: TreeGroupData) {

@@ -10,7 +10,7 @@ import {GroupByComponentData} from './group-by-component-data';
   styleUrls: ['./group-by.component.scss']
 })
 export class GroupByComponent implements OnInit, OnChanges {
-
+  maxGroupCount = 99999999;
   backgroundColor = '#0F4450';
   border = '1px solid #1B596C';
 

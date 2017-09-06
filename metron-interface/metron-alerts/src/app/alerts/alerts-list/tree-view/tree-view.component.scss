@@ -17,7 +17,7 @@
  */
 @import "../../../../variables.scss";
 
-$group-height: 65px;
+$group-height: 70px;
 
 .card {
   background: none;
@@ -56,23 +56,32 @@ $group-height: 65px;
   }
 
   .down-arrow {
-    text-decoration: none;
+    padding: 10px 20px;
+
+    &:hover {
+      background: $eden-1;
+      border: 2px solid $blue-mine;
+    }
 
     &:after {
-      font-family: "FontAwesome";
-      font-style: normal;
+      top: 2px;
+      right: 37px;
+      color: $gothic;
       font-size: 25px;
       content: '\f107';
-      color: $gothic;
+      font-style: normal;
+      position: absolute;
+      font-family: "FontAwesome";
     }
   }
 
   .two-line {
-    padding-top: 8px;
-    line-height: 1.1;
+    padding-top: 16px;
+    line-height: 1;
   }
 
   .card-block {
+    padding-bottom: 0px;
     background: $mine-shaft-9;
   }
 
@@ -99,6 +108,20 @@ $group-height: 65px;
 
   .table-group-row {
     background: $mine-shaft-10;
+  }
+
+  .no-hover {
+    height: $group-height;
+
+    td {
+      text-align:center;
+      vertical-align:middle;
+      border-bottom: none;
+
+      &:hover {
+        background: none;
+      }
+    }
   }
 }
 
