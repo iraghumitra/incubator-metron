@@ -12,7 +12,7 @@
   the specific language governing permissions and limitations under the License.
   -->
 <div class="table-wrapper">
-  <table class="table table-sm" metron-config-table [data]="alerts" [cellSelectable]="true" (onSort)="sort($event)" style="white-space: nowrap;" (window:resize)="resize()" #table>
+  <table class="table table-sm" metron-config-table [data]="alerts" [cellSelectable]="true" (onSort)="onSort($event)" style="white-space: nowrap;" (window:resize)="resize()" #table>
     <thead>
     <tr>
       <th style="width:55px"> <metron-config-sorter [type]="'number'" [sortBy]="threatScoreFieldName"> Score </metron-config-sorter> </th>
@@ -37,6 +37,6 @@
 </div>
 <div clas="row">
   <div class="col-md-3 push-md-5">
-    <metron-table-pagination [(pagingData)]="pagingData" (pageChange)="pageChange()"> </metron-table-pagination>
+    <metron-table-pagination [(pagingData)]="pagingData" (pageChange)="onPageChange()"> </metron-table-pagination>
   </div>
 </div>

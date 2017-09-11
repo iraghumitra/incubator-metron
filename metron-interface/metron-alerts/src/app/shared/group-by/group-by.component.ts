@@ -51,6 +51,8 @@ export class GroupByComponent implements OnInit, OnChanges {
       if (!groupByItem) {
         groupByItem = new GroupByComponentData(key, count);
         this.data.push(groupByItem);
+      } else {
+        groupByItem.count = count;
       }
     }
   }

@@ -36,16 +36,15 @@
     </div>
     <div class="mrow">
         <div class="col-md-9 px-0">
-            <span class="col-form-label-lg" *ngIf="alerts.length === 0"> Alerts ({{pagingData.total}}) </span>
-            <span class="col-form-label-lg" *ngIf="alerts.length !== 0"> Alerts ({{alerts.length}} of {{pagingData.total}}) </span>
+            <span class="col-form-label-lg"> Alerts ({{alertsSearchResponse.total}}) </span>
         </div>
         <div class="col-md-3 px-0">
             <div class="pull-right" style="position: relative; display: block;">
                 <div class="btn settings">
                     <i #settingsIcon class="fa fa-sliders" aria-hidden="true"></i>
                 </div>
-                <app-configure-rows [srcElement]="settingsIcon" [tableMetaData]="tableMetaData" [(interval)]="refreshInterval" [(size)]="pagingData.size" (configRowsChange)="onConfigRowsChange()" > </app-configure-rows>
-                <div class="btn pause-play" (click)="onPausePlay()">
+                <app-configure-rows [srcElement]="settingsIcon" [tableMetaData]="tableMetaData" [(interval)]="refreshInterval" [(size)]="tableMetaData.size" (configRowsChange)="onConfigRowsChange()" > </app-configure-rows>
+                <div class="btn  pause-play" (click)="onPausePlay()">
                     <i *ngIf="!pauseRefresh" class="fa fa-pause" aria-hidden="true"></i>
                     <i *ngIf="pauseRefresh" class="fa fa-play" aria-hidden="true"></i>
                 </div>
@@ -72,22 +71,24 @@
             <div class="col-sm-12 pl-0 pb-3">
                 <app-group-by [facets]="alertsSearchResponse.facetCounts" (groupsChange)="onGroupsChange($event)"> </app-group-by>
             </div>
-            <div class="col-sm-12 px-0">
-                <app-table-view *ngIf="queryBuilder.groupRequest.groups.length === 0"
-                                [(selectedAlerts)]="selectedAlerts"
-                                [pagingData]="pagingData" [alerts]="alerts"
+            <div class="col-sm-12 pl-0">
+                <app-table-view #dataViewComponent *ngIf="queryBuilder.groupRequest.groups.length === 0"
+                                [queryBuilder]="queryBuilder"
                                 [alertsColumnsToDisplay]="alertsColumnsToDisplay"
+                                [(selectedAlerts)]="selectedAlerts"
                                 (onResize)="onResize()"
-                                (onSort)="onSort($event)"
-                                (onPageChange)="onPageChange()"
-                                (beforeShowDetails)="showDetails()"
-                                (onAddFilter)="onAddFilter($event)"></app-table-view>
-                <app-tree-view *ngIf="queryBuilder.groupRequest.groups.length !== 0"
-                               [groups]="queryBuilder.groupRequest.groups"
-                               [pauseRefresh]="pauseRefresh"
-                               [refreshInterval]="refreshInterval"
+                                (onAddFilter)="onAddFilter($event)"
+                                (onShowDetails)="showDetails($event)"
+                                (onShowConfigureTable)="showConfigureTable()"></app-table-view>
+                <app-tree-view #dataViewComponent *ngIf="queryBuilder.groupRequest.groups.length !== 0"
                                [queryBuilder]="queryBuilder"
-                               [alertsColumnsToDisplay]="alertsColumnsToDisplay"></app-tree-view>
+                               [alertsColumnsToDisplay]="alertsColumnsToDisplay"
+                               [groups]="queryBuilder.groupRequest.groups"
+                               [(selectedAlerts)]="selectedAlerts"
+                               (onResize)="onResize()"
+                               (onAddFilter)="onAddFilter($event)"
+                               (onShowDetails)="showDetails($event)"
+                               (onShowConfigureTable)="showConfigureTable()"></app-tree-view>
             </div>
         </div>
     </div>
