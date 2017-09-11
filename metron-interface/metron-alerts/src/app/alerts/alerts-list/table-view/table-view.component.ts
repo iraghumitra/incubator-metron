@@ -16,44 +16,123 @@
  * limitations under the License.
  */
 
-import { Component, OnInit, OnChanges, Input, Output, EventEmitter, SimpleChanges } from '@angular/core';
+import { Component, OnInit, OnChanges, Input, Output, EventEmitter, SimpleChanges, OnDestroy } from '@angular/core';
 import {Router} from '@angular/router';
+import {Observable, Subscription} from 'rxjs/Rx';
 
 import {Pagination} from '../../../model/pagination';
 import {SortEvent} from '../../../shared/metron-table/metron-table.directive';
 import {ColumnMetadata} from '../../../model/column-metadata';
 import {Alert} from '../../../model/alert';
+import {AlertsSearchResponse} from '../../../model/alerts-search-response';
+import {AlertService} from '../../../service/alert.service';
+import {MetronDialogBox, DialogType} from '../../../shared/metron-dialog-box';
+import {ElasticsearchUtils} from '../../../utils/elasticsearch-utils';
+import {QueryBuilder} from '../query-builder';
+import {Sort} from '../../../utils/enums';
 
 @Component({
   selector: 'app-table-view',
   templateUrl: './table-view.component.html',
   styleUrls: ['./table-view.component.scss']
 })
-export class TableViewComponent implements OnInit, OnChanges {
 
+export class TableViewComponent implements OnInit, OnChanges, OnDestroy {
+
+  alerts: Alert[] = [];
   threatScoreFieldName = 'threat:triage:score';
 
-  @Input() alerts = [];
-  @Input() pagingData = new Pagination();
-  @Input() selectedAlerts: Alert[] = [];
+  router: Router;
+  alertsService: AlertService;
+  metronDialogBox: MetronDialogBox;
+  refreshTimer: Subscription;
+  pagingData = new Pagination();
+  alertsSearchResponse: AlertsSearchResponse = new AlertsSearchResponse();
+  
+  @Input() queryBuilder: QueryBuilder;
   @Input() alertsColumnsToDisplay: ColumnMetadata[] = [];
+  @Input() selectedAlerts: Alert[] = [];
 
   @Output() onResize = new EventEmitter<void>();
-  @Output() onSort = new EventEmitter<SortEvent>();
-  @Output() onPageChange = new EventEmitter<void>();
   @Output() onAddFilter = new EventEmitter<{}>();
+  @Output() onShowDetails = new EventEmitter<Alert>();
+  @Output() onShowConfigureTable = new EventEmitter<Alert>();
+  
   @Output() selectedAlertsChange = new EventEmitter< Alert[]>();
-  @Output() beforeShowDetails = new EventEmitter<void>();
 
-  constructor(private router: Router) { }
+  constructor(router: Router,
+              alertsService: AlertService,
+              metronDialogBox: MetronDialogBox) {
+    this.router = router;
+    this.alertsService = alertsService;
+    this.metronDialogBox = metronDialogBox;
+  }
 
   ngOnInit() {
   }
 
   ngOnChanges(changes: SimpleChanges) {
-    if (changes['selectedAlerts'] && changes['selectedAlerts'].currentValue) {
-      console.log(this.selectedAlerts);
+    if (changes['alertsSearchResponse'] && changes['alertsSearchResponse'].currentValue) {
+      this.alerts = this.alertsSearchResponse.results ? this.alertsSearchResponse.results : [];
     }
+  }
+
+  ngOnDestroy() {
+    // this.tryStopPolling();
+  }
+
+  search(resetPaginationParams = true, pageSize: number = null) {
+    if (resetPaginationParams) {
+      this.pagingData.from = 0;
+    }
+
+    this.pagingData.size = pageSize === null ? this.pagingData.size : pageSize;
+    this.queryBuilder.setFromAndSize(this.pagingData.from, this.pagingData.size);
+
+    this.alertsService.search(this.queryBuilder.searchRequest).subscribe(results => {
+      this.setAlertData(results);
+    }, error => {
+      this.setAlertData(new AlertsSearchResponse());
+      this.metronDialogBox.showConfirmationMessage(ElasticsearchUtils.extractESErrorMessage(error), DialogType.Error);
+    });
+  }
+
+  // tryStartPolling() {
+  //   if (!this.pauseRefresh) {
+  //     this.tryStopPolling();
+  //     this.refreshTimer = this.alertsService.pollSearch(this.queryBuilder.searchRequest).subscribe(results => {
+  //       this.setAlertData(results);
+  //     });
+  //   }
+  // }
+
+  // tryStopPolling() {
+  //   if (this.refreshTimer && !this.refreshTimer.closed) {
+  //     this.refreshTimer.unsubscribe();
+  //   }
+  // }
+
+  // TODO: Handle this from ngchages
+  onPausePlay() {
+    // this.pauseRefresh = !this.pauseRefresh;
+    // if (this.pauseRefresh) {
+    //   this.tryStopPolling();
+    // } else {
+    //   this.search(false);
+    // }
+  }
+
+  setAlertData(results: AlertsSearchResponse) {
+    this.alertsSearchResponse = results;
+    this.pagingData.total = results.total;
+    this.alerts = this.alertsSearchResponse.results ? this.alertsSearchResponse.results : [];
+  }
+
+  onSort(sortEvent: SortEvent) {
+    let sortOrder = (sortEvent.sortOrder === Sort.ASC ? 'asc' : 'desc');
+    let sortBy = sortEvent.sortBy === 'id' ? '_uid' : sortEvent.sortBy;
+    this.queryBuilder.setSort(sortBy, sortOrder);
+    this.search();
   }
 
   getValue(alert: Alert, column: ColumnMetadata, formatData: boolean) {
@@ -89,8 +168,8 @@ export class TableViewComponent implements OnInit, OnChanges {
     return returnValue;
   }
 
-  pageChange() {
-    this.onPageChange.emit();
+  onPageChange() {
+    this.search(false);
   }
 
   selectRow($event, alert: Alert) {
@@ -101,10 +180,6 @@ export class TableViewComponent implements OnInit, OnChanges {
     }
 
     this.selectedAlertsChange.emit(this.selectedAlerts);
-  }
-  
-  sort(sortEvent: SortEvent) {
-    this.onSort.emit(sortEvent);
   }
 
   selectAllRows($event) {
@@ -122,22 +197,18 @@ export class TableViewComponent implements OnInit, OnChanges {
 
   addFilter(field: string, value: string) {
     let map = {};
+    field = (field === 'id') ? '_uid' : field;
     map[field] = value;
     this.onAddFilter.emit(map);
   }
 
   showDetails($event, alert: Alert) {
-    if ($event.target.type !== 'checkbox' && $event.target.parentElement.firstChild.type !== 'checkbox' && $event.target.nodeName !== 'A') {
-      this.selectedAlerts = [];
-      this.selectedAlerts = [alert];
-      this.beforeShowDetails.emit();
-      this.selectedAlertsChange.emit(this.selectedAlerts);
-      this.router.navigateByUrl('/alerts-list(dialog:details/' + alert.source['source:type'] + '/' + alert.source.guid + ')');
+    if ($event.target.parentElement.firstElementChild.type !== 'checkbox' && $event.target.nodeName !== 'A') {
+      this.onShowDetails.emit(alert);
     }
   }
 
   showConfigureTable() {
-    this.beforeShowDetails.emit();
-    this.router.navigateByUrl('/alerts-list(dialog:configure-table)');
+    this.onShowConfigureTable.emit();
   }
 }
