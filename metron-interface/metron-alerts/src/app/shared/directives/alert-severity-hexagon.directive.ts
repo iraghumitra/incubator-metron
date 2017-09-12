@@ -15,20 +15,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { Directive, ElementRef, OnChanges, SimpleChanges, Input, OnInit } from '@angular/core';
+import { Directive, ElementRef, SimpleChanges, Input, OnChanges } from '@angular/core';
 
 @Directive({
   selector: '[appAlertSeverityHexagon]'
 })
-export class AlertSeverityHexagonDirective {
+export class AlertSeverityHexagonDirective implements OnChanges {
 
   @Input() severity: number;
 
   constructor(private el: ElementRef) { }
-
-  ngOnInit() {
-    this.setColor(this.severity);
-  }
 
   ngOnChanges(changes: SimpleChanges) {
     if (changes['severity'] && changes['severity'].currentValue) {

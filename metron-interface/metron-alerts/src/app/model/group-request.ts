@@ -20,6 +20,6 @@ import {Group} from './group';
 export class GroupRequest {
   indices: string[] = ['websphere', 'snort', 'asa', 'bro', 'yaf'];
   query: string;
-  scoreField: string = 'threat:triage:score';
+  scoreField = 'threat:triage:score';
   groups: Group[] = [];
 }

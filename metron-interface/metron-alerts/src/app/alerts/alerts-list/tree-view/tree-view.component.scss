@@ -80,6 +80,9 @@ $group-height: 70px;
     line-height: 1;
   }
 
+  .collapse {
+    background: $mine-shaft-9;
+  }
   .card-block {
     padding-bottom: 0px;
     background: $mine-shaft-9;
@@ -134,4 +137,13 @@ $group-height: 70px;
 
 sup {
   font-size: 100%;
+}
+
+.configure-table-icon {
+  font-size: 16px;
+  cursor: pointer;
+}
+
+.tree-wrapper {
+  min-height: calc(100vh - 280px);
 }

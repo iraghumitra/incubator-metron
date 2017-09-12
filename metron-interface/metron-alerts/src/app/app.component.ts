@@ -35,17 +35,17 @@ export class AppComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    $("body").tooltip({
+    $('body').tooltip({
       trigger : 'hover',
       selector: '[data-toggle="tooltip"]'
     });
 
     $('body').on('show.bs.tooltip	', function () {
-      $(".tooltip").tooltip("hide");
+      $('.tooltip').tooltip('hide');
     });
 
     $(document).on('click', function () {
-      $(".tooltip").tooltip("hide");
+      $('.tooltip').tooltip('hide');
     });
   }
 }

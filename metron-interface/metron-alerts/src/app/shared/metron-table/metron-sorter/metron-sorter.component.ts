@@ -43,7 +43,7 @@ export class MetronSorterComponent implements OnChanges {
   }
 
   ngOnChanges(changes: SimpleChanges) {
-    if(changes['sortOnCol'] && changes['sortOnCol'].currentValue) {
+    if (changes['sortOnCol'] && changes['sortOnCol'].currentValue) {
       if (this.sortOnCol === this.sortBy ) {
         this.sortAsc = this.sortOrder === Sort.ASC;
         this.sortDesc = this.sortOrder === Sort.DSC;

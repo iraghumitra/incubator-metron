@@ -16,13 +16,11 @@
  * limitations under the License.
  */
 
-import { Component, OnInit, Input, OnChanges, SimpleChanges, OnDestroy } from '@angular/core';
-import {Subscription} from 'rxjs/Rx';
+import { Component, Input, OnChanges, SimpleChanges } from '@angular/core';
 import {Router} from '@angular/router';
 
 import {TableViewComponent} from '../table-view/table-view.component';
 import {AlertsSearchResponse} from '../../../model/alerts-search-response';
-import {QueryBuilder} from '../query-builder';
 import {AlertService} from '../../../service/alert.service';
 import {TreeGroupData} from './tree-group-data';
 import {GroupResponse} from '../../../model/group-response';
@@ -39,15 +37,14 @@ import {ElasticsearchUtils} from '../../../utils/elasticsearch-utils';
   styleUrls: ['./tree-view.component.scss']
 })
 
-export class TreeViewComponent extends TableViewComponent implements OnInit, OnChanges, OnDestroy {
-
-  groupByFields: string[] = [];
-  groupPollingTimer: Subscription;
-  searchResponse: GroupResponse = new GroupResponse();
-  topGroups: TreeGroupData[] = [];
-  treeGroupSubscriptionMap: {[key: string]: TreeGroupData } = {};
+export class TreeViewComponent extends TableViewComponent implements OnChanges {
 
   @Input() groups: Group[] = [];
+
+  groupByFields: string[] = [];
+  topGroups: TreeGroupData[] = [];
+  searchResponse: GroupResponse = new GroupResponse();
+  treeGroupSubscriptionMap: {[key: string]: TreeGroupData } = {};
 
   constructor(router: Router,
               alertsService: AlertService,
@@ -55,7 +52,7 @@ export class TreeViewComponent extends TableViewComponent implements OnInit, OnC
     super(router, alertsService, metronDialogBox);
   }
 
-  collapseGroup(groupArray:TreeGroupData[], level:number, index:number) {
+  collapseGroup(groupArray: TreeGroupData[], level: number, index: number) {
     for (let i = index + 1; i < groupArray.length; i++) {
       if (groupArray[i].level > (level)) {
         groupArray[i].show = false;
@@ -81,7 +78,7 @@ export class TreeViewComponent extends TableViewComponent implements OnInit, OnC
     return groupQery;
   }
 
-  expandGroup(groupArray:TreeGroupData[], level:number, index:number) {
+  expandGroup(groupArray: TreeGroupData[], level: number, index: number) {
     for (let i = index + 1; i < groupArray.length; i++) {
       if (groupArray[i].level === (level + 1)) {
         groupArray[i].show = true;
@@ -110,21 +107,6 @@ export class TreeViewComponent extends TableViewComponent implements OnInit, OnC
     });
   }
 
-  // tryStartPolling() {
-  //   if (!this.pauseRefresh) {
-  //     this.tryStopPolling();
-  //     this.groupPollingTimer = this.alertsService.pollGroups(this.queryBuilder.groupRequest).subscribe(groupResponse => {
-  //       this.updateGroupData(groupResponse);
-  //     });
-  //   }
-  // }
-  //
-  // tryStopPolling() {
-  //   if (this.groupPollingTimer && !this.groupPollingTimer.closed) {
-  //     this.groupPollingTimer.unsubscribe();
-  //   }
-  // }
-
   updateGroupData(groupResponse) {
     this.searchResponse = groupResponse;
     this.parseTopLevelGroup();
@@ -148,7 +130,7 @@ export class TreeViewComponent extends TableViewComponent implements OnInit, OnC
     });
   }
 
-  createTopGroupQueryMap(groupByFields:string, groupResult:GroupResult) {
+  createTopGroupQueryMap(groupByFields: string, groupResult: GroupResult) {
     let groupQueryMap = {};
     groupQueryMap[groupByFields] = groupResult.key;
     return groupQueryMap;
@@ -157,9 +139,9 @@ export class TreeViewComponent extends TableViewComponent implements OnInit, OnC
   initTopGroups() {
     let groupByFields =  this.groups.map(group => group.field);
     let currentTopGroupKeys = this.searchResponse.groupResults.map(groupResult => groupResult.key);
-    var previousTopGroupKeys = this.topGroups.map(group => group.key);
+    let previousTopGroupKeys = this.topGroups.map(group => group.key);
 
-    if (this.topGroups.length == 0 || JSON.stringify(this.groupByFields) !== JSON.stringify(groupByFields) ||
+    if (this.topGroups.length === 0 || JSON.stringify(this.groupByFields) !== JSON.stringify(groupByFields) ||
         JSON.stringify(currentTopGroupKeys) !== JSON.stringify(previousTopGroupKeys)) {
       this.createTopGroups(groupByFields);
     }
@@ -172,17 +154,9 @@ export class TreeViewComponent extends TableViewComponent implements OnInit, OnC
   }
 
   ngOnChanges(changes: SimpleChanges) {
-    if((changes['groups'] && changes['groups'].currentValue)) {
+    if ((changes['groups'] && changes['groups'].currentValue)) {
       this.search();
     }
-  }
-
-  ngOnInit() {
-    // this.getGroups();
-  }
-
-  ngOnDestroy() {
-    // this.tryStopPolling();
   }
 
   searchGroup(selectedGroup: TreeGroupData) {
@@ -256,14 +230,14 @@ export class TreeViewComponent extends TableViewComponent implements OnInit, OnC
 
     if (!group.groupResults) {
       groupAsArray[index].groupQueryMap = JSON.parse(JSON.stringify(groupQueryMap));
-      if(groupAsArray[index].expand && groupAsArray[index].show && groupAsArray[index].groupQueryMap) {
+      if (groupAsArray[index].expand && groupAsArray[index].show && groupAsArray[index].groupQueryMap) {
         this.checkAndToSubscription(groupAsArray[index]);
       }
       return index;
     }
 
     group.groupResults.forEach(subGroup => {
-      index = this.parseSubGroups(subGroup, groupAsArray, groupQueryMap, group.groupedBy, level+1, index);
+      index = this.parseSubGroups(subGroup, groupAsArray, groupQueryMap, group.groupedBy, level + 1, index);
     });
 
     return index;
@@ -287,7 +261,7 @@ export class TreeViewComponent extends TableViewComponent implements OnInit, OnC
           index = this.parseSubGroups(subGroup, topGroup.treeSubGroups, groupQueryMap, resultGroup.groupedBy, 1, index);
         });
 
-        topGroup.treeSubGroups.splice(index+1);
+        topGroup.treeSubGroups.splice(index + 1);
       }
     }
 
@@ -310,6 +284,6 @@ export class TreeViewComponent extends TableViewComponent implements OnInit, OnC
   refreshAllExpandedGroups() {
     Object.keys(this.treeGroupSubscriptionMap).forEach(key => {
       this.getAlerts(this.treeGroupSubscriptionMap[key]);
-    })
+    });
   }
 }
