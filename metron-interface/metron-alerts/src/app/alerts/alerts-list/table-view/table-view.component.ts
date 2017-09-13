@@ -16,9 +16,8 @@
  * limitations under the License.
  */
 
-import { Component, OnInit, OnChanges, Input, Output, EventEmitter, SimpleChanges, OnDestroy } from '@angular/core';
+import { Component, Input, Output, EventEmitter } from '@angular/core';
 import {Router} from '@angular/router';
-import {Observable, Subscription} from 'rxjs/Rx';
 
 import {Pagination} from '../../../model/pagination';
 import {SortEvent} from '../../../shared/metron-table/metron-table.directive';
@@ -37,7 +36,7 @@ import {Sort} from '../../../utils/enums';
   styleUrls: ['./table-view.component.scss']
 })
 
-export class TableViewComponent implements OnInit, OnChanges, OnDestroy {
+export class TableViewComponent {
 
   alerts: Alert[] = [];
   threatScoreFieldName = 'threat:triage:score';
@@ -45,10 +44,9 @@ export class TableViewComponent implements OnInit, OnChanges, OnDestroy {
   router: Router;
   alertsService: AlertService;
   metronDialogBox: MetronDialogBox;
-  refreshTimer: Subscription;
   pagingData = new Pagination();
   alertsSearchResponse: AlertsSearchResponse = new AlertsSearchResponse();
-  
+
   @Input() queryBuilder: QueryBuilder;
   @Input() alertsColumnsToDisplay: ColumnMetadata[] = [];
   @Input() selectedAlerts: Alert[] = [];
@@ -57,7 +55,6 @@ export class TableViewComponent implements OnInit, OnChanges, OnDestroy {
   @Output() onAddFilter = new EventEmitter<{}>();
   @Output() onShowDetails = new EventEmitter<Alert>();
   @Output() onShowConfigureTable = new EventEmitter<Alert>();
-  
   @Output() selectedAlertsChange = new EventEmitter< Alert[]>();
 
   constructor(router: Router,
@@ -66,19 +63,6 @@ export class TableViewComponent implements OnInit, OnChanges, OnDestroy {
     this.router = router;
     this.alertsService = alertsService;
     this.metronDialogBox = metronDialogBox;
-  }
-
-  ngOnInit() {
-  }
-
-  ngOnChanges(changes: SimpleChanges) {
-    if (changes['alertsSearchResponse'] && changes['alertsSearchResponse'].currentValue) {
-      this.alerts = this.alertsSearchResponse.results ? this.alertsSearchResponse.results : [];
-    }
-  }
-
-  ngOnDestroy() {
-    // this.tryStopPolling();
   }
 
   search(resetPaginationParams = true, pageSize: number = null) {
@@ -95,31 +79,6 @@ export class TableViewComponent implements OnInit, OnChanges, OnDestroy {
       this.setAlertData(new AlertsSearchResponse());
       this.metronDialogBox.showConfirmationMessage(ElasticsearchUtils.extractESErrorMessage(error), DialogType.Error);
     });
-  }
-
-  // tryStartPolling() {
-  //   if (!this.pauseRefresh) {
-  //     this.tryStopPolling();
-  //     this.refreshTimer = this.alertsService.pollSearch(this.queryBuilder.searchRequest).subscribe(results => {
-  //       this.setAlertData(results);
-  //     });
-  //   }
-  // }
-
-  // tryStopPolling() {
-  //   if (this.refreshTimer && !this.refreshTimer.closed) {
-  //     this.refreshTimer.unsubscribe();
-  //   }
-  // }
-
-  // TODO: Handle this from ngchages
-  onPausePlay() {
-    // this.pauseRefresh = !this.pauseRefresh;
-    // if (this.pauseRefresh) {
-    //   this.tryStopPolling();
-    // } else {
-    //   this.search(false);
-    // }
   }
 
   setAlertData(results: AlertsSearchResponse) {

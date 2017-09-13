@@ -19,10 +19,10 @@
 import {GroupOrder} from './group-order';
 
 export class Group {
-  order:GroupOrder;
+  order: GroupOrder;
   field: string;
 
-  constructor(field:string) {
+  constructor(field: string) {
     this.field = field;
     this.order = new GroupOrder();
   }

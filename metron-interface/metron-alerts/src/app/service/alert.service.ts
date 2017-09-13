@@ -15,7 +15,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {Http, Headers, RequestOptions, Response} from '@angular/http';
+import {Http, Headers, RequestOptions} from '@angular/http';
 import {Injectable, NgZone} from '@angular/core';
 import {Observable} from 'rxjs/Rx';
 import 'rxjs/add/observable/interval';

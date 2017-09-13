@@ -15,18 +15,17 @@ export class GroupByComponent implements OnInit, OnChanges {
   border = '1px solid #1B596C';
 
   data: GroupByComponentData[] = [];
-  @Input() facets:Facets = new Facets();
+  @Input() facets: Facets = new Facets();
 
   @Output() groupsChange = new EventEmitter<string[]>();
 
   constructor(private dragulaService: DragulaService) {}
 
   fireGroupsChange() {
-    let groupNames = this.data.map(groupBy => groupBy.name);
     let selectedGroupNames = [];
-    this.data.reduce((selectedGroups, groupBy)=> {
+    this.data.reduce((selectedGroups, groupBy) => {
       if (groupBy.selected) {
-        selectedGroups.push(groupBy.name)
+        selectedGroups.push(groupBy.name);
       }
       return selectedGroups;
     }, selectedGroupNames);
@@ -37,7 +36,7 @@ export class GroupByComponent implements OnInit, OnChanges {
     this.setTransitStyle();
   }
 
-  ngOnChanges(changes:SimpleChanges) {
+  ngOnChanges(changes: SimpleChanges) {
     if (changes && changes['facets'] && this.facets) {
       this.prepareData();
     }

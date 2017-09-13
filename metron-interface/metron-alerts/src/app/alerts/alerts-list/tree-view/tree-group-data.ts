@@ -33,15 +33,15 @@ export class TreeGroupData {
 
   sortField: SortField;
   sortEvent: SortEvent = { sortBy: '', type: '', sortOrder: Sort.ASC};
-  treeSubGroups: TreeGroupData[] = [];  
+  treeSubGroups: TreeGroupData[] = [];
 
   groupQueryMap = null;
   searchRequest: SearchRequest = new SearchRequest();
   response: AlertsSearchResponse = new AlertsSearchResponse();
   pagingData: Pagination = new Pagination();
 
-  
-  constructor(key:string, total:number, score: number, level:number, expand: boolean) {
+
+  constructor(key: string, total: number, score: number, level: number, expand: boolean) {
     this.key = key;
     this.total = total;
     this.score = score;
