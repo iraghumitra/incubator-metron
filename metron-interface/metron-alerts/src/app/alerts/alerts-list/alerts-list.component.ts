@@ -161,8 +161,10 @@ export class AlertsListComponent implements OnInit, OnDestroy {
   }
 
   onConfigRowsChange() {
-    this.searchService.interval = this.refreshInterval;
-    this.search();
+    this.alertsService.interval = this.refreshInterval;
+    if (this.queryBuilder.groupRequest.groups.length === 0) {
+      this.search();
+    }
   }
 
   onGroupsChange(groups) {
@@ -246,6 +248,7 @@ export class AlertsListComponent implements OnInit, OnDestroy {
 
     this.saveCurrentSearch(savedSearch);
 
+    this.queryBuilder.setFromAndSize(0, 0);
     this.searchService.search(this.queryBuilder.searchRequest).subscribe(results => {
       this.setData(results);
     }, error => {
