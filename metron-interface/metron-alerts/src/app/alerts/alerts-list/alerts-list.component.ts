@@ -20,7 +20,7 @@ import {Router, NavigationStart} from '@angular/router';
 import {Observable, Subscription} from 'rxjs/Rx';
 
 import {Alert} from '../../model/alert';
-import {AlertService} from '../../service/alert.service';
+import {SearchService} from '../../service/search.service';
 import {QueryBuilder} from './query-builder';
 import {ConfigureTableService} from '../../service/configure-table.service';
 import {WorkflowService} from '../../service/workflow.service';
@@ -31,7 +31,8 @@ import {RefreshInterval} from '../configure-rows/configure-rows-enums';
 import {SaveSearch} from '../../model/save-search';
 import {TableMetadata} from '../../model/table-metadata';
 import {MetronDialogBox, DialogType} from '../../shared/metron-dialog-box';
-import {AlertsSearchResponse} from '../../model/alerts-search-response';
+import {AlertSearchDirective} from '../../shared/directives/alert-search.directive';
+import {SearchResponse} from '../../model/search-response';
 import {ElasticsearchUtils} from '../../utils/elasticsearch-utils';
 import {TableViewComponent} from './table-view/table-view.component';
 
@@ -62,7 +63,7 @@ export class AlertsListComponent implements OnInit, OnDestroy {
   queryBuilder: QueryBuilder = new QueryBuilder();
 
   constructor(private router: Router,
-              private alertsService: AlertService,
+              private searchService: SearchService,
               private configureTableService: ConfigureTableService,
               private workflowService: WorkflowService,
               private clusterMetaDataService: ClusterMetaDataService,
@@ -160,10 +161,8 @@ export class AlertsListComponent implements OnInit, OnDestroy {
   }
 
   onConfigRowsChange() {
-    this.alertsService.interval = this.refreshInterval;
-    if (this.queryBuilder.groupRequest.groups.length === 0) {
-      this.search();
-    }
+    this.searchService.interval = this.refreshInterval;
+    this.search();
   }
 
   onGroupsChange(groups) {
@@ -208,26 +207,26 @@ export class AlertsListComponent implements OnInit, OnDestroy {
 
   processEscalate() {
     this.workflowService.start(this.selectedAlerts).subscribe(workflowId => {
-      this.alertsService.updateAlertState(this.selectedAlerts, 'ESCALATE', workflowId).subscribe(results => {
+      this.searchService.updateAlertState(this.selectedAlerts, 'ESCALATE', workflowId).subscribe(results => {
         this.updateSelectedAlertStatus('ESCALATE');
       });
     });
   }
 
   processDismiss() {
-    this.alertsService.updateAlertState(this.selectedAlerts, 'DISMISS', '').subscribe(results => {
+    this.searchService.updateAlertState(this.selectedAlerts, 'DISMISS', '').subscribe(results => {
       this.updateSelectedAlertStatus('DISMISS');
     });
   }
 
   processOpen() {
-    this.alertsService.updateAlertState(this.selectedAlerts, 'OPEN', '').subscribe(results => {
+    this.searchService.updateAlertState(this.selectedAlerts, 'OPEN', '').subscribe(results => {
       this.updateSelectedAlertStatus('OPEN');
     });
   }
 
   processResolve() {
-    this.alertsService.updateAlertState(this.selectedAlerts, 'RESOLVE', '').subscribe(results => {
+    this.searchService.updateAlertState(this.selectedAlerts, 'RESOLVE', '').subscribe(results => {
       this.updateSelectedAlertStatus('RESOLVE');
     });
   }
@@ -247,11 +246,10 @@ export class AlertsListComponent implements OnInit, OnDestroy {
 
     this.saveCurrentSearch(savedSearch);
 
-    this.queryBuilder.setFromAndSize(0, 0);
-    this.alertsService.search(this.queryBuilder.searchRequest).subscribe(results => {
+    this.searchService.search(this.queryBuilder.searchRequest).subscribe(results => {
       this.setData(results);
     }, error => {
-      this.setData(new AlertsSearchResponse());
+      this.setData(new SearchResponse());
       this.metronDialogBox.showConfirmationMessage(ElasticsearchUtils.extractESErrorMessage(error), DialogType.Error);
     });
 
@@ -310,7 +308,7 @@ export class AlertsListComponent implements OnInit, OnDestroy {
   tryStartPolling() {
     if (!this.pauseRefresh) {
       this.tryStopPolling();
-      this.refreshTimer = this.alertsService.pollSearch(this.queryBuilder.searchRequest).subscribe(results => {
+      this.refreshTimer = this.searchService.pollSearch(this.queryBuilder.searchRequest).subscribe(results => {
         this.setData(results);
         this.searchView(false);
       });
