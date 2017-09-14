@@ -16,19 +16,14 @@
  * limitations under the License.
  */
 
-import { Component, Input, Output, EventEmitter } from '@angular/core';
-import {Router} from '@angular/router';
 
-import {Pagination} from '../../../model/pagination';
-import {SortEvent} from '../../../shared/metron-table/metron-table.directive';
-import {ColumnMetadata} from '../../../model/column-metadata';
-import {Alert} from '../../../model/alert';
-import {AlertsSearchResponse} from '../../../model/alerts-search-response';
-import {AlertService} from '../../../service/alert.service';
+import {SearchResponse} from '../../../model/search-response';
+import {SearchService} from '../../../service/search.service';
 import {MetronDialogBox, DialogType} from '../../../shared/metron-dialog-box';
 import {ElasticsearchUtils} from '../../../utils/elasticsearch-utils';
 import {QueryBuilder} from '../query-builder';
 import {Sort} from '../../../utils/enums';
+import {Filter} from '../../../model/filter';
 
 @Component({
   selector: 'app-table-view',
@@ -42,26 +37,26 @@ export class TableViewComponent {
   threatScoreFieldName = 'threat:triage:score';
 
   router: Router;
-  alertsService: AlertService;
+  searchService: SearchService;
   metronDialogBox: MetronDialogBox;
   pagingData = new Pagination();
-  alertsSearchResponse: AlertsSearchResponse = new AlertsSearchResponse();
+  searchResponse: SearchResponse = new SearchResponse();
 
   @Input() queryBuilder: QueryBuilder;
   @Input() alertsColumnsToDisplay: ColumnMetadata[] = [];
   @Input() selectedAlerts: Alert[] = [];
 
   @Output() onResize = new EventEmitter<void>();
-  @Output() onAddFilter = new EventEmitter<{}>();
+  @Output() onAddFilter = new EventEmitter<Filter>();
   @Output() onShowDetails = new EventEmitter<Alert>();
   @Output() onShowConfigureTable = new EventEmitter<Alert>();
   @Output() selectedAlertsChange = new EventEmitter< Alert[]>();
 
   constructor(router: Router,
-              alertsService: AlertService,
+              searchService: SearchService,
               metronDialogBox: MetronDialogBox) {
     this.router = router;
-    this.alertsService = alertsService;
+    this.searchService = searchService;
     this.metronDialogBox = metronDialogBox;
   }
 
@@ -73,18 +68,18 @@ export class TableViewComponent {
     this.pagingData.size = pageSize === null ? this.pagingData.size : pageSize;
     this.queryBuilder.setFromAndSize(this.pagingData.from, this.pagingData.size);
 
-    this.alertsService.search(this.queryBuilder.searchRequest).subscribe(results => {
+    this.searchService.search(this.queryBuilder.searchRequest).subscribe(results => {
       this.setAlertData(results);
     }, error => {
-      this.setAlertData(new AlertsSearchResponse());
+      this.setAlertData(new SearchResponse());
       this.metronDialogBox.showConfirmationMessage(ElasticsearchUtils.extractESErrorMessage(error), DialogType.Error);
     });
   }
 
-  setAlertData(results: AlertsSearchResponse) {
-    this.alertsSearchResponse = results;
+  setAlertData(results: SearchResponse) {
+    this.searchResponse = results;
     this.pagingData.total = results.total;
-    this.alerts = this.alertsSearchResponse.results ? this.alertsSearchResponse.results : [];
+    this.alerts = this.searchResponse.results ? this.searchResponse.results : [];
   }
 
   onSort(sortEvent: SortEvent) {
@@ -155,10 +150,8 @@ export class TableViewComponent {
   }
 
   addFilter(field: string, value: string) {
-    let map = {};
     field = (field === 'id') ? '_uid' : field;
-    map[field] = value;
-    this.onAddFilter.emit(map);
+    this.onAddFilter.emit(new Filter(field, value));
   }
 
   showDetails($event, alert: Alert) {
