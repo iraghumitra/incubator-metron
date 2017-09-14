@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 import {SearchRequest} from '../../../model/search-request';
-import {AlertsSearchResponse} from '../../../model/alerts-search-response';
+import {SearchResponse} from '../../../model/search-response';
 import {Pagination} from '../../../model/pagination';
 import {TREE_SUB_GROUP_SIZE} from '../../../utils/constants';
 import {SortField} from '../../../model/sort-field';
@@ -37,7 +37,7 @@ export class TreeGroupData {
 
   groupQueryMap = null;
   searchRequest: SearchRequest = new SearchRequest();
-  response: AlertsSearchResponse = new AlertsSearchResponse();
+  response: SearchResponse = new SearchResponse();
   pagingData: Pagination = new Pagination();
 
 

@@ -16,12 +16,12 @@
  * limitations under the License.
  */
 import {SortField} from './sort-field';
-import {DEFAULT_FACETS, DEFAULT_GROUPS} from '../utils/constants';
+import {DEFAULT_FACETS, DEFAULT_GROUPS, INDEXES} from '../utils/constants';
 
 export class SearchRequest {
   // _source: string[]; //TODO: This needs to be removed
   from: number;
-  indices: string[] = ['websphere', 'snort', 'asa', 'bro', 'yaf'];
+  indices: string[] = INDEXES;
   query: string;
   size: number;
   sort: SortField[];

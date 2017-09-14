@@ -184,6 +184,7 @@ Request and Response objects are JSON formatted.  The JSON schemas are available
 
 |            |
 | ---------- |
+| [ `POST /api/v1/alert/escalate`](#get-apiv1alertescalate)|
 | [ `GET /api/v1/global/config`](#get-apiv1globalconfig)|
 | [ `DELETE /api/v1/global/config`](#delete-apiv1globalconfig)|
 | [ `POST /api/v1/global/config`](#post-apiv1globalconfig)|
@@ -248,6 +249,13 @@ Request and Response objects are JSON formatted.  The JSON schemas are available
 | [ `PUT /api/v1/update/replace`](#patch-apiv1updatereplace)|
 | [ `GET /api/v1/user`](#get-apiv1user)|
 
+### `POST /api/v1/alert/escalate`
+  * Description: Escalates a list of alerts by producing it to the Kafka escalate topic
+  * Input:
+    * alerts - The alerts to be escalated
+  * Returns:
+    * 200 - Alerts were escalated
+
 ### `GET /api/v1/global/config`
   * Description: Retrieves the current Global Config from Zookeeper
   * Returns:
@@ -288,10 +296,13 @@ Request and Response objects are JSON formatted.  The JSON schemas are available
     * 200 - JSON results
 
 ### `POST /api/v1/hdfs`
-  * Description: Writes contents to an HDFS file.  Warning: this will overwrite the contents of a file if it already exists.
+  * Description: Writes contents to an HDFS file.  Warning: this will overwrite the contents of a file if it already exists. Permissions must be set for all three groups if they are to be set. If any are missing, the default permissions will be used, and if any are invalid an exception will be thrown.
   * Input:
     * path - Path to HDFS file
     * contents - File contents
+    * userMode - [optional] symbolic permission string for user portion of the permissions to be set on the file written. For example 'rwx' or read, write, execute. The symbol '-' is used to exclude that permission such as 'rw-' for read, write, no execute
+    * groupMode - [optional] symbolic permission string for group portion of the permissions to be set on the file written. For example 'rwx' or read, write, execute. The symbol '-' is used to exclude that permission such as 'rw-' for read, write, no execute
+    * otherMode - [optional] symbolic permission string for other portion of the permissions to be set on the file written. For example 'rwx' or read, write, execute. The symbol '-' is used to exclude that permission such as 'rw-' for read, write, no execute
   * Returns:
     * 200 - Contents were written
 
@@ -362,7 +373,7 @@ Request and Response objects are JSON formatted.  The JSON schemas are available
     * 200 - Search response
     
 ### `POST /api/v1/search/group`
-  * Description: Searches the indexing store and returns field groups. Groups are hierarchical and nested in the order the fields appear in the 'groups' request parameter. The default sorting within groups is by count descending.
+  * Description: Searches the indexing store and returns field groups. Groups are hierarchical and nested in the order the fields appear in the 'groups' request parameter. The default sorting within groups is by count descending.  A groupOrder type of count will sort based on then number of documents in a group while a groupType of term will sort by the groupBy term.
   * Input:
       * groupRequest - Group request
         * indices - list of indices to search

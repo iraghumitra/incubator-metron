@@ -36,10 +36,13 @@
     </div>
     <div class="mrow">
         <div class="col-md-9 px-0">
-            <span class="col-form-label-lg"> Alerts ({{alertsSearchResponse.total}}) </span>
+            <span class="col-form-label-lg"> Alerts ({{searchResponse.total}}) </span>
         </div>
         <div class="col-md-3 px-0">
             <div class="pull-right" style="position: relative; display: block;">
+                <div class="btn settings">
+                    <i class="fa fa-cog configure-table-icon" (click)="showConfigureTable()"></i>
+                </div>
                 <div class="btn settings">
                     <i #settingsIcon class="fa fa-sliders" aria-hidden="true"></i>
                 </div>
@@ -65,11 +68,11 @@
 <div class="container-fluid no-gutters">
     <div class="row">
         <div class="px-0" style="width: 200px;max-width: 200px;">
-            <app-alert-filters [facets]="alertsSearchResponse.facetCounts" (facetFilterChange)="onAddFacetFilter($event)"> </app-alert-filters>
+            <app-alert-filters [facets]="searchResponse.facetCounts" (facetFilterChange)="onAddFacetFilter($event)"> </app-alert-filters>
         </div>
         <div class="col pr-0">
             <div class="col-sm-12 pl-0 pb-3">
-                <app-group-by [facets]="alertsSearchResponse.facetCounts" (groupsChange)="onGroupsChange($event)"> </app-group-by>
+                <app-group-by [facets]="searchResponse.facetCounts" (groupsChange)="onGroupsChange($event)"> </app-group-by>
             </div>
             <div class="col-sm-12 pl-0">
                 <app-table-view #dataViewComponent *ngIf="queryBuilder.groupRequest.groups.length === 0"
@@ -78,8 +81,7 @@
                                 [(selectedAlerts)]="selectedAlerts"
                                 (onResize)="onResize()"
                                 (onAddFilter)="onAddFilter($event)"
-                                (onShowDetails)="showDetails($event)"
-                                (onShowConfigureTable)="showConfigureTable()"></app-table-view>
+                                (onShowDetails)="showDetails($event)"></app-table-view>
                 <app-tree-view #dataViewComponent *ngIf="queryBuilder.groupRequest.groups.length !== 0"
                                [queryBuilder]="queryBuilder"
                                [alertsColumnsToDisplay]="alertsColumnsToDisplay"
@@ -87,8 +89,7 @@
                                [(selectedAlerts)]="selectedAlerts"
                                (onResize)="onResize()"
                                (onAddFilter)="onAddFilter($event)"
-                               (onShowDetails)="showDetails($event)"
-                               (onShowConfigureTable)="showConfigureTable()"></app-tree-view>
+                               (onShowDetails)="showDetails($event)"></app-tree-view>
             </div>
         </div>
     </div>

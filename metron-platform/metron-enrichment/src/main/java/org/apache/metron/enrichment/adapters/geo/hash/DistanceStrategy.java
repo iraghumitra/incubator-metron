@@ -1,4 +1,4 @@
-/**
+/*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
  * distributed with this work for additional information
@@ -15,13 +15,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {Alert} from './alert';
-import {Facets} from './facets';
-import {SearchResultGroup} from './search-result-group';
+package org.apache.metron.enrichment.adapters.geo.hash;
 
-export class AlertsSearchResponse {
-  total = 0;
-  groupedBy: string;
-  results: Alert[] = [];
-  facetCounts: Facets;
+import ch.hsr.geohash.WGS84Point;
+
+public interface DistanceStrategy {
+  public double distance(WGS84Point point1, WGS84Point point2);
 }

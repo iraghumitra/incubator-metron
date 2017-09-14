@@ -20,8 +20,8 @@ import { Component, Input, OnChanges, SimpleChanges } from '@angular/core';
 import {Router} from '@angular/router';
 
 import {TableViewComponent} from '../table-view/table-view.component';
-import {AlertsSearchResponse} from '../../../model/alerts-search-response';
-import {AlertService} from '../../../service/alert.service';
+import {SearchResponse} from '../../../model/search-response';
+import {SearchService} from '../../../service/search.service';
 import {TreeGroupData} from './tree-group-data';
 import {GroupResponse} from '../../../model/group-response';
 import {GroupResult} from '../../../model/group-result';
@@ -43,13 +43,13 @@ export class TreeViewComponent extends TableViewComponent implements OnChanges {
 
   groupByFields: string[] = [];
   topGroups: TreeGroupData[] = [];
-  searchResponse: GroupResponse = new GroupResponse();
+  groupResponse: GroupResponse = new GroupResponse();
   treeGroupSubscriptionMap: {[key: string]: TreeGroupData } = {};
 
   constructor(router: Router,
-              alertsService: AlertService,
+              searchService: SearchService,
               metronDialogBox: MetronDialogBox) {
-    super(router, alertsService, metronDialogBox);
+    super(router, searchService, metronDialogBox);
   }
 
   collapseGroup(groupArray: TreeGroupData[], level: number, index: number) {
@@ -101,14 +101,14 @@ export class TreeViewComponent extends TableViewComponent implements OnChanges {
     let groupRequest = this.queryBuilder.groupRequest;
     groupRequest.query = this.queryBuilder.generateSelect();
 
-    this.alertsService.groups(groupRequest).subscribe(groupResponse => {
+    this.searchService.groups(groupRequest).subscribe(groupResponse => {
       this.updateGroupData(groupResponse);
       this.refreshAllExpandedGroups();
     });
   }
 
   updateGroupData(groupResponse) {
-    this.searchResponse = groupResponse;
+    this.groupResponse = groupResponse;
     this.parseTopLevelGroup();
   }
 
@@ -120,7 +120,7 @@ export class TreeViewComponent extends TableViewComponent implements OnChanges {
     this.topGroups = [];
     this.treeGroupSubscriptionMap = {};
 
-    this.searchResponse.groupResults.forEach((groupResult: GroupResult) => {
+    this.groupResponse.groupResults.forEach((groupResult: GroupResult) => {
       let treeGroupData = new TreeGroupData(groupResult.key, groupResult.total, groupResult.score, 0, false);
       if (groupByFields.length === 1) {
         treeGroupData.groupQueryMap  = this.createTopGroupQueryMap(groupByFields[0], groupResult);
@@ -138,7 +138,7 @@ export class TreeViewComponent extends TableViewComponent implements OnChanges {
 
   initTopGroups() {
     let groupByFields =  this.groups.map(group => group.field);
-    let currentTopGroupKeys = this.searchResponse.groupResults.map(groupResult => groupResult.key);
+    let currentTopGroupKeys = this.groupResponse.groupResults.map(groupResult => groupResult.key);
     let previousTopGroupKeys = this.topGroups.map(group => group.key);
 
     if (this.topGroups.length === 0 || JSON.stringify(this.groupByFields) !== JSON.stringify(groupByFields) ||
@@ -160,14 +160,14 @@ export class TreeViewComponent extends TableViewComponent implements OnChanges {
   }
 
   searchGroup(selectedGroup: TreeGroupData) {
-    this.alertsService.search(selectedGroup.searchRequest).subscribe(results => {
+    this.searchService.search(selectedGroup.searchRequest).subscribe(results => {
       this.setData(selectedGroup, results);
     }, error => {
       this.metronDialogBox.showConfirmationMessage(ElasticsearchUtils.extractESErrorMessage(error), DialogType.Error);
     });
   }
 
-  setData(selectedGroup: TreeGroupData, results: AlertsSearchResponse) {
+  setData(selectedGroup: TreeGroupData, results: SearchResponse) {
     selectedGroup.response.results = results.results;
     selectedGroup.pagingData.total = results.total;
   }
@@ -244,14 +244,14 @@ export class TreeViewComponent extends TableViewComponent implements OnChanges {
   }
 
   parseTopLevelGroup() {
-    let groupedBy = this.searchResponse.groupedBy;
+    let groupedBy = this.groupResponse.groupedBy;
 
     this.initTopGroups();
 
-    for (let i = 0; i < this.searchResponse.groupResults.length; i++) {
+    for (let i = 0; i < this.groupResponse.groupResults.length; i++) {
       let index = -1;
       let topGroup = this.topGroups[i];
-      let resultGroup = this.searchResponse.groupResults[i];
+      let resultGroup = this.groupResponse.groupResults[i];
       let groupQueryMap = this.createTopGroupQueryMap(groupedBy, resultGroup);
 
       topGroup.total = resultGroup.total;

@@ -25,17 +25,37 @@ import 'rxjs/add/operator/onErrorResumeNext';
 import {HttpUtil} from '../utils/httpUtil';
 import {Alert} from '../model/alert';
 import {DataSource} from './data-source';
-import {AlertsSearchResponse} from '../model/alerts-search-response';
+import {SearchResponse} from '../model/search-response';
 import {SearchRequest} from '../model/search-request';
 import {AlertSource} from '../model/alert-source';
 import {GroupRequest} from '../model/group-request';
 import {GroupResult} from '../model/group-result';
+import {INDEXES} from '../utils/constants';
+import {ColumnMetadata} from '../model/column-metadata';
 
 @Injectable()
-export class AlertService {
+export class SearchService {
 
   interval = 80000;
   defaultHeaders = {'Content-Type': 'application/json', 'X-Requested-With': 'XMLHttpRequest'};
+
+  private static extractColumnNameDataFromRestApi(res: Response): ColumnMetadata[] {
+    let response: any = res || {};
+    let processedKeys: string[] = [];
+    let columnMetadatas: ColumnMetadata[] = [];
+
+    for (let index of Object.keys(response)) {
+      let indexMetaData = response[index];
+      for (let key of Object.keys(indexMetaData)) {
+        if (processedKeys.indexOf(key) === -1) {
+          processedKeys.push(key);
+          columnMetadatas.push(new ColumnMetadata(key, indexMetaData[key]));
+        }
+      }
+    }
+
+    return columnMetadatas;
+  }
 
   constructor(private http: Http,
               private dataSource: DataSource,
@@ -49,29 +69,11 @@ export class AlertService {
     .onErrorResumeNext();
   }
 
-  public search(searchRequest: SearchRequest): Observable<AlertsSearchResponse> {
-    let url = '/api/v1/search/search';
-    return this.http.post(url, searchRequest, new RequestOptions({headers: new Headers(this.defaultHeaders)}))
-    .map(HttpUtil.extractData)
-    .catch(HttpUtil.handleError)
-    .onErrorResumeNext();
-  }
-
-  public pollGroups(groupRequest: GroupRequest): Observable<AlertsSearchResponse> {
+  public pollGroups(groupRequest: GroupRequest): Observable<SearchResponse> {
     return this.ngZone.runOutsideAngular(() => {
       return this.ngZone.run(() => {
         return Observable.interval(this.interval * 1000).switchMap(() => {
           return this.groups(groupRequest);
-        });
-      });
-    });
-  }
-
-  public pollSearch(searchRequest: SearchRequest): Observable<AlertsSearchResponse> {
-    return this.ngZone.runOutsideAngular(() => {
-      return this.ngZone.run(() => {
-        return Observable.interval(this.interval * 1000).switchMap(() => {
-          return this.search(searchRequest);
         });
       });
     });
@@ -82,6 +84,32 @@ export class AlertService {
     let requestSchema = { guid: alertId, sensorType: sourceType};
 
     return this.http.post(url, requestSchema, new RequestOptions({headers: new Headers(this.defaultHeaders)}))
+    .map(HttpUtil.extractData)
+    .catch(HttpUtil.handleError)
+    .onErrorResumeNext();
+  }
+
+  public getColumnMetaData(): Observable<ColumnMetadata[]> {
+    let url = '/api/v1/search/column/metadata';
+    return this.http.post(url, INDEXES, new RequestOptions({headers: new Headers(this.defaultHeaders)}))
+    .map(HttpUtil.extractData)
+    .map(SearchService.extractColumnNameDataFromRestApi)
+    .catch(HttpUtil.handleError);
+  }
+
+  public pollSearch(searchRequest: SearchRequest): Observable<SearchResponse> {
+    return this.ngZone.runOutsideAngular(() => {
+      return this.ngZone.run(() => {
+        return Observable.interval(this.interval * 1000).switchMap(() => {
+          return this.search(searchRequest);
+        });
+      });
+    });
+  }
+
+  public search(searchRequest: SearchRequest): Observable<SearchResponse> {
+    let url = '/api/v1/search/search';
+    return this.http.post(url, searchRequest, new RequestOptions({headers: new Headers(this.defaultHeaders)}))
     .map(HttpUtil.extractData)
     .catch(HttpUtil.handleError)
     .onErrorResumeNext();

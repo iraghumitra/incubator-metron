@@ -23,6 +23,5 @@ export const ALERTS_COLUMN_NAMES = 'metron-alerts-column-names';
 
 export let DEFAULT_FACETS = ['source:type', 'ip_src_addr', 'ip_dst_addr', 'host', 'enrichments:geo:ip_dst_addr:country'];
 export let DEFAULT_GROUPS = ['source:type', 'ip_src_addr', 'ip_dst_addr', 'host', 'enrichments:geo:ip_dst_addr:country'];
-
 export let TREE_SUB_GROUP_SIZE = 5;
-
+export let INDEXES = ['websphere', 'snort', 'asa', 'bro', 'yaf'];
