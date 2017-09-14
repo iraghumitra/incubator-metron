@@ -70,7 +70,7 @@
         <div class="px-0" style="width: 200px;max-width: 200px;">
             <app-alert-filters [facets]="searchResponse.facetCounts" (facetFilterChange)="onAddFacetFilter($event)"> </app-alert-filters>
         </div>
-        <div class="col pr-0">
+        <div class="col pr-0 pl-4">
             <div class="col-sm-12 pl-0 pb-3">
                 <app-group-by [facets]="searchResponse.facetCounts" (groupsChange)="onGroupsChange($event)"> </app-group-by>
             </div>

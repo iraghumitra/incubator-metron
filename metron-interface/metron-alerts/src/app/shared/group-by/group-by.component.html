@@ -18,7 +18,7 @@
             <div #dragEle class="group-by-items" *ngFor="let group of data" (click)="selectGroup(group)"
                  data-animation="false" data-toggle="tooltip" data-placement="bottom" title="Drag to Sort"
                  [ngClass]="{'active': group.selected}">
-                <div *ngIf="group.count <= maxGroupCount" class="count"> {{ 999999 | number }}</div>
+                <div *ngIf="group.count <= maxGroupCount" class="count"> {{ group.count  | number }}</div>
                 <div *ngIf="group.count > maxGroupCount" class="count"> {{ maxGroupCount | number }} <sup>+</sup> </div>
                 <div class="name"> {{ group.name | columnNameTranslate | centerEllipses:15 }}</div>
             </div>
