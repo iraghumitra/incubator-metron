@@ -17,7 +17,6 @@
  */
 import {Http, Headers, RequestOptions} from '@angular/http';
 import {Injectable, NgZone} from '@angular/core';
-import {Headers, RequestOptions} from '@angular/http';
 import {Observable} from 'rxjs/Rx';
 import 'rxjs/add/observable/interval';
 import 'rxjs/add/operator/switchMap';
@@ -70,11 +69,7 @@ export class SearchService {
     .onErrorResumeNext();
   }
 
-  public search(searchRequest: SearchRequest): Observable<AlertsSearchResponse> {
-    return this.dataSource.getAlerts(searchRequest);
-  }
-
-  public pollGroups(groupRequest: GroupRequest): Observable<AlertsSearchResponse> {
+  public pollGroups(groupRequest: GroupRequest): Observable<SearchResponse> {
     return this.ngZone.runOutsideAngular(() => {
       return this.ngZone.run(() => {
         return Observable.interval(this.interval * 1000).switchMap(() => {

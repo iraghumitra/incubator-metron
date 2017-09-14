@@ -35,10 +35,7 @@ import {AlertSearchDirective} from '../../shared/directives/alert-search.directi
 import {SearchResponse} from '../../model/search-response';
 import {ElasticsearchUtils} from '../../utils/elasticsearch-utils';
 import {TableViewComponent} from './table-view/table-view.component';
-<<<<<<< HEAD
-=======
 import {Filter} from '../../model/filter';
->>>>>>> METRON-1182
 
 @Component({
   selector: 'app-alerts-list',
@@ -52,11 +49,7 @@ export class AlertsListComponent implements OnInit, OnDestroy {
   alertsColumnsToDisplay: ColumnMetadata[] = [];
   selectedAlerts: Alert[] = [];
   alerts: Alert[] = [];
-<<<<<<< HEAD
-  alertsSearchResponse: AlertsSearchResponse = new AlertsSearchResponse();
-=======
   searchResponse: SearchResponse = new SearchResponse();
->>>>>>> METRON-1182
   colNumberTimerId: number;
   refreshInterval = RefreshInterval.ONE_MIN;
   pauseRefresh = false;
@@ -66,10 +59,7 @@ export class AlertsListComponent implements OnInit, OnDestroy {
 
   @ViewChild('table') table: ElementRef;
   @ViewChild('dataViewComponent') dataViewComponent: TableViewComponent;
-<<<<<<< HEAD
-=======
   @ViewChild(AlertSearchDirective) alertSearchDirective: AlertSearchDirective;
->>>>>>> METRON-1182
 
   tableMetaData = new TableMetadata();
   queryBuilder: QueryBuilder = new QueryBuilder();
@@ -172,20 +162,17 @@ export class AlertsListComponent implements OnInit, OnDestroy {
   }
 
   onConfigRowsChange() {
-    this.alertsService.interval = this.refreshInterval;
+    this.searchService.interval = this.refreshInterval;
     if (this.queryBuilder.groupRequest.groups.length === 0) {
       this.search();
     }
   }
 
-<<<<<<< HEAD
   onGroupsChange(groups) {
     this.queryBuilder.setGroupby(groups);
     this.searchView();
   }
 
-=======
->>>>>>> METRON-1182
   searchView(resetPaginationParams = true, pageSize: number = null) {
     this.changeDetector.detectChanges();
     this.dataViewComponent.search(resetPaginationParams, pageSize);
@@ -289,13 +276,8 @@ export class AlertsListComponent implements OnInit, OnDestroy {
     }
   }
 
-<<<<<<< HEAD
-  setData(results: AlertsSearchResponse) {
-    this.alertsSearchResponse = results;
-=======
   setData(results: SearchResponse) {
     this.searchResponse = results;
->>>>>>> METRON-1182
     this.alerts = results.results ? results.results : [];
   }
 
@@ -344,11 +326,7 @@ export class AlertsListComponent implements OnInit, OnDestroy {
   }
 
   updateConfigRowsSettings() {
-<<<<<<< HEAD
-    this.alertsService.interval = this.refreshInterval;
-=======
     this.searchService.interval = this.refreshInterval;
->>>>>>> METRON-1182
   }
 
   updateSelectedAlertStatus(status: string) {

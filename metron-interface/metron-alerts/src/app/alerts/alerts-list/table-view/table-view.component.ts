@@ -16,7 +16,13 @@
  * limitations under the License.
  */
 
+import { Component, Input, Output, EventEmitter } from '@angular/core';
+import {Router} from '@angular/router';
 
+import {Pagination} from '../../../model/pagination';
+import {SortEvent} from '../../../shared/metron-table/metron-table.directive';
+import {ColumnMetadata} from '../../../model/column-metadata';
+import {Alert} from '../../../model/alert';
 import {SearchResponse} from '../../../model/search-response';
 import {SearchService} from '../../../service/search.service';
 import {MetronDialogBox, DialogType} from '../../../shared/metron-dialog-box';
