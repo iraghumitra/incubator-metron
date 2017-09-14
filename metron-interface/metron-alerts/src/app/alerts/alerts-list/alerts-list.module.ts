@@ -16,6 +16,7 @@
  * limitations under the License.
  */
 import {NgModule} from '@angular/core';
+import {DecimalPipe} from '@angular/common';
 
 import {AlertsListComponent}   from './alerts-list.component';
 import {routing} from './alerts-list.routing';
@@ -35,7 +36,7 @@ import {TreeViewComponent} from './tree-view/tree-view.component';
                 ListGroupModule, CollapseModule, GroupByModule],
     exports: [AlertsListComponent],
     declarations: [AlertsListComponent, TableViewComponent, TreeViewComponent],
-    providers: [SearchService]
+    providers: [DecimalPipe, SearchService]
 })
 export class AlertsListModule {
 }

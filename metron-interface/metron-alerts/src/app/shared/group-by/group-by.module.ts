@@ -16,6 +16,7 @@
  * limitations under the License.
  */
 import {NgModule} from '@angular/core';
+import { DecimalPipe } from '@angular/common';
 import { DragulaModule } from 'ng2-dragula';
 
 import {SharedModule} from '../shared.module';
@@ -28,7 +29,7 @@ import {GroupByComponent} from './group-by.component';
   ],
   exports: [GroupByComponent],
   declarations: [GroupByComponent],
-  providers: [],
+  providers: [DecimalPipe],
 })
 export class GroupByModule {
 }

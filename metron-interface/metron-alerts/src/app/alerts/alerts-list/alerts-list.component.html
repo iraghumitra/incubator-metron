@@ -41,6 +41,9 @@
         <div class="col-md-3 px-0">
             <div class="pull-right" style="position: relative; display: block;">
                 <div class="btn settings">
+                    <i class="fa fa-cog configure-table-icon" (click)="showConfigureTable()"></i>
+                </div>
+                <div class="btn settings">
                     <i #settingsIcon class="fa fa-sliders" aria-hidden="true"></i>
                 </div>
                 <app-configure-rows [srcElement]="settingsIcon" [tableMetaData]="tableMetaData" [(interval)]="refreshInterval" [(size)]="tableMetaData.size" (configRowsChange)="onConfigRowsChange()" > </app-configure-rows>
@@ -74,8 +77,7 @@
                             [(selectedAlerts)]="selectedAlerts"
                             (onResize)="onResize()"
                             (onAddFilter)="onAddFilter($event)"
-                            (onShowDetails)="showDetails($event)"
-                            (onShowConfigureTable)="showConfigureTable()"></app-table-view>
+                            (onShowDetails)="showDetails($event)"></app-table-view>
             <app-tree-view #dataViewComponent *ngIf="queryBuilder.groupRequest.groups.length !== 0"
                            [queryBuilder]="queryBuilder"
                            [alertsColumnsToDisplay]="alertsColumnsToDisplay"
@@ -83,8 +85,7 @@
                            [(selectedAlerts)]="selectedAlerts"
                            (onResize)="onResize()"
                            (onAddFilter)="onAddFilter($event)"
-                           (onShowDetails)="showDetails($event)"
-                           (onShowConfigureTable)="showConfigureTable()"></app-tree-view>
+                           (onShowDetails)="showDetails($event)"></app-tree-view>
         </div>
     </div>
 </div>

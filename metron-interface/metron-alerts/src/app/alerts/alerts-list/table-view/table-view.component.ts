@@ -55,7 +55,6 @@ export class TableViewComponent {
   @Output() onResize = new EventEmitter<void>();
   @Output() onAddFilter = new EventEmitter<Filter>();
   @Output() onShowDetails = new EventEmitter<Alert>();
-  @Output() onShowConfigureTable = new EventEmitter<Alert>();
   @Output() selectedAlertsChange = new EventEmitter< Alert[]>();
 
   constructor(router: Router,
@@ -164,9 +163,5 @@ export class TableViewComponent {
     if ($event.target.parentElement.firstElementChild.type !== 'checkbox' && $event.target.nodeName !== 'A') {
       this.onShowDetails.emit(alert);
     }
-  }
-
-  showConfigureTable() {
-    this.onShowConfigureTable.emit();
   }
 }
