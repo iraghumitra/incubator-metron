@@ -37,7 +37,7 @@ describe('metron-alerts App', function() {
 
   afterAll(() => {
     loginPage.logout();
-    deleteTestData();
+    // deleteTestData();
   });
 
   beforeEach(() => {
