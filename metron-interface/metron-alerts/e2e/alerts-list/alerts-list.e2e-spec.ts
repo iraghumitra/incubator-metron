@@ -63,7 +63,7 @@ describe('metron-alerts App', function() {
     expect(page.getTableColumnNames()).toEqualBcoz(columnNames, 'for default column names for alert list table');
   });
 
-  it('should have all pagination controls and they should be working', () => {
+  xit('should have all pagination controls and they should be working', () => {
     expect(page.isChevronLeftEnabled()).toEqualBcoz(false, 'for left chevron to be disabled for first page');
     expect(page.getPaginationText()).toEqualBcoz('1 - 25 of 169', 'for pagination text');
     expect(page.isChevronRightEnabled()).toEqualBcoz(true, 'for right chevron to be enabled for first page');
@@ -94,7 +94,7 @@ describe('metron-alerts App', function() {
 
   });
 
-  it('should have all settings controls and they should be working', () => {
+  xit('should have all settings controls and they should be working', () => {
     let settingsPaneLbelNames = [ 'REFRESH RATE', 'ROWS PER PAGE', 'HIDE Resolved Alerts', 'HIDE Dismissed Alerts' ];
     let settingPaneRefreshIntervals = [ '5s', '10s', '15s', '30s', '1m', '10m', '1h' ];
     let settingsPanePageSize = [ '10', '25', '50', '100', '250', '500', '1000' ];
@@ -124,7 +124,7 @@ describe('metron-alerts App', function() {
     page.clickSettings();
   });
 
-  it('play pause should start polling and stop polling ', () => {
+  xit('play pause should start polling and stop polling ', () => {
     expect(page.getPlayPauseState()).toEqual('fa fa-pause', 'for default pause option');
 
     page.clickPlayPause();
@@ -134,7 +134,7 @@ describe('metron-alerts App', function() {
     expect(page.getPlayPauseState()).toEqual('fa fa-pause', 'for default pause option');
   });
 
-  it('should select columns from table configuration', () => {
+  xit('should select columns from table configuration', () => {
     let newColNamesColumnConfig = [ 'score', 'timestamp', 'source:type', 'ip_src_addr', 'enrichments:geo:ip_dst_addr:country',
       'ip_dst_addr', 'host', 'alert_status', 'guid' ];
 

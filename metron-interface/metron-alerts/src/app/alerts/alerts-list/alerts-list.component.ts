@@ -259,6 +259,7 @@ export class AlertsListComponent implements OnInit, OnDestroy {
     this.queryBuilder.setFromAndSize(0, 0);
 
     let searchRequest = this.queryBuilder.searchRequest;
+
     if (this.indices) {
       searchRequest.indices = this.indices;
     }

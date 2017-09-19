@@ -1,4 +1,4 @@
-/// <reference path="../matchers/custom-matchers.d.ts"/>
+/// <reference path="../../matchers/custom-matchers.d.ts"/>
 /**
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -16,23 +16,25 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { MetronAlertsPage } from './alerts-list.po';
-import { customMatchers } from  '../matchers/custom-matchers';
-import { LoginPage } from '../login/login.po';
-import { loadTestData, deleteTestData } from "../utils/e2e_util";
+import { customMatchers } from  '../../matchers/custom-matchers';
+import { LoginPage } from '../../login/login.po';
+import {TreeViewPage} from './tree-view.po';
+import { loadTestData, deleteTestData } from "../../utils/e2e_util";
+import {browser} from 'protractor';
+import {MetronAlertsPage} from '../alerts-list.po';
 
-describe('metron-alerts App', function() {
-  let page: MetronAlertsPage;
+describe('metron-alerts tree view', function() {
+  let page: TreeViewPage;
+  let listPage: MetronAlertsPage;
   let loginPage: LoginPage;
-  let columnNames = [ 'Score', 'id', 'timestamp', 'source:type', 'ip_src_addr', 'enrichm...:country',
-                      'ip_dst_addr', 'host', 'alert_status', '', '' ];
-  let colNamesColumnConfig = [ 'score', 'id', 'timestamp', 'source:type', 'ip_src_addr', 'enrichments:geo:ip_dst_addr:country',
-                                'ip_dst_addr', 'host', 'alert_status' ];
 
   beforeAll(() => {
-    loadTestData();
+    // loadTestData();
     loginPage = new LoginPage();
+    page = new TreeViewPage();
+    listPage = new MetronAlertsPage();
     loginPage.login();
+    page.navigateToAlertsList();
   });
 
   afterAll(() => {
@@ -41,110 +43,124 @@ describe('metron-alerts App', function() {
   });
 
   beforeEach(() => {
-    page = new MetronAlertsPage();
     jasmine.addMatchers(customMatchers);
   });
 
-  it('should have all the UI elements', () => {
-    page.navigateTo();
-    page.clearLocalStorage();
-
-    expect(page.isMetronLogoPresent()).toEqualBcoz(true, 'for Metron Logo');
-    expect(page.isSavedSearchButtonPresent()).toEqualBcoz(true, 'for SavedSearch Button');
-    expect(page.isClearSearchPresent()).toEqualBcoz(true, 'for Clear Search');
-    expect(page.isSearchButtonPresent()).toEqualBcoz(true, 'for Search Button');
-    expect(page.isSaveSearchButtonPresent()).toEqualBcoz(true, 'for Save Search Button');
-    expect(page.isTableSettingsButtonPresent()).toEqualBcoz(true, 'for table settings button');
-    expect(page.isPausePlayRefreshButtonPresent()).toEqualBcoz(true, 'for pause/play button');
-    expect(page.isConfigureTableColumnsPresent()).toEqualBcoz(true, 'for alerts table column configure button');
-
-    expect(page.getAlertTableTitle()).toEqualBcoz('Alerts (25 of 169)', 'for alerts title');
-    expect(page.getActionDropdownItems()).toEqualBcoz([ 'Open', 'Dismiss', 'Escalate', 'Resolve' ], 'for default dropdown actions');
-    expect(page.getTableColumnNames()).toEqualBcoz(columnNames, 'for default column names for alert list table');
+  it('should have all group by elements', () => {
+    let groupByItems = {
+      'source:type': '1',
+      'ip_dst_addr': '8',
+      'host': '9',
+      'enrichm...:country': '3',
+      'ip_src_addr': '2'
+    };
+    expect(page.getGroupByCount()).toEqualBcoz(Object.keys(groupByItems).length, '5 Group By Elements should be present');
+    expect(page.getGroupByItemNames()).toEqualBcoz(Object.keys(groupByItems), 'Group By Elements names should be present');
+    expect(page.getGroupByItemCounts()).toEqualBcoz(Object.keys(groupByItems).map(key => groupByItems[key]), '5 Group By Elements values should be present');
   });
 
-  it('should have all pagination controls and they should be working', () => {
-    expect(page.isChevronLeftEnabled()).toEqualBcoz(false, 'for left chevron to be disabled for first page');
-    expect(page.getPaginationText()).toEqualBcoz('1 - 25 of 169', 'for pagination text');
-    expect(page.isChevronRightEnabled()).toEqualBcoz(true, 'for right chevron to be enabled for first page');
+  it('should have group details for single group by', () => {
+    let dashRowValues = [ '0', 'alerts_ui_e2e', 'ALERTS', '169'];
+    let row1_page1 = ['-', 'dcda4423-7...0962fafc47', '2017-09-13 17:59:32', 'alerts_ui_e2e',
+      '192.168.138.158', 'US', '72.34.49.86', 'comarksecurity.com', 'NEW', ''];
+    let row1_page2 = ['-', '07b29c29-9...ff19eaa888', '2017-09-13 17:59:37', 'alerts_ui_e2e',
+      '192.168.138.158', 'FR', '62.75.195.236', '62.75.195.236', 'NEW', ''];
 
-    page.clickChevronRight();
+    page.selectGroup('source:type');
+    expect(page.getActiveGroups()).toEqualBcoz(['source:type'], 'only source type group should be selected');
+    expect(page.getDashGroupValues('alerts_ui_e2e')).toEqualBcoz(dashRowValues, 'Dash Group Values should be present');
 
-    expect(page.isChevronLeftEnabled()).toEqualBcoz(true, 'for left chevron to be enabled for second page');
-    expect(page.getPaginationText()).toEqualBcoz('26 - 50 of 169', 'for pagination text');
-    expect(page.isChevronRightEnabled()).toEqualBcoz(true, 'for right chevron to be enabled for second page');
+    page.expandDashGroup('alerts_ui_e2e');
+    expect(page.getDashGroupTableValuesForRow('alerts_ui_e2e', 0)).toEqualBcoz(row1_page1, 'Dash Group Values should be present');
 
-    page.clickChevronRight();
+    page.clickOnNextPage('alerts_ui_e2e');
+    expect(page.getTableValuesByRowId('alerts_ui_e2e', 0, 'FR')).toEqualBcoz(row1_page2, 'Dash Group Values should be present');
 
-    expect(page.isChevronLeftEnabled()).toEqualBcoz(true, 'for left chevron to be enabled for third page');
-    expect(page.getPaginationText()).toEqualBcoz('51 - 75 of 169', 'for pagination text');
-    expect(page.isChevronRightEnabled()).toEqualBcoz(true, 'for right chevron to be enabled for third page');
-
-    page.clickChevronRight(4);
-
-    expect(page.isChevronLeftEnabled()).toEqualBcoz(true, 'for left chevron to be enabled for last page');
-    expect(page.getPaginationText()).toEqualBcoz('151 - 169 of 169', 'for pagination text');
-    expect(page.isChevronRightEnabled()).toEqualBcoz(false, 'for right chevron to be disabled for last page');
-
-    page.clickChevronLeft(7);
-
-    expect(page.isChevronLeftEnabled()).toEqualBcoz(false, 'for left chevron to be disabled for first page again');
-    expect(page.getPaginationText()).toEqualBcoz('1 - 25 of 169', 'for pagination text');
-    expect(page.isChevronRightEnabled()).toEqualBcoz(true, 'for right chevron to be enabled for first page again');
-
+    page.unGroup();
+    expect(page.getActiveGroups()).toEqualBcoz([], 'no groups should be selected');
   });
 
-  it('should have all settings controls and they should be working', () => {
-    let settingsPaneLbelNames = [ 'REFRESH RATE', 'ROWS PER PAGE', 'HIDE Resolved Alerts', 'HIDE Dismissed Alerts' ];
-    let settingPaneRefreshIntervals = [ '5s', '10s', '15s', '30s', '1m', '10m', '1h' ];
-    let settingsPanePageSize = [ '10', '25', '50', '100', '250', '500', '1000' ];
+  it('should have group details for multiple group by', () => {
 
-    page.clickSettings();
+    let dashRow_runLoveUs = {
+      'dashRow': [ '0', 'runlove.us', 'ALERTS', '13'],
+      'firstSubGroup': '0 US (13)',
+      'firstSubGroupIdCol': ['9a969c64-b...001cb011a3', 'a651f7c3-1...a97d4966c9', 'afc36901-3...d931231ab2',
+                                  'd860ac35-1...f9e282d571', '04a5c3d0-9...af17c06fbc']
+    };
 
-    expect(page.getSettingsLabels()).toEqualBcoz(settingsPaneLbelNames, 'for table settings labels');
+    let dashRow_62_75_195_236 = {
+      'dashRow': [ '0', '62.75.195.236', 'ALERTS', '18'],
+      'firstSubGroup': '0 FR (18)',
+      'firstSubGroupIdCol': ['07b29c29-9...ff19eaa888', '7cd91565-1...de5be54a6e', 'ca5bde58-a...f3a88d2df4',
+                                  '5d6faf83-8...b88a407647', 'e2883424-f...79bb8b0606']
+    };
 
-    expect(page.getRefreshRateOptions()).toEqualBcoz(settingPaneRefreshIntervals, 'for table settings refresh rate labels');
-    expect(page.getRefreshRateSelectedOption()).toEqualBcoz([ '1m' ], 'for table settings default refresh rate');
+    page.selectGroup('host');
+    page.selectGroup('enrichments:geo:ip_dst_addr:country');
+    expect(page.getActiveGroups()).toEqualBcoz(['host', 'enrichments:geo:ip_dst_addr:country'], 'two groups should be selected');
 
-    page.clickRefreshInterval('10s');
-    expect(page.getRefreshRateSelectedOption()).toEqualBcoz([ '10s' ], 'for refresh interval 10s');
+    expect(page.getDashGroupValues('runlove.us')).toEqualBcoz(dashRow_runLoveUs.dashRow, 'Dash Group Values should be present for runlove.us');
+    page.expandDashGroup('runlove.us');
+    expect(page.getSubGroupValues('runlove.us', 'US')).toEqualBcoz(dashRow_runLoveUs.firstSubGroup, 'Dash Group Values should be present for runlove.us');
+    page.expandSubGroup('runlove.us', 'US');
+    expect(page.getCellValuesFromTable('runlove.us', 'id', '04a5c3d0-9...af17c06fbc')).toEqual(dashRow_runLoveUs.firstSubGroupIdCol, 'id should not be sorted');
 
-    page.clickRefreshInterval('1h');
-    expect(page.getRefreshRateSelectedOption()).toEqualBcoz([ '1h' ], 'for refresh interval 1h');
+    expect(page.getDashGroupValues('62.75.195.236')).toEqualBcoz(dashRow_62_75_195_236.dashRow, 'Dash Group Values should be present');
+    page.expandDashGroup('62.75.195.236');
+    expect(page.getSubGroupValues('62.75.195.236', 'FR')).toEqualBcoz(dashRow_62_75_195_236.firstSubGroup, 'Dash Group Values should be present for 62.75.195.236');
+    page.expandSubGroup('62.75.195.236', 'FR');
+    expect(page.getCellValuesFromTable('62.75.195.236', 'id', 'e2883424-f...79bb8b0606')).toEqual(dashRow_62_75_195_236.firstSubGroupIdCol, 'id should not be sorted');
 
-    expect(page.getPageSizeOptions()).toEqualBcoz(settingsPanePageSize, 'for table settings refresh rate labels');
-    expect(page.getPageSizeSelectedOption()).toEqualBcoz([ '25' ], 'for table settings default page size');
-
-    page.clickPageSize('10');
-    expect(page.getPageSizeSelectedOption()).toEqualBcoz([ '10' ], 'for page size 10');
-
-    page.clickPageSize('100');
-    expect(page.getPageSizeSelectedOption()).toEqualBcoz([ '100' ], 'for page size 100');
-
-    page.clickSettings();
+    page.unGroup();
+    expect(page.getActiveGroups()).toEqualBcoz([], 'no groups should be selected');
   });
 
-  it('play pause should start polling and stop polling ', () => {
-    expect(page.getPlayPauseState()).toEqual('fa fa-pause', 'for default pause option');
 
-    page.clickPlayPause();
-    expect(page.getPlayPauseState()).toEqual('fa fa-play', 'for default pause option');
+  it('should have sort working for group details for multiple sub groups', () => {
 
-    page.clickPlayPause();
-    expect(page.getPlayPauseState()).toEqual('fa fa-pause', 'for default pause option');
+    let usIDCol = ['dcda4423-7...0962fafc47', '9a969c64-b...001cb011a3', 'a651f7c3-1...a97d4966c9', 'afc36901-3...d931231ab2', 'd860ac35-1...f9e282d571'];
+    let ruIDCol = ['350c0e9f-a...3cbe5b29d2', '9b47e24a-e...2ca6627943', '4cac5e2c-3...3deb1ebcc6', 'eb54c3fa-c...e02719c3b0', 'cace11d0-c...b1bd7b9499'];
+    let frIDCol = ['07b29c29-9...ff19eaa888', '7cd91565-1...de5be54a6e', 'ca5bde58-a...f3a88d2df4', '5d6faf83-8...b88a407647', 'e2883424-f...79bb8b0606'];
+
+    let usSortedIDCol = ['04a5c3d0-9...af17c06fbc', '06e70f55-4...f486927126', '105529cb-2...61b58237cc', '4c732cb0-0...6a93129aba', '500eb5e2-6...37b0f98772'];
+    let ruSortedIDCol = ['001b5451-6...38ec4221ee', '00814048-d...c9e6f27800', '0454b31e-e...0a711a36e7', '09552ace-9...e146579030', '0e99ba49-4...456c107bc9'];
+    let frSortedIDCol = ['07b29c29-9...ff19eaa888', '2681ed49-b...c33a80d429', '29ffaeb4-e...36822e5f81', '2cc174d7-c...8073777309', '436b9ecf-b...5f1ece4c4d'];
+
+    page.selectGroup('source:type');
+    page.selectGroup('enrichments:geo:ip_dst_addr:country');
+
+    page.expandDashGroup('alerts_ui_e2e');
+    page.expandSubGroup('alerts_ui_e2e', 'US');
+    page.expandSubGroup('alerts_ui_e2e', 'RU');
+    page.expandSubGroup('alerts_ui_e2e', 'FR');
+
+    expect(page.getCellValuesFromTable('alerts_ui_e2e', 'id', 'e2883424-f...79bb8b0606')).toEqual([...usIDCol, ...ruIDCol, ...frIDCol], 'id should not be sorted');
+
+    page.sortSubGroup('alerts_ui_e2e', 'id');
+    expect(page.getCellValuesFromTable('alerts_ui_e2e', 'id', '436b9ecf-b...5f1ece4c4d')).toEqual([...usSortedIDCol, ...ruSortedIDCol, ...frSortedIDCol], 'id should be sorted');
+
+    page.unGroup();
+    expect(page.getActiveGroups()).toEqualBcoz([], 'no groups should be selected');
   });
 
-  it('should select columns from table configuration', () => {
-    let newColNamesColumnConfig = [ 'score', 'timestamp', 'source:type', 'ip_src_addr', 'enrichments:geo:ip_dst_addr:country',
-      'ip_dst_addr', 'host', 'alert_status', 'guid' ];
+  it('should have search working for group details for multiple sub groups', () => {
 
-    page.clickConfigureTable();
-    expect(page.getSelectedColumnNames()).toEqual(colNamesColumnConfig, 'for default selected column names');
-    page.toggleSelectCol('id');
-    page.toggleSelectCol('guid', 'method');
-    expect(page.getSelectedColumnNames()).toEqual(newColNamesColumnConfig, 'for guid added to selected column names');
-    page.saveConfigureColumns();
+    page.selectGroup('source:type');
+    page.selectGroup('enrichments:geo:ip_dst_addr:country');
 
+    page.expandDashGroup('alerts_ui_e2e');
+    expect(page.getNumOfSubGroups('alerts_ui_e2e')).toEqual(3, 'three sub groups should be present');
+
+    listPage.setSearchText('enrichments:geo:ip_dst_addr:country:FR');
+
+    page.expandSubGroup('alerts_ui_e2e', 'FR');
+    expect(page.getNumOfSubGroups('alerts_ui_e2e')).toEqual(1, 'one sub groups should be present');
+
+    expect(page.getCellValuesFromTable('alerts_ui_e2e', 'enrichments:geo:ip_dst_addr:country', 'FR')).toEqual(['FR', 'FR', 'FR', 'FR', 'FR'], 'id should be sorted');
+
+    page.unGroup();
+    expect(page.getActiveGroups()).toEqualBcoz([], 'no groups should be selected');
   });
 
 });
