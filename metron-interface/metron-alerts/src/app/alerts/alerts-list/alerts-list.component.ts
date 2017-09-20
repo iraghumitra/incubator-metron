@@ -37,7 +37,6 @@ import {SearchResponse} from '../../model/search-response';
 import {ElasticsearchUtils} from '../../utils/elasticsearch-utils';
 import {TableViewComponent} from './table-view/table-view.component';
 import {Filter} from '../../model/filter';
-import {environment} from '../../../environments/environment';
 
 @Component({
   selector: 'app-alerts-list',
@@ -82,9 +81,6 @@ export class AlertsListComponent implements OnInit, OnDestroy {
         this.restoreRefreshState();
       }
     });
-    if (environment.indices) {
-      this.indices = environment.indices.split(',');
-    }
   }
 
   addAlertColChangedListner() {
@@ -344,10 +340,6 @@ export class AlertsListComponent implements OnInit, OnDestroy {
   }
 
   updateSelectedAlertStatus(status: string) {
-    for (let selectedAlert of this.selectedAlerts) {
-      selectedAlert.status = status;
-      this.alerts.filter(alert => alert.source.guid == selectedAlert.source.guid)
-      .map(alert => alert.source['alert_status'] = status);
-    }
+    this.dataViewComponent.updateSelectedAlertStatus(status);
   }
 }

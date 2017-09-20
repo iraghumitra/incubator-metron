@@ -29,7 +29,7 @@ describe('metron-alerts tree view', function() {
   let loginPage: LoginPage;
 
   beforeAll(() => {
-    // loadTestData();
+    loadTestData();
     loginPage = new LoginPage();
     page = new TreeViewPage();
     listPage = new MetronAlertsPage();
@@ -39,7 +39,7 @@ describe('metron-alerts tree view', function() {
 
   afterAll(() => {
     loginPage.logout();
-    // deleteTestData();
+    deleteTestData();
   });
 
   beforeEach(() => {

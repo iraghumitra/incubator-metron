@@ -53,6 +53,8 @@ describe('metron-alerts alert status', function() {
     page.clickResolve();
     expect(page.getAlertStatus('ESCALATE')).toEqual('RESOLVE');
     page.clickNew();
+
+    page.closeDetailsPage();
   });
 
 });

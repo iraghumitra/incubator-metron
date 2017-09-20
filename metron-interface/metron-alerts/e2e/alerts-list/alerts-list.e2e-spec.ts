@@ -25,7 +25,7 @@ describe('metron-alerts App', function() {
   let page: MetronAlertsPage;
   let loginPage: LoginPage;
   let columnNames = [ 'Score', 'id', 'timestamp', 'source:type', 'ip_src_addr', 'enrichm...:country',
-                      'ip_dst_addr', 'host', 'alert_status', '', '' ];
+                      'ip_dst_addr', 'host', 'alert_status', ''];
   let colNamesColumnConfig = [ 'score', 'id', 'timestamp', 'source:type', 'ip_src_addr', 'enrichments:geo:ip_dst_addr:country',
                                 'ip_dst_addr', 'host', 'alert_status' ];
 
@@ -58,12 +58,12 @@ describe('metron-alerts App', function() {
     expect(page.isPausePlayRefreshButtonPresent()).toEqualBcoz(true, 'for pause/play button');
     expect(page.isConfigureTableColumnsPresent()).toEqualBcoz(true, 'for alerts table column configure button');
 
-    expect(page.getAlertTableTitle()).toEqualBcoz('Alerts (25 of 169)', 'for alerts title');
+    expect(page.getAlertTableTitle()).toEqualBcoz('Alerts (169)', 'for alerts title');
     expect(page.getActionDropdownItems()).toEqualBcoz([ 'Open', 'Dismiss', 'Escalate', 'Resolve' ], 'for default dropdown actions');
     expect(page.getTableColumnNames()).toEqualBcoz(columnNames, 'for default column names for alert list table');
   });
 
-  xit('should have all pagination controls and they should be working', () => {
+  it('should have all pagination controls and they should be working', () => {
     expect(page.isChevronLeftEnabled()).toEqualBcoz(false, 'for left chevron to be disabled for first page');
     expect(page.getPaginationText()).toEqualBcoz('1 - 25 of 169', 'for pagination text');
     expect(page.isChevronRightEnabled()).toEqualBcoz(true, 'for right chevron to be enabled for first page');
@@ -94,7 +94,7 @@ describe('metron-alerts App', function() {
 
   });
 
-  xit('should have all settings controls and they should be working', () => {
+  it('should have all settings controls and they should be working', () => {
     let settingsPaneLbelNames = [ 'REFRESH RATE', 'ROWS PER PAGE', 'HIDE Resolved Alerts', 'HIDE Dismissed Alerts' ];
     let settingPaneRefreshIntervals = [ '5s', '10s', '15s', '30s', '1m', '10m', '1h' ];
     let settingsPanePageSize = [ '10', '25', '50', '100', '250', '500', '1000' ];
@@ -124,7 +124,7 @@ describe('metron-alerts App', function() {
     page.clickSettings();
   });
 
-  xit('play pause should start polling and stop polling ', () => {
+  it('play pause should start polling and stop polling ', () => {
     expect(page.getPlayPauseState()).toEqual('fa fa-pause', 'for default pause option');
 
     page.clickPlayPause();
@@ -134,7 +134,7 @@ describe('metron-alerts App', function() {
     expect(page.getPlayPauseState()).toEqual('fa fa-pause', 'for default pause option');
   });
 
-  xit('should select columns from table configuration', () => {
+  it('should select columns from table configuration', () => {
     let newColNamesColumnConfig = [ 'score', 'timestamp', 'source:type', 'ip_src_addr', 'enrichments:geo:ip_dst_addr:country',
       'ip_dst_addr', 'host', 'alert_status', 'guid' ];
 
