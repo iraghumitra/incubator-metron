@@ -21,10 +21,12 @@
     "@angular/platform-browser": "^4.0.0",
     "@angular/platform-browser-dynamic": "^4.0.0",
     "@angular/router": "^4.0.0",
+    "@types/moment": "^2.13.0",
     "ace-builds": "^1.2.6",
     "bootstrap": "4.0.0-alpha.6",
     "core-js": "^2.4.1",
     "font-awesome": "^4.7.0",
+    "moment": "^2.18.1",
     "rxjs": "^5.1.0",
     "web-animations-js": "^2.2.2",
     "zone.js": "^0.8.4"
