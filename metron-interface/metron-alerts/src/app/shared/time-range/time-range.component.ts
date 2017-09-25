@@ -15,155 +15,216 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { Component, OnInit, ViewChild, ElementRef } from '@angular/core';
+import { Component, OnInit, ViewChild, ElementRef, HostListener, EventEmitter, Output, Input, OnChanges, SimpleChanges} from '@angular/core';
 import * as moment from 'moment/moment';
+import {Filter, RangeFilter} from '../../model/filter';
 
 @Component({
   selector: 'app-time-range',
   templateUrl: './time-range.component.html',
   styleUrls: ['./time-range.component.scss']
 })
-export class TimeRangeComponent implements OnInit {
-  toDate = '';
-  fromDate = '';
+export class TimeRangeComponent implements OnInit, OnChanges {
   toDateStr = '';
   fromDateStr = '';
-  selectedTimeRange = 'Today';
+  selectedTimeRangeValue = 'Last 30 days';
+  timeRangeMapping = {
+    'Last 7 days':            'last-7-days',
+    'Last 30 days':           'last-30-days',
+    'Last 60 days':           'last-60-days',
+    'Last 90 days':           'last-90-days',
+    'Last 6 months':          'last-6-months',
+    'Last 1 year':            'last-1-year',
+    'Last 2 years':           'last-2-years',
+    'Last 5 years':           'last-5-years',
+    'Yesterday':              'yesterday',
+    'Day before yesterday':   'day-before-yesterday',
+    'This day last week':     'this-day-last-week',
+    'Previous week':          'previous-week',
+    'Previous month':         'previous-month',
+    'Previous year':          'previous-year',
+    'Today':                  'today',
+    'Today so far':           'today-so-far',
+    'This week':              'this-week',
+    'This week so far':       'this-week-so-far',
+    'This month':             'this-month',
+    'This year':              'this-year',
+    'Last 5 minutes':         'last-5-minutes',
+    'Last 15 minutes':        'last-15-minutes',
+    'Last 30 minutes':        'last-30-minutes',
+    'Last 1 hour':            'last-1-hour',
+    'Last 3 hours':           'last-3-hours',
+    'Last 6 hours':           'last-6-hours',
+    'Last 12 hours':          'last-12-hours',
+    'Last 24 hours':          'last-24-hours'
+  };
+
   @ViewChild('datePicker') datePicker: ElementRef;
+
+  @Input()
+  disabled = false;
+  @Output()
+  timeRangeChange = new EventEmitter<Filter>();
 
   constructor() { }
 
+  ngOnChanges(changes: SimpleChanges) {
+    if (changes && !changes['disabled'].currentValue){
+      this.setDate(this.timeRangeMapping[this.selectedTimeRangeValue]);
+    }
+  }
+
   ngOnInit() {
-    let message = moment().subtract(7, 'days');
-    this.setDate('today');
+    this.setDate(this.timeRangeMapping[this.selectedTimeRangeValue]);
   }
 
   selectTimeRange($event, range: string) {
-    this.selectedTimeRange = $event.target.textContent.trim();
-    this.datePicker.nativeElement.classList.remove('show');
-
+    this.hideDatePicker();
+    this.selectedTimeRangeValue = $event.target.textContent.trim();
     this.setDate(range);
   }
 
+  hideDatePicker() {
+    this.datePicker.nativeElement.classList.remove('show');
+  }
+
   setDate(range:string) {
+    let toDate = '';
+    let fromDate = '';
+    
     switch (range) {
       case 'last-7-days':
-        this.fromDate = moment().local().format();
-        this.toDate = moment().subtract(7, 'days').local().format();
+        fromDate = moment().subtract(7, 'days').local().format();
+        toDate = moment().local().format();
         break;
       case 'last-30-days':
-        this.fromDate = moment().local().format();
-        this.toDate = moment().subtract(30, 'days').local().format();
+        fromDate = moment().subtract(30, 'days').local().format();
+        toDate = moment().local().format();
         break;
       case 'last-60-days':
-        this.fromDate = moment().local().format();
-        this.toDate = moment().subtract(60, 'days').local().format();
+        fromDate = moment().subtract(60, 'days').local().format();
+        toDate = moment().local().format();
         break;
       case 'last-90-days':
-        this.fromDate = moment().local().format();
-        this.toDate = moment().subtract(90, 'days').local().format();
+        fromDate = moment().subtract(90, 'days').local().format();
+        toDate = moment().local().format();
         break;
       case 'last-6-months':
-        this.fromDate = moment().local().format();
-        this.toDate = moment().subtract(6, 'months').local().format();
+        fromDate = moment().subtract(6, 'months').local().format();
+        toDate = moment().local().format();
         break;
       case 'last-1-year':
-        this.fromDate = moment().local().format();
-        this.toDate = moment().subtract(1, 'year').local().format();
+        fromDate = moment().subtract(1, 'year').local().format();
+        toDate = moment().local().format();
         break;
       case 'last-2-years':
-        this.fromDate = moment().local().format();
-        this.toDate = moment().subtract(2, 'years').local().format();
+        fromDate = moment().subtract(2, 'years').local().format();
+        toDate = moment().local().format();
         break;
       case 'last-5-years':
-        this.fromDate = moment().local().format();
-        this.toDate = moment().subtract(5, 'years').local().format();
+        fromDate = moment().subtract(5, 'years').local().format();
+        toDate = moment().local().format();
         break;
       case 'yesterday':
-        this.fromDate = moment().subtract(1, 'days').startOf('day').local().format();
-        this.toDate = moment().subtract(1, 'days').endOf('day').local().format();
+        fromDate = moment().subtract(1, 'days').startOf('day').local().format();
+        toDate = moment().subtract(1, 'days').endOf('day').local().format();
         break;
       case 'day-before-yesterday':
-        this.fromDate = moment().subtract(2, 'days').startOf('day').local().format();
-        this.toDate = moment().subtract(2, 'days').endOf('day').local().format();
+        fromDate = moment().subtract(2, 'days').startOf('day').local().format();
+        toDate = moment().subtract(2, 'days').endOf('day').local().format();
         break;
       case 'this-day-last-week':
-        this.fromDate = moment().subtract(7, 'days').startOf('day').local().format();
-        this.toDate = moment().subtract(7, 'days').endOf('day').local().format();
+        fromDate = moment().subtract(7, 'days').startOf('day').local().format();
+        toDate = moment().subtract(7, 'days').endOf('day').local().format();
         break;
       case 'previous-week':
-        this.fromDate = moment().subtract(1, 'weeks').startOf('week').local().format();
-        this.toDate = moment().subtract(1, 'weeks').endOf('week').local().format();
+        fromDate = moment().subtract(1, 'weeks').startOf('week').local().format();
+        toDate = moment().subtract(1, 'weeks').endOf('week').local().format();
         break;
       case 'previous-month':
-        this.fromDate = moment().subtract(1, 'months').startOf('month').local().format();
-        this.toDate = moment().subtract(1, 'months').endOf('month').local().format();
+        fromDate = moment().subtract(1, 'months').startOf('month').local().format();
+        toDate = moment().subtract(1, 'months').endOf('month').local().format();
         break;
       case 'previous-year':
-        this.fromDate = moment().subtract(1, 'years').startOf('year').local().format();
-        this.toDate = moment().subtract(1, 'years').endOf('year').local().format();
+        fromDate = moment().subtract(1, 'years').startOf('year').local().format();
+        toDate = moment().subtract(1, 'years').endOf('year').local().format();
         break;
       case 'today':
-        this.fromDate = moment().startOf('day').local().format();
-        this.toDate = moment().endOf('day').local().format();
+        fromDate = moment().startOf('day').local().format();
+        toDate = moment().endOf('day').local().format();
         break;
       case 'today-so-far':
-        this.fromDate = moment().startOf('day').local().format();
-        this.toDate = moment().local().format();
+        fromDate = moment().startOf('day').local().format();
+        toDate = moment().local().format();
         break;
       case 'this-week':
-        this.fromDate = moment().startOf('week').local().format();
-        this.toDate = moment().endOf('week').local().format();
+        fromDate = moment().startOf('week').local().format();
+        toDate = moment().endOf('week').local().format();
         break;
       case 'this-week-so-far':
-        this.fromDate = moment().startOf('week').local().format();
-        this.toDate = moment().local().format();
+        fromDate = moment().startOf('week').local().format();
+        toDate = moment().local().format();
         break;
       case 'this-month':
-        this.fromDate = moment().startOf('month').local().format();
-        this.toDate = moment().endOf('month').local().format();
+        fromDate = moment().startOf('month').local().format();
+        toDate = moment().endOf('month').local().format();
         break;
       case 'this-year':
-        this.fromDate = moment().startOf('year').local().format();
-        this.toDate = moment().endOf('year').local().format();
+        fromDate = moment().startOf('year').local().format();
+        toDate = moment().endOf('year').local().format();
         break;
       case 'last-5-minutes':
-        this.fromDate = moment().subtract(5, 'minutes').local().format();
-        this.toDate = moment().local().format();
+        fromDate = moment().subtract(5, 'minutes').local().format();
+        toDate = moment().local().format();
         break;
       case 'last-15-minutes':
-        this.fromDate = moment().subtract(15, 'minutes').local().format();
-        this.toDate = moment().local().format();
+        fromDate = moment().subtract(15, 'minutes').local().format();
+        toDate = moment().local().format();
         break;
       case 'last-30-minutes':
-        this.fromDate = moment().subtract(30, 'minutes').local().format();
-        this.toDate = moment().local().format();
+        fromDate = moment().subtract(30, 'minutes').local().format();
+        toDate = moment().local().format();
         break;
       case 'last-1-hour':
-        this.fromDate = moment().subtract(60, 'minutes').local().format();
-        this.toDate = moment().local().format();
+        fromDate = moment().subtract(60, 'minutes').local().format();
+        toDate = moment().local().format();
         break;
       case 'last-3-hours':
-        this.fromDate = moment().subtract(3, 'hours').local().format();
-        this.toDate = moment().local().format();
+        fromDate = moment().subtract(3, 'hours').local().format();
+        toDate = moment().local().format();
         break;
       case 'last-6-hours':
-        this.fromDate = moment().subtract(6, 'hours').local().format();
-        this.toDate = moment().local().format();
+        fromDate = moment().subtract(6, 'hours').local().format();
+        toDate = moment().local().format();
         break;
       case 'last-12-hours':
-        this.fromDate = moment().subtract(12, 'hours').local().format();
-        this.toDate = moment().local().format();
+        fromDate = moment().subtract(12, 'hours').local().format();
+        toDate = moment().local().format();
         break;
       case 'last-24-hours':
-        this.fromDate = moment().subtract(24, 'hours').local().format();
-        this.toDate = moment().local().format();
+        fromDate = moment().subtract(24, 'hours').local().format();
+        toDate = moment().local().format();
         break;
     }
 
-    this.toDateStr = moment(this.toDate).format('D-M-YYYY H:m:s');
-    this.fromDateStr = moment(this.fromDate).format('D-M-YYYY H:m:s');
-    console.log(this.fromDate, this.toDate);
+    this.toDateStr = moment(toDate).format('D-M-YYYY H:m:s');
+    this.fromDateStr = moment(fromDate).format('D-M-YYYY H:m:s');
+    console.log(fromDate, toDate);
+    console.log(new Date(fromDate).getTime(), new Date(toDate).getTime());
+
+    this.timeRangeChange.emit(new RangeFilter('timestamp', new Date((fromDate)).getTime(), new Date((toDate)).getTime(), false));
+  }
+
+  @HostListener('document:click', ['$event', '$event.target'])
+  public onClick(event: MouseEvent, targetElement: HTMLElement): void {
+    if (!targetElement) {
+      return;
+    }
+
+    const clickedInside = this.datePicker.nativeElement.contains(targetElement);
+    if (!clickedInside) {
+      this.hideDatePicker();
+    }
   }
 
 }

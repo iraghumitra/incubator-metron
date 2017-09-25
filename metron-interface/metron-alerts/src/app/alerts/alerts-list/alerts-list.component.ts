@@ -37,6 +37,8 @@ import {MetronDialogBox, DialogType} from '../../shared/metron-dialog-box';
 import {AlertSearchDirective} from '../../shared/directives/alert-search.directive';
 import {SearchResponse} from '../../model/search-response';
 import {ElasticsearchUtils} from '../../utils/elasticsearch-utils';
+import {Filter, RangeFilter} from '../../model/filter';
+import {THREAT_SCORE_FIELD_NAME, TIMESTAMP_FIELD_NAME} from '../../utils/constants';
 
 @Component({
   selector: 'app-alerts-list',
@@ -55,7 +57,8 @@ export class AlertsListComponent implements OnInit, OnDestroy {
   refreshTimer: Subscription;
   pauseRefresh = false;
   lastPauseRefreshValue = false;
-  threatScoreFieldName = 'threat:triage:score';
+  timeStampfilterPresent = false;
+  threatScoreFieldName = THREAT_SCORE_FIELD_NAME;
 
   @ViewChild('table') table: ElementRef;
   @ViewChild(AlertSearchDirective) alertSearchDirective: AlertSearchDirective;
@@ -187,19 +190,21 @@ export class AlertsListComponent implements OnInit, OnDestroy {
   }
 
   onClear() {
+    this.timeStampfilterPresent = false;
     this.queryBuilder.displayQuery = '';
     this.search();
   }
 
   onSearch($event) {
     this.queryBuilder.displayQuery = $event;
+    this.timeStampfilterPresent = this.queryBuilder.isTimeStampFieldPresent();
     this.search();
-
     return false;
   }
 
   onAddFilter(field: string, value: string) {
-    this.queryBuilder.addOrUpdateFilter(field, value);
+    this.timeStampfilterPresent = (field === TIMESTAMP_FIELD_NAME);
+    this.queryBuilder.addOrUpdateFilter(new Filter(field, value));
     this.search();
   }
 
@@ -231,6 +236,11 @@ export class AlertsListComponent implements OnInit, OnDestroy {
     let sortOrder = (sortEvent.sortOrder === Sort.ASC ? 'asc' : 'desc');
     let sortBy = sortEvent.sortBy === 'id' ? '_uid' : sortEvent.sortBy;
     this.queryBuilder.setSort(sortBy, sortOrder);
+    this.search();
+  }
+
+  onTimeRangeChange(filter: Filter) {
+    this.queryBuilder.addOrUpdateFilter(filter);
     this.search();
   }
 
@@ -278,6 +288,7 @@ export class AlertsListComponent implements OnInit, OnDestroy {
   }
 
   removeFilter(field: string) {
+    this.timeStampfilterPresent = (field === TIMESTAMP_FIELD_NAME) ? false : this.timeStampfilterPresent;
     this.queryBuilder.removeFilter(field);
     this.search();
   }

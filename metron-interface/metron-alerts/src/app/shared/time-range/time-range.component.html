@@ -12,8 +12,8 @@
   the specific language governing permissions and limitations under the License.
   -->
 <!--<span class="time-range-span"> Today </span>-->
-<button class="btn btn-secondary btn-search" type="button" data-animation="false"  data-toggle="collapse" data-target="#time-range" aria-expanded="false" aria-controls="time-range">
-  {{selectedTimeRange}}
+<button class="btn btn-secondary btn-search" [disabled]="disabled" type="button" data-animation="false"  data-toggle="collapse" data-target="#time-range" aria-expanded="false" aria-controls="time-range">
+  {{selectedTimeRangeValue}}
   <br/> <span style="font-size: 8px;"> {{fromDateStr}} - {{toDateStr}}</span>
 </button>
 
@@ -64,15 +64,14 @@
               <span (click)="selectTimeRange($event, 'this-year')">         This year          </span> <br>
             </div>
             <div class="col-3">
-              <span (click)="selectTimeRange($event, 'last-5-minutes')"> Last 5 minutes  </span> <br>
+              <span (click)="selectTimeRange($event, 'last-5-minutes')">  Last 5 minutes  </span> <br>
               <span (click)="selectTimeRange($event, 'last-15-minutes')"> Last 15 minutes </span> <br>
               <span (click)="selectTimeRange($event, 'last-30-minutes')"> Last 30 minutes </span> <br>
-              <span (click)="selectTimeRange($event, 'last-1-hour')"> Last 1 hour     </span> <br>
-              <span (click)="selectTimeRange($event, 'last-3-hours')"> Last 3 hours    </span> <br>
-              <span (click)="selectTimeRange($event, 'last-6-hours')"> Last 6 hours    </span> <br>
-              <span (click)="selectTimeRange($event, 'last-12-hours')"> Last 12 hours   </span> <br>
-              <span (click)="selectTimeRange($event, 'last-24-hours')"> Last 24 hours   </span> <br>
-
+              <span (click)="selectTimeRange($event, 'last-1-hour')">     Last 1 hour     </span> <br>
+              <span (click)="selectTimeRange($event, 'last-3-hours')">    Last 3 hours    </span> <br>
+              <span (click)="selectTimeRange($event, 'last-6-hours')">    Last 6 hours    </span> <br>
+              <span (click)="selectTimeRange($event, 'last-12-hours')">   Last 12 hours   </span> <br>
+              <span (click)="selectTimeRange($event, 'last-24-hours')">   Last 24 hours   </span> <br>
             </div>
           </div>
         </div>
