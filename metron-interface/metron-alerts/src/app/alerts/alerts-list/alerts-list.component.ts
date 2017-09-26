@@ -158,6 +158,10 @@ export class AlertsListComponent implements OnInit, OnDestroy {
     return false;
   }
 
+  onAddFacetFilter($event) {
+    this.onAddFilter($event.name, $event.key);
+  }
+
   onAddFilter(filter: Filter) {
     this.queryBuilder.addOrUpdateFilter(filter);
     this.search();

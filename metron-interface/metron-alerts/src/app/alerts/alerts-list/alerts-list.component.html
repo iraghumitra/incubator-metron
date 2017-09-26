@@ -65,28 +65,40 @@
     </div>
 </div>
 
-<div class="container-fluid nav-content">
+<div class="container-fluid no-gutters">
     <div class="row">
-        <div class="col-sm-12 pl-0 pb-3">
-            <app-group-by [facets]="searchResponse.facetCounts" (groupsChange)="onGroupsChange($event)"> </app-group-by>
+        <div class="px-0" style="width: 200px;max-width: 200px;">
+            <app-alert-filters [facets]="alertsSearchResponse.facetCounts" (facetFilterChange)="onAddFacetFilter($event)"> </app-alert-filters>
         </div>
-        <div class="col-sm-12 pl-0">
-            <app-table-view #dataViewComponent *ngIf="queryBuilder.groupRequest.groups.length === 0"
-                            [queryBuilder]="queryBuilder"
-                            [alertsColumnsToDisplay]="alertsColumnsToDisplay"
-                            [(selectedAlerts)]="selectedAlerts"
-                            (onResize)="onResize()"
-                            (onAddFilter)="onAddFilter($event)"
-                            (onShowDetails)="showDetails($event)"
-                            (onShowConfigureTable)="showConfigureTable()"></app-table-view>
-            <app-tree-view #dataViewComponent *ngIf="queryBuilder.groupRequest.groups.length !== 0"
-                           [queryBuilder]="queryBuilder"
-                           [alertsColumnsToDisplay]="alertsColumnsToDisplay"
-                           [groups]="queryBuilder.groupRequest.groups"
-                           [(selectedAlerts)]="selectedAlerts"
-                           (onResize)="onResize()"
-                           (onAddFilter)="onAddFilter($event)"
-                           (onShowDetails)="showDetails($event)"></app-tree-view>
+        <div class="col">
+            <div class="col-sm-12 pl-0 pb-3">
+                <app-group-by [facets]="searchResponse.facetCounts" (groupsChange)="onGroupsChange($event)"> </app-group-by>
+            </div>
+            <div class="col-sm-12 pl-0">
+                <div class="row">
+                    <div class="px-0" style="width: 200px;max-width: 200px;">
+                        <app-alert-filters [facets]="alertsSearchResponse.facetCounts" (facetFilterChange)="onAddFacetFilter($event)"> </app-alert-filters>
+                    </div>
+                    <div class="col">
+                        <app-table-view #dataViewComponent *ngIf="queryBuilder.groupRequest.groups.length === 0"
+                                        [queryBuilder]="queryBuilder"
+                                        [alertsColumnsToDisplay]="alertsColumnsToDisplay"
+                                        [(selectedAlerts)]="selectedAlerts"
+                                        (onResize)="onResize()"
+                                        (onAddFilter)="onAddFilter($event)"
+                                        (onShowDetails)="showDetails($event)"
+                                        (onShowConfigureTable)="showConfigureTable()"></app-table-view>
+                        <app-tree-view #dataViewComponent *ngIf="queryBuilder.groupRequest.groups.length !== 0"
+                                       [queryBuilder]="queryBuilder"
+                                       [alertsColumnsToDisplay]="alertsColumnsToDisplay"
+                                       [groups]="queryBuilder.groupRequest.groups"
+                                       [(selectedAlerts)]="selectedAlerts"
+                                       (onResize)="onResize()"
+                                       (onAddFilter)="onAddFilter($event)"
+                                       (onShowDetails)="showDetails($event)"></app-tree-view>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 </div>
