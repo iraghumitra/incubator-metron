@@ -1,0 +1,62 @@
+import { Component, OnInit, ViewChild, ElementRef, OnChanges, SimpleChanges, Input, Output, EventEmitter } from '@angular/core';
+import * as moment from 'moment/moment';
+import * as Pikaday from "pikaday";
+
+@Component({
+  selector: 'app-date-picker',
+  templateUrl: './date-picker.component.html',
+  styleUrls: ['./date-picker.component.scss']
+})
+export class DatePickerComponent implements OnInit, OnChanges {
+  defaultDateStr = 'now/d';
+  picker: Pikaday;
+  dateStr = this.defaultDateStr;
+
+  @Input() date = '';
+  @Input() minDate = '';
+  @Output() dateChange = new EventEmitter<string>();
+  @ViewChild('inputText') inputText: ElementRef;
+
+  constructor(private elementRef: ElementRef) {}
+
+  ngOnInit() {
+    let _datePickerComponent = this;
+    let pikadayConfig = {
+      field: this.elementRef.nativeElement,
+      onSelect: function() {
+        _datePickerComponent.dateStr = this.getMoment().format('YYYY-MM-DD');
+        _datePickerComponent.dateChange.emit(_datePickerComponent.dateStr);
+      }
+    };
+    this.picker = new Pikaday(pikadayConfig);
+    this.setDate();
+  }
+
+  ngOnChanges(changes: SimpleChanges) {
+    if (changes && changes['minDate'] && this.picker) {
+      this.setMinDate();
+    }
+
+    if (changes && changes['date'] && this.picker) {
+      this.setDate();
+    }
+  }
+
+  setDate() {
+    if (this.date === '') {
+      this.dateStr = this.defaultDateStr;
+    } else {
+      this.dateStr = this.date;
+      this.picker.setDate(this.dateStr);
+    }
+  }
+
+  setMinDate() {
+    let currentDate = new Date(this.dateStr).getTime();
+    let currentMinDate = new Date(this.minDate).getTime();
+    if (currentMinDate > currentDate) {
+      this.dateStr = this.defaultDateStr;
+    }
+    this.picker.setMinDate(new Date(this.minDate));
+  }
+}

@@ -32,13 +32,15 @@ import {GroupByModule} from '../../shared/group-by/group-by.module';
 import {TableViewComponent} from './table-view/table-view.component';
 import {TreeViewComponent} from './tree-view/tree-view.component';
 import {AlertFiltersComponent} from './alert-filters/alert-filters.component';
+import {TimeRangeModule} from '../../shared/time-range/time-range.module';
 
 @NgModule({
     imports: [routing, SharedModule, ConfigureRowsModule, MetronSorterModule, MetronTablePaginationModule,
-                ListGroupModule, CollapseModule, GroupByModule],
+                ListGroupModule, CollapseModule, TimeRangeModule, GroupByModule],
     exports: [AlertsListComponent],
     declarations: [AlertsListComponent, AlertFiltersComponent, TableViewComponent, TreeViewComponent],
     providers: [DecimalPipe, SearchService, UpdateService]
 })
+
 export class AlertsListModule {
 }

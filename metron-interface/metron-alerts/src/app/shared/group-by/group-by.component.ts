@@ -19,7 +19,9 @@ export class GroupByComponent implements OnInit, OnChanges {
 
   @Output() groupsChange = new EventEmitter<string[]>();
 
-  constructor(private dragulaService: DragulaService) {}
+  constructor(private dragulaService: DragulaService) {
+    this.setTransitStyle();
+  }
 
   fireGroupsChange() {
     let selectedGroupNames = [];

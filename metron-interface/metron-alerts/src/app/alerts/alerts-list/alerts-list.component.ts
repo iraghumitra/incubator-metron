@@ -36,7 +36,8 @@ import {AlertSearchDirective} from '../../shared/directives/alert-search.directi
 import {SearchResponse} from '../../model/search-response';
 import {ElasticsearchUtils} from '../../utils/elasticsearch-utils';
 import {TableViewComponent} from './table-view/table-view.component';
-import {Filter} from '../../model/filter';
+import {Filter, RangeFilter} from '../../model/filter';
+import {THREAT_SCORE_FIELD_NAME, TIMESTAMP_FIELD_NAME} from '../../utils/constants';
 
 @Component({
   selector: 'app-alerts-list',
@@ -55,8 +56,9 @@ export class AlertsListComponent implements OnInit, OnDestroy {
   refreshInterval = RefreshInterval.ONE_MIN;
   pauseRefresh = false;
   lastPauseRefreshValue = false;
-  threatScoreFieldName = 'threat:triage:score';
   refreshTimer: Subscription;
+  timeStampfilterPresent = false;
+  threatScoreFieldName = THREAT_SCORE_FIELD_NAME;
 
   @ViewChild('table') table: ElementRef;
   @ViewChild('dataViewComponent') dataViewComponent: TableViewComponent;
@@ -147,14 +149,15 @@ export class AlertsListComponent implements OnInit, OnDestroy {
   }
 
   onClear() {
+    this.timeStampfilterPresent = false;
     this.queryBuilder.displayQuery = '';
     this.search();
   }
 
   onSearch($event) {
     this.queryBuilder.displayQuery = $event;
+    this.timeStampfilterPresent = this.queryBuilder.isTimeStampFieldPresent();
     this.search();
-
     return false;
   }
 
@@ -163,6 +166,7 @@ export class AlertsListComponent implements OnInit, OnDestroy {
   }
 
   onAddFilter(filter: Filter) {
+    this.timeStampfilterPresent = (filter.field === TIMESTAMP_FIELD_NAME);
     this.queryBuilder.addOrUpdateFilter(filter);
     this.search();
   }
@@ -194,6 +198,11 @@ export class AlertsListComponent implements OnInit, OnDestroy {
   onResize() {
     clearTimeout(this.colNumberTimerId);
     this.colNumberTimerId = setTimeout(() => { this.calcColumnsToDisplay(); }, 500);
+  }
+
+  onTimeRangeChange(filter: Filter) {
+    this.queryBuilder.addOrUpdateFilter(filter);
+    this.search();
   }
 
   prepareColumnData(configuredColumns: ColumnMetadata[], defaultColumns: ColumnMetadata[]) {
@@ -243,6 +252,7 @@ export class AlertsListComponent implements OnInit, OnDestroy {
   }
 
   removeFilter(field: string) {
+    this.timeStampfilterPresent = (field === TIMESTAMP_FIELD_NAME) ? false : this.timeStampfilterPresent;
     this.queryBuilder.removeFilter(field);
     this.search();
   }

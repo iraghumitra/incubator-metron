@@ -1,0 +1,82 @@
+<!--
+  Licensed to the Apache Software
+	Foundation (ASF) under one or more contributor license agreements. See the
+	NOTICE file distributed with this work for additional information regarding
+	copyright ownership. The ASF licenses this file to You under the Apache License,
+	Version 2.0 (the "License"); you may not use this file except in compliance
+	with the License. You may obtain a copy of the License at
+  http://www.apache.org/licenses/LICENSE-2.0
+  Unless required by applicable law or agreed to in writing, software distributed
+	under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES
+	OR CONDITIONS OF ANY KIND, either express or implied. See the License for
+  the specific language governing permissions and limitations under the License.
+  -->
+<!--<span class="time-range-span"> Today </span>-->
+<button class="btn btn-secondary btn-search" [disabled]="disabled" type="button" data-animation="false"  data-toggle="collapse" data-target="#time-range" aria-expanded="false" aria-controls="time-range">
+  {{selectedTimeRangeValue}}
+  <br/> <span style="font-size: 8px;"> {{fromDateStr}} to {{toDateStr}}</span>
+</button>
+
+<div #datePicker class="collapse" id="time-range">
+  <div class="card card-block">
+    <div class="container-fluid no-gutters h-100">
+      <div class="row h-100">
+        <div class="col-4 time-range">
+          <div class="title">Time Range</div> <br>
+          <form>
+            <div class="form-group">
+              <label>FROM</label>
+              <app-date-picker [(date)]="datePickerFromDate"> </app-date-picker>
+            </div>
+            <div class="form-group">
+              <label>TO</label>
+              <app-date-picker [(date)]="datePickerToDate" [minDate]="datePickerFromDate"> </app-date-picker>
+            </div>
+            <button class="btn btn-primary pull-right" type="button" [disabled]='datePickerFromDate==="" || datePickerToDate===""' (click)="applyCustomDate()">APPLY</button>
+          </form>
+        </div>
+        <div class="col-8 quick-ranges pr-0">
+          <div class="title"> Quick Ranges </div> <br>
+          <div class="row no-gutters">
+            <div class="col-3">
+                <span (click)="selectTimeRange($event, 'last-7-days')">   Last 7 days   </span> <br>
+                <span (click)="selectTimeRange($event, 'last-30-days')">  Last 30 days  </span> <br>
+                <span (click)="selectTimeRange($event, 'last-60-days')">  Last 60 days  </span> <br>
+                <span (click)="selectTimeRange($event, 'last-90-days')">  Last 90 days  </span> <br>
+                <span (click)="selectTimeRange($event, 'last-6-months')"> Last 6 months </span> <br>
+                <span (click)="selectTimeRange($event, 'last-1-year')">   Last 1 year   </span> <br>
+                <span (click)="selectTimeRange($event, 'last-2-years')">  Last 2 years  </span> <br>
+                <span (click)="selectTimeRange($event, 'last-5-years')">  Last 5 years  </span> <br>
+            </div>
+            <div class="col-3">
+              <span (click)="selectTimeRange($event, 'yesterday')">            Yesterday            </span> <br>
+              <span (click)="selectTimeRange($event, 'day-before-yesterday')"> Day before yesterday </span> <br>
+              <span (click)="selectTimeRange($event, 'this-day-last-week')">   This day last week   </span> <br>
+              <span (click)="selectTimeRange($event, 'previous-week')">        Previous week        </span> <br>
+              <span (click)="selectTimeRange($event, 'previous-month')">       Previous month       </span> <br>
+              <span (click)="selectTimeRange($event, 'previous-year')">        Previous year        </span> <br>
+            </div>
+            <div class="col-3">
+              <span (click)="selectTimeRange($event, 'today')">             Today              </span> <br>
+              <span (click)="selectTimeRange($event, 'today-so-far')">      Today so far       </span> <br>
+              <span (click)="selectTimeRange($event, 'this-week')">         This week          </span> <br>
+              <span (click)="selectTimeRange($event, 'this-week-so-far')">  This week so far   </span> <br>
+              <span (click)="selectTimeRange($event, 'this-month')">        This month         </span> <br>
+              <span (click)="selectTimeRange($event, 'this-year')">         This year          </span> <br>
+            </div>
+            <div class="col-3">
+              <span (click)="selectTimeRange($event, 'last-5-minutes')">  Last 5 minutes  </span> <br>
+              <span (click)="selectTimeRange($event, 'last-15-minutes')"> Last 15 minutes </span> <br>
+              <span (click)="selectTimeRange($event, 'last-30-minutes')"> Last 30 minutes </span> <br>
+              <span (click)="selectTimeRange($event, 'last-1-hour')">     Last 1 hour     </span> <br>
+              <span (click)="selectTimeRange($event, 'last-3-hours')">    Last 3 hours    </span> <br>
+              <span (click)="selectTimeRange($event, 'last-6-hours')">    Last 6 hours    </span> <br>
+              <span (click)="selectTimeRange($event, 'last-12-hours')">   Last 12 hours   </span> <br>
+              <span (click)="selectTimeRange($event, 'last-24-hours')">   Last 24 hours   </span> <br>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
