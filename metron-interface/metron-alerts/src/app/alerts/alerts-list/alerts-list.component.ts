@@ -159,7 +159,7 @@ export class AlertsListComponent implements OnInit, OnDestroy {
   }
 
   onAddFacetFilter($event) {
-    this.onAddFilter($event.name, $event.key);
+    this.onAddFilter(new Filter($event.name, $event.key));
   }
 
   onAddFilter(filter: Filter) {
