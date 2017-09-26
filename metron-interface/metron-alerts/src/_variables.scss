@@ -93,6 +93,27 @@ $nav-content-nav-width: 200px;
 $login-label: #606060;
 $black: #000000;
 
+
+//Pikaday
+$pd-text-color: #999999;
+$pd-title-color: #999999;
+$pd-title-bg: #3D3D3D;
+$pd-picker-bg: #3D3D3D;
+$pd-picker-border: #4D4D4D;
+$pd-picker-border-bottom: #353535;
+$pd-picker-shadow: rgba(0,0,0,.5);
+$pd-th-color: #999;
+$pd-day-color: #999999;
+$pd-day-bg: #2D2D2D;
+$pd-day-hover-color: #FDFEFE;
+$pd-day-hover-bg: #1F91BE;
+$pd-day-today-color: #FFFFFF;
+$pd-day-selected-color: #1E87AF;
+$pd-day-selected-bg: tranparent;
+$pd-day-selected-shadow: tranparent;
+$pd-day-disabled-color: #999;
+$pd-week-color: #999;
+
 @mixin place-holder-text
 {
   font-family: Roboto;

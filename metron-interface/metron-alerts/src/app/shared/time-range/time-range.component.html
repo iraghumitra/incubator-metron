@@ -14,7 +14,7 @@
 <!--<span class="time-range-span"> Today </span>-->
 <button class="btn btn-secondary btn-search" [disabled]="disabled" type="button" data-animation="false"  data-toggle="collapse" data-target="#time-range" aria-expanded="false" aria-controls="time-range">
   {{selectedTimeRangeValue}}
-  <br/> <span style="font-size: 8px;"> {{fromDateStr}} - {{toDateStr}}</span>
+  <br/> <span style="font-size: 8px;"> {{fromDateStr}} to {{toDateStr}}</span>
 </button>
 
 <div #datePicker class="collapse" id="time-range">
@@ -25,13 +25,14 @@
           <div class="title">Time Range</div> <br>
           <form>
             <div class="form-group">
-              <span>From</span>
-              <div class="input-group"> <input class="form-control" type="date"> </div>
+              <label>FROM</label>
+              <app-date-picker [(date)]="datePickerFromDate"> </app-date-picker>
             </div>
             <div class="form-group">
-              <span>To</span>
-              <div class="input-group"> <input class="form-control" type="date"> </div>
+              <label>TO</label>
+              <app-date-picker [(date)]="datePickerToDate" [minDate]="datePickerFromDate"> </app-date-picker>
             </div>
+            <button class="btn btn-primary pull-right" type="button" [disabled]='datePickerFromDate==="" || datePickerToDate===""' (click)="applyCustomDate()">APPLY</button>
           </form>
         </div>
         <div class="col-8 quick-ranges pr-0">

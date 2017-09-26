@@ -27,7 +27,14 @@ import {Filter, RangeFilter} from '../../model/filter';
 export class TimeRangeComponent implements OnInit, OnChanges {
   toDateStr = '';
   fromDateStr = '';
+  datePickerFromDate = '';
+  datePickerToDate = '';
   selectedTimeRangeValue = 'Last 30 days';
+
+  @Input() disabled = false;
+  @ViewChild('datePicker') datePicker: ElementRef;
+  @Output() timeRangeChange = new EventEmitter<Filter>();
+
   timeRangeMapping = {
     'Last 7 days':            'last-7-days',
     'Last 30 days':           'last-30-days',
@@ -58,13 +65,6 @@ export class TimeRangeComponent implements OnInit, OnChanges {
     'Last 12 hours':          'last-12-hours',
     'Last 24 hours':          'last-24-hours'
   };
-
-  @ViewChild('datePicker') datePicker: ElementRef;
-
-  @Input()
-  disabled = false;
-  @Output()
-  timeRangeChange = new EventEmitter<Filter>();
 
   constructor() { }
 
@@ -207,16 +207,22 @@ export class TimeRangeComponent implements OnInit, OnChanges {
         break;
     }
 
-    this.toDateStr = moment(toDate).format('D-M-YYYY H:m:s');
-    this.fromDateStr = moment(fromDate).format('D-M-YYYY H:m:s');
-    console.log(fromDate, toDate);
-    console.log(new Date(fromDate).getTime(), new Date(toDate).getTime());
+    this.applyRange(toDate, fromDate);
+  }
 
+  applyRange(toDate:string, fromDate:string) {
+    this.toDateStr = moment(toDate).format('YYYY-MM-DD H:m:s');
+    this.fromDateStr = moment(fromDate).format('YYYY-MM-DD H:m:s');
     this.timeRangeChange.emit(new RangeFilter('timestamp', new Date((fromDate)).getTime(), new Date((toDate)).getTime(), false));
   }
 
+  applyCustomDate() {
+    this.applyRange(this.datePickerToDate, this.datePickerFromDate);
+    this.hideDatePicker();
+  }
+
   @HostListener('document:click', ['$event', '$event.target'])
-  public onClick(event: MouseEvent, targetElement: HTMLElement): void {
+  onClick(event: MouseEvent, targetElement: HTMLElement): void {
     if (!targetElement) {
       return;
     }
