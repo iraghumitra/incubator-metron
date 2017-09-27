@@ -1,6 +1,6 @@
 import { Component, OnInit, ViewChild, ElementRef, OnChanges, SimpleChanges, Input, Output, EventEmitter } from '@angular/core';
 import * as moment from 'moment/moment';
-import * as Pikaday from "pikaday";
+import * as Pikaday from "pikaday-time";
 
 @Component({
   selector: 'app-date-picker',
@@ -23,6 +23,8 @@ export class DatePickerComponent implements OnInit, OnChanges {
     let _datePickerComponent = this;
     let pikadayConfig = {
       field: this.elementRef.nativeElement,
+      showSeconds: true,
+      use24hour: true,
       onSelect: function() {
         _datePickerComponent.dateStr = this.getMoment().format('YYYY-MM-DD');
         _datePickerComponent.dateChange.emit(_datePickerComponent.dateStr);
