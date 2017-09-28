@@ -15,10 +15,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { ModuleWithProviders }  from '@angular/core';
-import { RouterModule } from '@angular/router';
-import {AlertDetailsComponent} from './alert-details.component';
+export class AlertComment {
+  comment: string;
+  username: string;
+  timestamp: number;
+  displayTime: string;
 
-export const routing: ModuleWithProviders = RouterModule.forChild([
-    { path: 'details/:sourceType/:guid/:index', component: AlertDetailsComponent, outlet: 'dialog'}
-]);
+  constructor(username:string) {
+    this.comment = '';
+    this.timestamp = 0;
+    this.username = username;
+  }
+}

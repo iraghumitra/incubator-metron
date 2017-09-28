@@ -160,6 +160,10 @@ export class TreeViewComponent extends TableViewComponent implements OnChanges {
     if ((changes['groups'] && changes['groups'].currentValue)) {
       this.search();
     }
+
+    if ((changes['alerts'] && changes['alerts'].currentValue)) {
+      this.search();
+    }
   }
 
   searchGroup(selectedGroup: TreeGroupData, searchRequest: SearchRequest): Subscription {
@@ -310,7 +314,7 @@ export class TreeViewComponent extends TableViewComponent implements OnChanges {
       });
     }
     
-    this.selectedAlertsChange.emit(this.selectedAlerts);
+    this.onSelectedAlertsChange.emit(this.selectedAlerts);
   }
 
   refreshAllExpandedGroups() {

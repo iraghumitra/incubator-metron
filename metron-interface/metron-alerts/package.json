@@ -38,6 +38,7 @@
     "@angular/compiler-cli": "^4.0.0",
     "@types/ace": "0.0.32",
     "@types/jasmine": "2.5.38",
+    "@types/moment": "^2.13.0",
     "@types/node": "~6.0.60",
     "@types/pikaday": "^1.6.1",
     "@types/pikaday-time": "^1.4.2",

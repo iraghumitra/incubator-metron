@@ -38,6 +38,8 @@ import {ElasticsearchUtils} from '../../utils/elasticsearch-utils';
 import {TableViewComponent} from './table-view/table-view.component';
 import {Filter, RangeFilter} from '../../model/filter';
 import {THREAT_SCORE_FIELD_NAME, TIMESTAMP_FIELD_NAME} from '../../utils/constants';
+import {Pagination} from '../../model/pagination';
+import {environment} from '../../../environments/environment';
 
 @Component({
   selector: 'app-alerts-list',
@@ -54,11 +56,12 @@ export class AlertsListComponent implements OnInit, OnDestroy {
   searchResponse: SearchResponse = new SearchResponse();
   colNumberTimerId: number;
   refreshInterval = RefreshInterval.ONE_MIN;
+  refreshTimer: Subscription;
   pauseRefresh = false;
   lastPauseRefreshValue = false;
-  refreshTimer: Subscription;
   timeStampfilterPresent = false;
   threatScoreFieldName = THREAT_SCORE_FIELD_NAME;
+  indices: string[];
 
   @ViewChild('table') table: ElementRef;
   @ViewChild('dataViewComponent') dataViewComponent: TableViewComponent;
@@ -66,6 +69,7 @@ export class AlertsListComponent implements OnInit, OnDestroy {
 
   tableMetaData = new TableMetadata();
   queryBuilder: QueryBuilder = new QueryBuilder();
+  pagination: Pagination = new Pagination();
 
   constructor(private router: Router,
               private searchService: SearchService,
@@ -82,6 +86,9 @@ export class AlertsListComponent implements OnInit, OnDestroy {
         this.restoreRefreshState();
       }
     });
+    if (environment.indices) {
+      this.indices = environment.indices.split(',');
+    }
   }
 
   addAlertColChangedListner() {
@@ -165,6 +172,18 @@ export class AlertsListComponent implements OnInit, OnDestroy {
     this.onAddFilter(new Filter($event.name, $event.key));
   }
 
+  onRefreshData($event) {
+    this.search($event);
+  }
+
+  onSelectedAlertsChange(selectedAlerts) {
+    if (selectedAlerts.length > 0) {
+      this.pause();
+    } else {
+      this.resume();
+    }
+  }
+
   onAddFilter(filter: Filter) {
     this.timeStampfilterPresent = (filter.field === TIMESTAMP_FIELD_NAME);
     this.queryBuilder.addOrUpdateFilter(filter);
@@ -177,13 +196,12 @@ export class AlertsListComponent implements OnInit, OnDestroy {
   }
 
   onGroupsChange(groups) {
+    if (groups.length === 0) {
+      this.queryBuilder.setFromAndSize(0, this.tableMetaData.size);
+    } else {
+      this.queryBuilder.setFromAndSize(0, 0);
+    }
     this.queryBuilder.setGroupby(groups);
-    this.searchView();
-  }
-
-  searchView(resetPaginationParams = true, pageSize: number = null) {
-    this.changeDetector.detectChanges();
-    this.dataViewComponent.search(resetPaginationParams, pageSize);
   }
 
   onPausePlay() {
@@ -222,30 +240,25 @@ export class AlertsListComponent implements OnInit, OnDestroy {
   }
 
   processEscalate() {
-    this.saveRefreshState();
     this.updateService.updateAlertState(this.selectedAlerts, 'ESCALATE').subscribe(results => {
       this.updateSelectedAlertStatus('ESCALATE');
     });
     this.alertsService.escalate(this.selectedAlerts).subscribe();
-
   }
 
   processDismiss() {
-    this.saveRefreshState();
     this.updateService.updateAlertState(this.selectedAlerts, 'DISMISS').subscribe(results => {
       this.updateSelectedAlertStatus('DISMISS');
     });
   }
 
   processOpen() {
-    this.saveRefreshState();
     this.updateService.updateAlertState(this.selectedAlerts, 'OPEN').subscribe(results => {
       this.updateSelectedAlertStatus('OPEN');
     });
   }
 
   processResolve() {
-    this.saveRefreshState();
     this.updateService.updateAlertState(this.selectedAlerts, 'RESOLVE').subscribe(results => {
       this.updateSelectedAlertStatus('RESOLVE');
     });
@@ -263,19 +276,24 @@ export class AlertsListComponent implements OnInit, OnDestroy {
   }
 
   search(resetPaginationParams = true, savedSearch?: SaveSearch) {
-    this.selectedAlerts = [];
-
     this.saveCurrentSearch(savedSearch);
-
-    this.queryBuilder.setFromAndSize(0, 0);
+    if (resetPaginationParams) {
+      this.pagination.from = 0;
+    }
+    this.queryBuilder.searchRequest.from = this.pagination.from;
+    if (this.tableMetaData.size) {
+      this.pagination.size = this.tableMetaData.size;
+    }
+    this.queryBuilder.searchRequest.size = this.pagination.size;
+    if (this.indices) {
+      this.queryBuilder.searchRequest.indices = this.indices;
+    }
     this.searchService.search(this.queryBuilder.searchRequest).subscribe(results => {
       this.setData(results);
     }, error => {
       this.setData(new SearchResponse());
       this.metronDialogBox.showConfirmationMessage(ElasticsearchUtils.extractESErrorMessage(error), DialogType.Error);
     });
-
-    this.searchView(resetPaginationParams, this.tableMetaData.size);
 
     this.tryStartPolling();
   }
@@ -295,7 +313,9 @@ export class AlertsListComponent implements OnInit, OnDestroy {
   }
 
   setData(results: SearchResponse) {
+    this.selectedAlerts = [];
     this.searchResponse = results;
+    this.pagination.total = results.total;
     this.alerts = results.results ? results.results : [];
   }
 
@@ -308,12 +328,22 @@ export class AlertsListComponent implements OnInit, OnDestroy {
     this.selectedAlerts = [];
     this.selectedAlerts = [alert];
     this.saveRefreshState();
-    this.router.navigateByUrl('/alerts-list(dialog:details/' + alert.source['source:type'] + '/' + alert.source.guid + ')');
+    this.router.navigateByUrl('/alerts-list(dialog:details/' + alert.source['source:type'] + '/' + alert.source.guid + '/' + alert.index + ')');
   }
 
   saveRefreshState() {
     this.lastPauseRefreshValue = this.pauseRefresh;
     this.tryStopPolling();
+  }
+
+  pause() {
+    this.pauseRefresh = true;
+    this.tryStopPolling();
+  }
+
+  resume() {
+    this.pauseRefresh = false;
+    this.tryStartPolling();
   }
 
   showSavedSearches() {
@@ -332,7 +362,6 @@ export class AlertsListComponent implements OnInit, OnDestroy {
       this.tryStopPolling();
       this.refreshTimer = this.searchService.pollSearch(this.queryBuilder.searchRequest).subscribe(results => {
         this.setData(results);
-        this.searchView(false);
       });
     }
   }
@@ -350,5 +379,12 @@ export class AlertsListComponent implements OnInit, OnDestroy {
   updateSelectedAlertStatus(status: string) {
     this.dataViewComponent.updateSelectedAlertStatus(status);
     this.restoreRefreshState();
+    for (let selectedAlert of this.selectedAlerts) {
+      selectedAlert.status = status;
+      this.alerts.filter(alert => alert.source.guid == selectedAlert.source.guid)
+      .map(alert => alert.source['alert_status'] = status);
+    }
+    this.selectedAlerts = [];
+    this.resume();
   }
 }
