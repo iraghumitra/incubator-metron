@@ -19,9 +19,10 @@ export class Patch
 {
   op: 'add' | 'remove';
   path: string;
-  value: string;
+  value: any;
 
-  constructor(path:string, value:string) {
+  constructor(op, path:string, value:any) {
+    this.op = op;
     this.path = path;
     this.value = value;
   }

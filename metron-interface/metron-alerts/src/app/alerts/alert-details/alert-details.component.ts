@@ -17,6 +17,8 @@
  */
 import { Component, OnInit } from '@angular/core';
 import {Router, ActivatedRoute} from '@angular/router';
+import * as moment from 'moment/moment';
+
 import {SearchService} from '../../service/search.service';
 import {UpdateService} from '../../service/update.service';
 import {Alert} from '../../model/alert';
@@ -52,7 +54,6 @@ export class AlertDetailsComponent implements OnInit {
   selectedAlertState: AlertState = AlertState.NEW;
   alertSource: AlertSource = new AlertSource();
   alertFields: string[] = [];
-  patchData = new Patch('/comments', '');
   alertComment: AlertComment;
   alertComments: AlertComment[] = [];
 
@@ -78,8 +79,13 @@ export class AlertDetailsComponent implements OnInit {
       this.alertSource = alert;
       this.alertFields = Object.keys(alert).filter(field => !field.includes(':ts') && field !== 'original_string' && field !== 'comments').sort();
       this.selectedAlertState = this.getAlertState(alert['alert_status']);
-      this.alertComments = alert['comments'] ? alert['comments'] : [];
+      this.setComments(alert);
     });
+  }
+
+  setComments(alert) {
+    this.alertComments = alert['comments'] ? alert['comments'] : [];
+    this.alertComments.forEach(alertComment => { alertComment.displayTime = moment(new Date(alertComment.timestamp)).fromNow()});
   }
 
   getAlertState(alertStatus) {
@@ -158,19 +164,15 @@ export class AlertDetailsComponent implements OnInit {
 
   onAddComment() {
     this.alertComment.timestamp = new Date().getTime();
-    this.alertComments.push(this.alertComment);
-
-    this.patchData.op = 'add';
-    this.patchData.value = this.alertComments;
-
-    this.patchAlert();
+    this.alertComments.unshift(this.alertComment);
+    this.patchAlert(new Patch('add', '/comments', this.alertComments));
   }
 
-  patchAlert() {
+  patchAlert(patch: Patch) {
     let patchRequest = new PatchRequest();
     patchRequest.guid = this.alertSource.guid;
     patchRequest.index = this.alertIndex;
-    patchRequest.patch = [this.patchData];
+    patchRequest.patch = [patch];
     patchRequest.sensorType = this.alertSourceType;
 
     this.updateService.patch(patchRequest).subscribe(() => {
@@ -189,11 +191,7 @@ export class AlertDetailsComponent implements OnInit {
     this.metronDialogBox.showConfirmationMessage(commentText).subscribe(response => {
       if(response) {
         this.alertComments.splice(index, 1);
-
-        this.patchData.op = 'add';
-        this.patchData.value = this.alertComments;
-
-        this.patchAlert();
+        this.patchAlert(new Patch('add', '/comments', this.alertComments));
       }
     });
   }

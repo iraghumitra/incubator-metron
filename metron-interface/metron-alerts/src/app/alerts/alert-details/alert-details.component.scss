@@ -18,8 +18,8 @@
 @import "../../../slider";
 @import "../../../variables";
 
-.container-fluid {
-  //padding-top: 15px;
+.title-container {
+  margin: 13px 0px;
 }
 
 .form-title {
@@ -112,4 +112,37 @@ textarea {
 
 .btn-mine_shaft_2 {
   margin-top: 10px;
+}
+
+.username-timestamp {
+  color: $rolling-stone;
+}
+
+.comment-container {
+  font-size: 14px;
+  padding: 10px 0px;
+
+  i {
+    right: 25px;
+    display: none;
+    cursor: pointer;
+    font-size: 18px;
+    position: absolute;
+  }
+
+  .comment {
+    padding-right: 25px;
+  }
+
+  &:hover {
+    background: $nile-blue;
+  }
+}
+
+.comment-container:hover i {
+  display: block;
+}
+
+.btn-mine_shaft_2 {
+  margin-bottom: 15px;
 }
