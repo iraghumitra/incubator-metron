@@ -220,6 +220,7 @@ export class TimeRangeComponent implements OnInit, OnChanges {
 
   applyCustomDate() {
     this.applyRange(this.datePickerToDate, this.datePickerFromDate);
+    this.selectedTimeRangeValue = 'Date Range';
     this.hideDatePicker();
   }
 
