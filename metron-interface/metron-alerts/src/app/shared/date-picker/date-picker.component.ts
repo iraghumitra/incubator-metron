@@ -1,6 +1,6 @@
 import { Component, OnInit, ViewChild, ElementRef, OnChanges, SimpleChanges, Input, Output, EventEmitter } from '@angular/core';
 import * as moment from 'moment/moment';
-import * as Pikaday from "pikaday";
+import * as Pikaday from "pikaday-time";
 
 @Component({
   selector: 'app-date-picker',
@@ -23,8 +23,10 @@ export class DatePickerComponent implements OnInit, OnChanges {
     let _datePickerComponent = this;
     let pikadayConfig = {
       field: this.elementRef.nativeElement,
+      showSeconds: true,
+      use24hour: true,
       onSelect: function() {
-        _datePickerComponent.dateStr = this.getMoment().format('YYYY-MM-DD');
+        _datePickerComponent.dateStr = this.getMoment().format('YYYY-MM-DD HH:mm:ss');
         _datePickerComponent.dateChange.emit(_datePickerComponent.dateStr);
       }
     };
@@ -58,5 +60,18 @@ export class DatePickerComponent implements OnInit, OnChanges {
       this.dateStr = this.defaultDateStr;
     }
     this.picker.setMinDate(new Date(this.minDate));
+    this.picker.setDate(moment(this.minDate).endOf('day').format('YYYY-MM-DD HH:mm:ss'));
+  }
+
+  toggleDatePicker($event) {
+    if (this.picker) {
+      if (this.picker.isVisible()) {
+        this.picker.hide();
+      } else {
+        this.picker.show();
+      }
+
+      $event.stopPropagation();
+    }
   }
 }

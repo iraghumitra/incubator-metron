@@ -205,6 +205,11 @@ export class AlertsListComponent implements OnInit, OnDestroy {
     this.search();
   }
 
+  onTimeRangeChange(filter: Filter) {
+    this.queryBuilder.addOrUpdateFilter(filter);
+    this.search();
+  }
+
   prepareColumnData(configuredColumns: ColumnMetadata[], defaultColumns: ColumnMetadata[]) {
     this.alertsColumns = (configuredColumns && configuredColumns.length > 0) ? configuredColumns : defaultColumns;
     this.queryBuilder.setFields(this.getColumnNamesForQuery());

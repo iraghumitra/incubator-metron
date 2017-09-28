@@ -30,4 +30,3 @@ export let DEFAULT_GROUPS = ['source:type', 'ip_src_addr', 'ip_dst_addr', 'host'
 export let INDEXES =  environment.indices ? environment.indices.split(',') : ['websphere', 'snort', 'asa', 'bro', 'yaf'];
 export let THREAT_SCORE_FIELD_NAME = 'threat:triage:score';
 export let TIMESTAMP_FIELD_NAME = 'timestamp';
-

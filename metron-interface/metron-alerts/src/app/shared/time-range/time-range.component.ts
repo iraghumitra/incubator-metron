@@ -81,6 +81,8 @@ export class TimeRangeComponent implements OnInit, OnChanges {
   selectTimeRange($event, range: string) {
     this.hideDatePicker();
     this.selectedTimeRangeValue = $event.target.textContent.trim();
+    this.datePickerFromDate = '';
+    this.datePickerToDate = '';
     this.setDate(range);
   }
 
@@ -221,9 +223,24 @@ export class TimeRangeComponent implements OnInit, OnChanges {
     this.hideDatePicker();
   }
 
+  isPikaSelectElement(targetElement: HTMLElement): boolean {
+    while(targetElement) {
+      if (targetElement.classList.toString().startsWith('pika')){
+        return true;
+      }
+      targetElement = targetElement.parentElement;
+    }
+
+    return false;
+  }
+
   @HostListener('document:click', ['$event', '$event.target'])
   onClick(event: MouseEvent, targetElement: HTMLElement): void {
     if (!targetElement) {
+      return;
+    }
+
+    if(this.isPikaSelectElement(targetElement)) {
       return;
     }
 
@@ -232,5 +249,4 @@ export class TimeRangeComponent implements OnInit, OnChanges {
       this.hideDatePicker();
     }
   }
-
 }
