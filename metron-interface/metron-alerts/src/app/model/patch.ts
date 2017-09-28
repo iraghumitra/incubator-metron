@@ -15,10 +15,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { ModuleWithProviders }  from '@angular/core';
-import { RouterModule } from '@angular/router';
-import {AlertDetailsComponent} from './alert-details.component';
+export class Patch
+{
+  op: 'add' | 'remove';
+  path: string;
+  value: string;
 
-export const routing: ModuleWithProviders = RouterModule.forChild([
-    { path: 'details/:sourceType/:guid/:index', component: AlertDetailsComponent, outlet: 'dialog'}
-]);
+  constructor(path:string, value:string) {
+    this.path = path;
+    this.value = value;
+  }
+}
