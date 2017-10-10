@@ -27,7 +27,7 @@ export class DatePickerComponent implements OnInit, OnChanges {
       use24hour: true,
       onSelect: function() {
         _datePickerComponent.dateStr = this.getMoment().format('YYYY-MM-DD HH:mm:ss');
-        _datePickerComponent.dateChange.emit(_datePickerComponent.dateStr);
+        setTimeout(() => _datePickerComponent.dateChange.emit(_datePickerComponent.dateStr), 0);
       }
     };
     this.picker = new Pikaday(pikadayConfig);

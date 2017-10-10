@@ -7,6 +7,7 @@ import {DatePickerModule} from '../date-picker/date-picker.module';
 @NgModule({
   imports: [
     CommonModule,
+    SharedModule,
     DatePickerModule
   ],
   declarations: [TimeRangeComponent],

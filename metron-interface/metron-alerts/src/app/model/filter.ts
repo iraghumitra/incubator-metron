@@ -20,7 +20,7 @@ import {ElasticsearchUtils} from '../utils/elasticsearch-utils';
 export class Filter {
   field: string;
   value: string;
-  display: boolean
+  display: boolean;
 
   constructor(field: string, value: string, display = true) {
     this.field = field;

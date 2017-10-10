@@ -148,7 +148,7 @@ export class QueryBuilder {
 
   private updateFilters(tQuery: string, updateNameTransform = false) {
     let query = tQuery;
-    this._filters = [];
+    this.removeDisplayedFilters();
 
     if (query && query !== '' && query !== '*') {
       let terms = query.split(' AND ');
@@ -158,6 +158,14 @@ export class QueryBuilder {
         field = updateNameTransform ? ColumnNamesService.getColumnDisplayKey(field) : field;
         let value = term.substring(separatorPos + 1, term.length);
         this.addOrUpdateFilter(new Filter(field, value));
+      }
+    }
+  }
+
+  private removeDisplayedFilters() {
+    for (let i = this._filters.length-1; i >= 0; i--) {
+      if (this._filters[i].display) {
+        this._filters.splice(i, 1);
       }
     }
   }

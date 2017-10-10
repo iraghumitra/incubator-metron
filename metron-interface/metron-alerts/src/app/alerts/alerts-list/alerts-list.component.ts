@@ -35,9 +35,9 @@ import {MetronDialogBox, DialogType} from '../../shared/metron-dialog-box';
 import {AlertSearchDirective} from '../../shared/directives/alert-search.directive';
 import {SearchResponse} from '../../model/search-response';
 import {ElasticsearchUtils} from '../../utils/elasticsearch-utils';
-import {TableViewComponent} from './table-view/table-view.component';
-import {Filter, RangeFilter} from '../../model/filter';
+import {Filter} from '../../model/filter';
 import {THREAT_SCORE_FIELD_NAME, TIMESTAMP_FIELD_NAME} from '../../utils/constants';
+import {TableViewComponent} from './table-view/table-view.component';
 import {Pagination} from '../../model/pagination';
 import {environment} from '../../../environments/environment';
 
@@ -299,6 +299,10 @@ export class AlertsListComponent implements OnInit, OnDestroy {
   }
 
   saveCurrentSearch(savedSearch: SaveSearch) {
+    if (this.queryBuilder.filters.length === 1 && this.queryBuilder.filters[0].display === false) {
+      return;
+    }
+    
     if (this.queryBuilder.query !== '*') {
       if (!savedSearch) {
         savedSearch = new SaveSearch();
