@@ -286,6 +286,10 @@ export class AlertsListComponent implements OnInit, OnDestroy {
   }
 
   saveCurrentSearch(savedSearch: SaveSearch) {
+    if (this.queryBuilder.filters.length === 1 && this.queryBuilder.filters[0].display === false) {
+      return;
+    }
+    
     if (this.queryBuilder.query !== '*') {
       if (!savedSearch) {
         savedSearch = new SaveSearch();

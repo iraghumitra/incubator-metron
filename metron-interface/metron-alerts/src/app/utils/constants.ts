@@ -25,3 +25,6 @@ export let THREAT_SCORE_FIELD_NAME = 'threat:triage:score';
 export let TIMESTAMP_FIELD_NAME = 'timestamp';
 
 export let INDEXES = ['websphere', 'snort', 'asa', 'bro', 'yaf'];
+
+export let DEFAULT_TIMESTAMP_FORMAT = 'YYYY-MM-DD H:m:s';
+export let CUSTOMM_DATE_RANGE_LABEL = 'Date Range';

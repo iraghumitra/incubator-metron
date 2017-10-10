@@ -12,8 +12,8 @@
   the specific language governing permissions and limitations under the License.
   -->
 <button class="btn btn-secondary btn-search" [disabled]="disabled" type="button" data-animation="false"  data-toggle="collapse" data-target="#time-range" aria-expanded="false" aria-controls="time-range">
-  {{selectedTimeRangeValue}}
-  <br/> <span style="font-size: 8px;"> {{fromDateStr}} to {{toDateStr}}</span>
+  <span> {{selectedTimeRangeValue}} </span>
+  <br/> <span style="font-size: 8px;" *ngIf="selectedTimeRangeValue !== 'All time'"> {{fromDateStr}} to {{toDateStr}}</span>
 </button>
 
 <div #datePicker class="collapse" id="time-range">
@@ -38,40 +38,16 @@
           <div class="title"> Quick Ranges </div> <br>
           <div class="row no-gutters">
             <div class="col-3">
-                <span (click)="selectTimeRange($event, 'last-7-days')">   Last 7 days   </span> <br>
-                <span (click)="selectTimeRange($event, 'last-30-days')">  Last 30 days  </span> <br>
-                <span (click)="selectTimeRange($event, 'last-60-days')">  Last 60 days  </span> <br>
-                <span (click)="selectTimeRange($event, 'last-90-days')">  Last 90 days  </span> <br>
-                <span (click)="selectTimeRange($event, 'last-6-months')"> Last 6 months </span> <br>
-                <span (click)="selectTimeRange($event, 'last-1-year')">   Last 1 year   </span> <br>
-                <span (click)="selectTimeRange($event, 'last-2-years')">  Last 2 years  </span> <br>
-                <span (click)="selectTimeRange($event, 'last-5-years')">  Last 5 years  </span> <br>
+                <span *ngFor="let key of timeRangeMappingCol1 | mapKeys" (click)="selectTimeRange($event, timeRangeMappingCol1[key])">  {{ key }} </span> <br>
             </div>
             <div class="col-3">
-              <span (click)="selectTimeRange($event, 'yesterday')">            Yesterday            </span> <br>
-              <span (click)="selectTimeRange($event, 'day-before-yesterday')"> Day before yesterday </span> <br>
-              <span (click)="selectTimeRange($event, 'this-day-last-week')">   This day last week   </span> <br>
-              <span (click)="selectTimeRange($event, 'previous-week')">        Previous week        </span> <br>
-              <span (click)="selectTimeRange($event, 'previous-month')">       Previous month       </span> <br>
-              <span (click)="selectTimeRange($event, 'previous-year')">        Previous year        </span> <br>
+              <span *ngFor="let key of timeRangeMappingCol2 | mapKeys" (click)="selectTimeRange($event, timeRangeMappingCol2[key])">  {{ key }} </span> <br>
             </div>
             <div class="col-3">
-              <span (click)="selectTimeRange($event, 'today')">             Today              </span> <br>
-              <span (click)="selectTimeRange($event, 'today-so-far')">      Today so far       </span> <br>
-              <span (click)="selectTimeRange($event, 'this-week')">         This week          </span> <br>
-              <span (click)="selectTimeRange($event, 'this-week-so-far')">  This week so far   </span> <br>
-              <span (click)="selectTimeRange($event, 'this-month')">        This month         </span> <br>
-              <span (click)="selectTimeRange($event, 'this-year')">         This year          </span> <br>
+              <span *ngFor="let key of timeRangeMappingCol3 | mapKeys" (click)="selectTimeRange($event, timeRangeMappingCol3[key])">  {{ key }} </span> <br>
             </div>
             <div class="col-3">
-              <span (click)="selectTimeRange($event, 'last-5-minutes')">  Last 5 minutes  </span> <br>
-              <span (click)="selectTimeRange($event, 'last-15-minutes')"> Last 15 minutes </span> <br>
-              <span (click)="selectTimeRange($event, 'last-30-minutes')"> Last 30 minutes </span> <br>
-              <span (click)="selectTimeRange($event, 'last-1-hour')">     Last 1 hour     </span> <br>
-              <span (click)="selectTimeRange($event, 'last-3-hours')">    Last 3 hours    </span> <br>
-              <span (click)="selectTimeRange($event, 'last-6-hours')">    Last 6 hours    </span> <br>
-              <span (click)="selectTimeRange($event, 'last-12-hours')">   Last 12 hours   </span> <br>
-              <span (click)="selectTimeRange($event, 'last-24-hours')">   Last 24 hours   </span> <br>
+              <span *ngFor="let key of timeRangeMappingCol4 | mapKeys" (click)="selectTimeRange($event, timeRangeMappingCol4[key])">  {{ key }} </span> <br>
             </div>
           </div>
         </div>

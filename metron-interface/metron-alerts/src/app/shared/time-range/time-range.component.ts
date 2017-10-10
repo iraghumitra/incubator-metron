@@ -18,6 +18,7 @@
 import { Component, OnInit, ViewChild, ElementRef, HostListener, EventEmitter, Output, Input, OnChanges, SimpleChanges} from '@angular/core';
 import * as moment from 'moment/moment';
 import {Filter, RangeFilter} from '../../model/filter';
+import {DEFAULT_TIMESTAMP_FORMAT, CUSTOMM_DATE_RANGE_LABEL} from '../../utils/constants';
 
 @Component({
   selector: 'app-time-range',
@@ -29,13 +30,13 @@ export class TimeRangeComponent implements OnInit, OnChanges {
   fromDateStr = '';
   datePickerFromDate = '';
   datePickerToDate = '';
-  selectedTimeRangeValue = 'Last 30 days';
+  selectedTimeRangeValue = 'All time';
 
   @Input() disabled = false;
   @ViewChild('datePicker') datePicker: ElementRef;
   @Output() timeRangeChange = new EventEmitter<Filter>();
 
-  timeRangeMapping = {
+  timeRangeMappingCol1 = {
     'Last 7 days':            'last-7-days',
     'Last 30 days':           'last-30-days',
     'Last 60 days':           'last-60-days',
@@ -43,19 +44,26 @@ export class TimeRangeComponent implements OnInit, OnChanges {
     'Last 6 months':          'last-6-months',
     'Last 1 year':            'last-1-year',
     'Last 2 years':           'last-2-years',
-    'Last 5 years':           'last-5-years',
+    'Last 5 years':           'last-5-years'
+  };
+  timeRangeMappingCol2 = {
     'Yesterday':              'yesterday',
     'Day before yesterday':   'day-before-yesterday',
     'This day last week':     'this-day-last-week',
     'Previous week':          'previous-week',
     'Previous month':         'previous-month',
     'Previous year':          'previous-year',
+    'All time':               'all-time'
+  };
+  timeRangeMappingCol3 = {
     'Today':                  'today',
     'Today so far':           'today-so-far',
     'This week':              'this-week',
     'This week so far':       'this-week-so-far',
     'This month':             'this-month',
-    'This year':              'this-year',
+    'This year':              'this-year'
+  };
+  timeRangeMappingCol4 = {
     'Last 5 minutes':         'last-5-minutes',
     'Last 15 minutes':        'last-15-minutes',
     'Last 30 minutes':        'last-30-minutes',
@@ -70,12 +78,26 @@ export class TimeRangeComponent implements OnInit, OnChanges {
 
   ngOnChanges(changes: SimpleChanges) {
     if (changes && !changes['disabled'].currentValue){
-      this.setDate(this.timeRangeMapping[this.selectedTimeRangeValue]);
+      this.setDate(this.getTimeRangeStr());
     }
   }
 
   ngOnInit() {
-    this.setDate(this.timeRangeMapping[this.selectedTimeRangeValue]);
+    this.setDate(this.getTimeRangeStr());
+  }
+
+  getTimeRangeStr() {
+    let mappingVal = this.timeRangeMappingCol1[this.selectedTimeRangeValue];
+    if (!mappingVal) {
+      mappingVal = this.timeRangeMappingCol2[this.selectedTimeRangeValue];
+    }
+    if (!mappingVal) {
+      mappingVal = this.timeRangeMappingCol3[this.selectedTimeRangeValue];
+    }
+    if (!mappingVal) {
+      mappingVal = this.timeRangeMappingCol4[this.selectedTimeRangeValue];
+    }
+    return mappingVal;
   }
 
   selectTimeRange($event, range: string) {
@@ -125,6 +147,10 @@ export class TimeRangeComponent implements OnInit, OnChanges {
         break;
       case 'last-5-years':
         fromDate = moment().subtract(5, 'years').local().format();
+        toDate = moment().local().format();
+        break;
+      case 'all-time':
+        fromDate = '1970-01-01T05:30:00+05:30';
         toDate = moment().local().format();
         break;
       case 'yesterday':
@@ -213,13 +239,14 @@ export class TimeRangeComponent implements OnInit, OnChanges {
   }
 
   applyRange(toDate:string, fromDate:string) {
-    this.toDateStr = moment(toDate).format('YYYY-MM-DD H:m:s');
-    this.fromDateStr = moment(fromDate).format('YYYY-MM-DD H:m:s');
+    this.toDateStr = moment(toDate).format(DEFAULT_TIMESTAMP_FORMAT);
+    this.fromDateStr = moment(fromDate).format(DEFAULT_TIMESTAMP_FORMAT);
     this.timeRangeChange.emit(new RangeFilter('timestamp', new Date((fromDate)).getTime(), new Date((toDate)).getTime(), false));
   }
 
   applyCustomDate() {
     this.applyRange(this.datePickerToDate, this.datePickerFromDate);
+    this.selectedTimeRangeValue = CUSTOMM_DATE_RANGE_LABEL;
     this.hideDatePicker();
   }
 
