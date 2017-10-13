@@ -21,10 +21,11 @@ import {SharedModule} from '../../shared/shared.module';
 import {AlertDetailsComponent} from './alert-details.component';
 import {AlertsService} from '../../service/alerts.service';
 import {UpdateService} from '../../service/update.service';
+import { AlertDetailsKeysPipe } from './alert-details-keys.pipe';
 
 @NgModule ({
     imports: [ routing,  SharedModule],
-    declarations: [ AlertDetailsComponent ],
+    declarations: [ AlertDetailsComponent, AlertDetailsKeysPipe ],
     providers: [ AlertsService, UpdateService ],
 })
 export class AlertDetailsModule { }

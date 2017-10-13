@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 
-import { Component, Input, Output, EventEmitter } from '@angular/core';
+import { Component, Input, Output, EventEmitter, OnChanges, SimpleChanges } from '@angular/core';
 import {Router} from '@angular/router';
 
 import {Pagination} from '../../../model/pagination';
@@ -28,6 +28,15 @@ import {MetronDialogBox} from '../../../shared/metron-dialog-box';
 import {QueryBuilder} from '../query-builder';
 import {Sort} from '../../../utils/enums';
 import {Filter} from '../../../model/filter';
+import {AlertSource} from '../../../model/alert-source';
+import {PatchRequest} from '../../../model/patch-request';
+import {Patch} from '../../../model/patch';
+import {UpdateService} from '../../../service/update.service';
+import {ReplaceRequest} from '../../../model/replace-request';
+
+export enum MetronAlertDisplayState {
+  COLLAPSE, EXPAND
+}
 
 @Component({
   selector: 'app-table-view',
@@ -35,14 +44,17 @@ import {Filter} from '../../../model/filter';
   styleUrls: ['./table-view.component.scss']
 })
 
-export class TableViewComponent {
+export class TableViewComponent implements OnChanges {
 
-  
   threatScoreFieldName = 'threat:triage:score';
 
   router: Router;
   searchService: SearchService;
+  updateService: UpdateService;
   metronDialogBox: MetronDialogBox;
+  metaAlertsDisplayState: {[key: string]: MetronAlertDisplayState} = {};
+  metronAlertDisplayState = MetronAlertDisplayState;
+  selectedMetaAlerts: AlertSource[] = [];
 
   @Input() alerts: Alert[] = [];
   @Input() queryBuilder: QueryBuilder;
@@ -59,10 +71,30 @@ export class TableViewComponent {
 
   constructor(router: Router,
               searchService: SearchService,
-              metronDialogBox: MetronDialogBox) {
+              metronDialogBox: MetronDialogBox,
+              updateService: UpdateService) {
     this.router = router;
     this.searchService = searchService;
     this.metronDialogBox = metronDialogBox;
+    this.updateService = updateService;
+  }
+
+  ngOnChanges(changes: SimpleChanges) {
+    if (changes && changes['alerts'] && changes['alerts'].currentValue) {
+
+      let expandedMetaAlerts = [];
+      Object.keys(this.metaAlertsDisplayState).forEach(id => {
+        if (this.metaAlertsDisplayState[id] === MetronAlertDisplayState.EXPAND) {
+          expandedMetaAlerts.push(id);
+        }
+      });
+
+      this.alerts.forEach(alert => {
+        if (alert.source.alert && alert.source.alert.length > 0) {
+          this.metaAlertsDisplayState[alert.id] = expandedMetaAlerts.indexOf(alert.id) === -1 ? MetronAlertDisplayState.COLLAPSE : MetronAlertDisplayState.EXPAND;
+        }
+      });
+    }
   }
 
   onSort(sortEvent: SortEvent) {
@@ -73,26 +105,33 @@ export class TableViewComponent {
   }
 
   getValue(alert: Alert, column: ColumnMetadata, formatData: boolean) {
+    if (column.name === 'id') {
+      return this.formatValue(column, alert[column.name]);
+    }
+
+    return this.getValueFromSource(alert.source, column, formatData);
+  }
+
+  getValueFromSource(alertSource: AlertSource, column:ColumnMetadata, formatData: boolean) {
     let returnValue = '';
     try {
       switch (column.name) {
         case 'id':
-          returnValue = alert[column.name];
+          returnValue = alertSource['guid'];
           break;
         case 'alert_status':
-          let alertStatus = alert.source['alert_status'];
-          returnValue = alertStatus ? alertStatus : 'NEW';
+          returnValue = alertSource['alert_status'] ? alertSource['alert_status'] : 'NEW';
           break;
         default:
-          returnValue = alert.source[column.name];
+          returnValue = alertSource[column.name];
           break;
       }
-    } catch (e) {}
+    } catch (e) {
+    }
 
     if (formatData) {
       returnValue = this.formatValue(column, returnValue);
     }
-
     return returnValue;
   }
 
@@ -109,6 +148,13 @@ export class TableViewComponent {
   onPageChange() {
     this.queryBuilder.setFromAndSize(this.pagination.from, this.pagination.size);
     this.onRefreshData.emit(false);
+  }
+
+  selectMetaAlertRow($event, metaAlert: AlertSource) {
+    let tAlert = new Alert();
+    tAlert.source = metaAlert;
+
+    this.selectRow($event, tAlert);
   }
 
   selectRow($event, alert: Alert) {
@@ -147,5 +193,67 @@ export class TableViewComponent {
 
   showConfigureTable() {
     this.onShowConfigureTable.emit();
+  }
+
+  toggleExpandCollapse($event, alert: Alert) {
+    if (this.metaAlertsDisplayState[alert.id] === MetronAlertDisplayState.COLLAPSE){
+      this.metaAlertsDisplayState[alert.id] = MetronAlertDisplayState.EXPAND;
+    } else {
+      this.metaAlertsDisplayState[alert.id] = MetronAlertDisplayState.COLLAPSE;
+    }
+
+    $event.stopPropagation();
+    return false;
+  }
+
+  doDeleteMetaAlert($event, alert: Alert, alertIndex: number, metaAlertIndex: number) {
+    this.metronDialogBox.showConfirmationMessage('Do you wish to remove the alert from the meta alert').subscribe(response => {
+      if (response) {
+        this.removeAlertFromMetaAlert(alert, alertIndex, metaAlertIndex);
+      }
+    });
+
+    $event.stopPropagation();
+  }
+
+  doDeleteAllMetaAlerts($event, alert: Alert, index: number) {
+    this.metronDialogBox.showConfirmationMessage('Do you wish to remove all the alerts from meta alert').subscribe(response => {
+      if (response) {
+        this.removeAlertsFromMetaAlert(alert, index);
+      }
+    });
+
+    $event.stopPropagation();
+  }
+
+  removeAlertFromMetaAlert(alert, alertIndex, metaAlertIndex) {
+    let metaAlerts = JSON.parse(JSON.stringify(alert.source.alert));
+    metaAlerts.splice(metaAlertIndex, 1);
+
+    let patchRequest = new PatchRequest();
+    patchRequest.guid = alert.source.guid;
+    patchRequest.sensorType = 'metaalert';
+    patchRequest.index = alert.index;
+    patchRequest.patch = [new Patch('replace', 'alert', metaAlerts)];
+    patchRequest.source = {};
+
+
+    this.updateService.patch(patchRequest).subscribe(rep => {
+      alert.source.alert.splice(metaAlertIndex, 1);
+    });
+  }
+  
+  removeAlertsFromMetaAlert(alert: Alert, index: number) {
+    let patchRequest = new PatchRequest();
+    patchRequest.guid = alert.source.guid;
+    patchRequest.sensorType = 'metaalert';
+    patchRequest.index = alert.index;
+    patchRequest.patch = [new Patch('replace', '/status', 'inactive')];
+    patchRequest.source = {};
+
+    this.updateService.patch(patchRequest).subscribe(rep => {
+      this.alerts.splice(index, 1);
+    });
+
   }
 }

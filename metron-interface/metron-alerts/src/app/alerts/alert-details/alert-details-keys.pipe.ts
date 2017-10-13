@@ -15,17 +15,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-@import "../../../../variables.scss";
+import { Pipe, PipeTransform } from '@angular/core';
 
-.table-wrapper {
-  min-height: calc(100vh - 320px);
+@Pipe({
+  name: 'alertDetailsKeys'
+})
+export class AlertDetailsKeysPipe implements PipeTransform {
+
+  transform(value: any): any {
+    let keys = value ? Object.keys(value) : [];
+    return keys.filter(field => !field.includes(':ts') && field !== 'original_string').sort();
+  }
+
 }
 
-.configure-table-icon {
-  font-size: 16px;
-  cursor: pointer;
-}
 
-.fa-chain-broken {
-  color: $piction-blue;
-}

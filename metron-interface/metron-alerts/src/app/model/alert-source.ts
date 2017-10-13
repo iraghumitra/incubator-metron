@@ -42,6 +42,7 @@ export class AlertSource {
   guid: string;
   sig_id: number;
   sig_generator: number;
+  alert: AlertSource[] = [];
   'threat:triage:score': number;
   'threatinteljoinbolt:joiner:ts': number;
   'enrichmentsplitterbolt:splitter:begin:ts': number;

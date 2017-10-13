@@ -15,7 +15,19 @@
     <div class="container-fluid">
         <div class="row mb-3">
             <div class="col-md-10">
-                <div class="form-title" appAlertSeverity [severity]="alertSource['threat:triage:score']"> {{ alertSource['threat:triage:score'] }} {{ alertSource.guid }}</div>
+                <div class="form-title row ml-2" appAlertSeverity [severity]="alertSource['threat:triage:score']">
+                    <div class="col px-0">
+                        <span> {{ alertSource['threat:triage:score'] }} </span>
+                    </div>
+                    <div class="col-10 px-0">
+                        <span class="editable-text" *ngIf="!showEditor" (click)="toggleNameEditor()"> {{ alertId }} </span>
+                        <div class="input-group" *ngIf="showEditor">
+                            <input type="text" class="form-control"  [(ngModel)]="alertName">
+                            <span class="input-group-addon" (click)="saveName()" ><i class="fa fa-check" aria-hidden="true"></i></span>
+                            <span class="input-group-addon" (click)="toggleNameEditor()"><i class="fa fa-times" aria-hidden="true"></i></span>
+                        </div>
+                    </div>
+                </div>
             </div>
             <div class="col-md-2"><i class="fa fa-times pull-right close-button" aria-hidden="true" (click)="goBack()"></i></div>
         </div>
@@ -38,9 +50,10 @@
                 </tr>
             </table>
         </div>
-        <div class="ml-1 my-4 form">
-            <div *ngFor="let field of alertFields" class="row">
-              <div class="col-6 mb-1 key">{{ field }}</div>   <div class="col-6"> {{ alertSource[field] }} </div>
+        <div class="ml-1 my-3 form" *ngFor="let alert of alertSources; let i = index;">
+            <div class="pb-2 alert-details-title"> Alert {{ i + 1 }} of {{ alertSources.length }}</div>
+            <div *ngFor="let field of alert | alertDetailsKeys" class="row ml-1">
+              <div class="col-6 mb-1 key">{{ field }}</div>   <div class="col-6"> {{ alert[field] }} </div>
             </div>
         </div>
     </div>

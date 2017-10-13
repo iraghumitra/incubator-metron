@@ -15,17 +15,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-@import "../../../../variables.scss";
+export class Patch {
+  op: 'add' | 'remove' | 'replace';
+  path: string;
+  value: any;
 
-.table-wrapper {
-  min-height: calc(100vh - 320px);
-}
-
-.configure-table-icon {
-  font-size: 16px;
-  cursor: pointer;
-}
-
-.fa-chain-broken {
-  color: $piction-blue;
+  constructor(op, path: string, value: any) {
+    this.op = op;
+    this.path = path;
+    this.value = value;
+  }
 }

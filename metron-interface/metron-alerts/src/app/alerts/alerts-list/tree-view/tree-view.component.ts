@@ -18,7 +18,7 @@
 
 import { Component, Input, OnChanges, SimpleChanges } from '@angular/core';
 import {Router} from '@angular/router';
-import {Subscription} from 'rxjs/Rx';
+import {Subscription, Observable} from 'rxjs/Rx';
 
 import {TableViewComponent} from '../table-view/table-view.component';
 import {SearchResponse} from '../../../model/search-response';
@@ -32,6 +32,10 @@ import {Sort} from '../../../utils/enums';
 import {MetronDialogBox, DialogType} from '../../../shared/metron-dialog-box';
 import {ElasticsearchUtils} from '../../../utils/elasticsearch-utils';
 import {SearchRequest} from '../../../model/search-request';
+import {MetaAlertCreateRequest} from '../../../model/meta-alert-create-request';
+import {MetaAlertService} from '../../../service/meta-alert.service';
+import {INDEXES} from '../../../utils/constants';
+import {UpdateService} from '../../../service/update.service';
 
 @Component({
   selector: 'app-tree-view',
@@ -48,8 +52,10 @@ export class TreeViewComponent extends TableViewComponent implements OnChanges {
 
   constructor(router: Router,
               searchService: SearchService,
-              metronDialogBox: MetronDialogBox) {
-    super(router, searchService, metronDialogBox);
+              metronDialogBox: MetronDialogBox,
+              updateService: UpdateService,
+              private metaAlertService: MetaAlertService) {
+    super(router, searchService, metronDialogBox, updateService);
   }
 
   collapseGroup(groupArray: TreeGroupData[], level: number, index: number) {
@@ -123,10 +129,7 @@ export class TreeViewComponent extends TableViewComponent implements OnChanges {
 
     this.groupResponse.groupResults.forEach((groupResult: GroupResult) => {
       let treeGroupData = new TreeGroupData(groupResult.key, groupResult.total, groupResult.score, 0, false);
-      if (groupByFields.length === 1) {
-        treeGroupData.groupQueryMap  = this.createTopGroupQueryMap(groupByFields[0], groupResult);
-      }
-
+      treeGroupData.isLeafNode = (groupByFields.length === 1);
       this.topGroups.push(treeGroupData);
     });
   }
@@ -181,7 +184,7 @@ export class TreeViewComponent extends TableViewComponent implements OnChanges {
   }
 
   checkAndToSubscription(group: TreeGroupData) {
-    if (group.groupQueryMap) {
+    if (group.isLeafNode) {
       let key = JSON.stringify(group.groupQueryMap);
       if (this.treeGroupSubscriptionMap[key]) {
         this.removeFromSubscription(group);
@@ -193,7 +196,7 @@ export class TreeViewComponent extends TableViewComponent implements OnChanges {
   }
 
   removeFromSubscription(group: TreeGroupData) {
-    if (group.groupQueryMap) {
+    if (group.isLeafNode) {
       let key = JSON.stringify(group.groupQueryMap);
       let subscription = this.treeGroupSubscriptionMap[key].refreshTimer;
       if (subscription && !subscription.closed) {
@@ -227,9 +230,9 @@ export class TreeViewComponent extends TableViewComponent implements OnChanges {
   }
 
   parseSubGroups(group: GroupResult, groupAsArray: TreeGroupData[],
-                 groupQueryMap: {[key: string]: string}, groupedBy: string, level: number, index: number): number {
+                 parentQueryMap: {[key: string]: string}, currentGroupKey: string, level: number, index: number): number {
     index++;
-    groupQueryMap[groupedBy] = group.key;
+    parentQueryMap[currentGroupKey] = group.key;
 
     let currentTreeNodeData = (groupAsArray.length > 0) ? groupAsArray[index] : null;
 
@@ -244,8 +247,11 @@ export class TreeViewComponent extends TableViewComponent implements OnChanges {
       }
     }
 
+    groupAsArray[index].isLeafNode = false;
+    groupAsArray[index].groupQueryMap = JSON.parse(JSON.stringify(parentQueryMap));
+
     if (!group.groupResults) {
-      groupAsArray[index].groupQueryMap = JSON.parse(JSON.stringify(groupQueryMap));
+      groupAsArray[index].isLeafNode = true;
       if (groupAsArray[index].expand && groupAsArray[index].show && groupAsArray[index].groupQueryMap) {
         this.checkAndToSubscription(groupAsArray[index]);
       }
@@ -253,7 +259,7 @@ export class TreeViewComponent extends TableViewComponent implements OnChanges {
     }
 
     group.groupResults.forEach(subGroup => {
-      index = this.parseSubGroups(subGroup, groupAsArray, groupQueryMap, group.groupedBy, level + 1, index);
+      index = this.parseSubGroups(subGroup, groupAsArray, parentQueryMap, group.groupedBy, level + 1, index);
     });
 
     return index;
@@ -268,13 +274,13 @@ export class TreeViewComponent extends TableViewComponent implements OnChanges {
       let index = -1;
       let topGroup = this.topGroups[i];
       let resultGroup = this.groupResponse.groupResults[i];
-      let groupQueryMap = this.createTopGroupQueryMap(groupedBy, resultGroup);
 
       topGroup.total = resultGroup.total;
+      topGroup.groupQueryMap = this.createTopGroupQueryMap(groupedBy, resultGroup);
 
       if (resultGroup.groupResults) {
         resultGroup.groupResults.forEach(subGroup => {
-          index = this.parseSubGroups(subGroup, topGroup.treeSubGroups, groupQueryMap, resultGroup.groupedBy, 1, index);
+          index = this.parseSubGroups(subGroup, topGroup.treeSubGroups, topGroup.groupQueryMap, resultGroup.groupedBy, 1, index);
         });
 
         topGroup.treeSubGroups.splice(index + 1);
@@ -322,5 +328,36 @@ export class TreeViewComponent extends TableViewComponent implements OnChanges {
     Object.keys(this.treeGroupSubscriptionMap).forEach(key => {
       this.getAlerts(this.treeGroupSubscriptionMap[key].group);
     });
+  }
+
+  getGUIDForAlertsInGroup(group: TreeGroupData): Observable<SearchResponse> {
+
+    let dashRowKey = Object.keys(group.groupQueryMap);
+    let searchRequest = new SearchRequest();
+    searchRequest.fields = [dashRowKey[0], 'guid'];
+    searchRequest.from = 0;
+    searchRequest.indices = INDEXES;
+    searchRequest.query = this.createQuery(group);
+    searchRequest.size = group.total;
+
+    return this.searchService.search(searchRequest);
+  }
+
+  createGuidToIndexMap(guidToIndicesMap: SearchResponse): any {
+    let map = {};
+    guidToIndicesMap.results.forEach(alert => map[alert.source.guid] = alert.index);
+    return map;
+  }
+
+  createMetaAlert(group: TreeGroupData) {
+    this.getGUIDForAlertsInGroup(group).subscribe(guidToIndicesMap => {
+      let metaAlert = new MetaAlertCreateRequest();
+      metaAlert.groups = this.queryBuilder.groupRequest.groups.map(group => group.field);
+      metaAlert.guidToIndices = this.createGuidToIndexMap(guidToIndicesMap);
+
+      this.metaAlertService.create(metaAlert).subscribe(() => {});
+    });
+
+    console.log(group);
   }
 }

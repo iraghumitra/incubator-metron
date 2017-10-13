@@ -30,13 +30,14 @@ import {ConfigureRowsModule} from '../configure-rows/configure-rows.module';
 import {GroupByModule} from '../../shared/group-by/group-by.module';
 import {TableViewComponent} from './table-view/table-view.component';
 import {TreeViewComponent} from './tree-view/tree-view.component';
+import {MetaAlertService} from '../../service/meta-alert.service';
 
 @NgModule({
     imports: [routing, SharedModule, ConfigureRowsModule, MetronSorterModule, MetronTablePaginationModule,
                 ListGroupModule, CollapseModule, GroupByModule],
     exports: [AlertsListComponent],
     declarations: [AlertsListComponent, TableViewComponent, TreeViewComponent],
-    providers: [DecimalPipe, SearchService]
+    providers: [DecimalPipe, SearchService, MetaAlertService]
 })
 export class AlertsListModule {
 }

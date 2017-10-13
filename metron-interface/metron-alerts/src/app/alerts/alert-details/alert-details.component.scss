@@ -27,6 +27,7 @@
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  height: 35px;
 }
 
 .actions {
@@ -68,5 +69,23 @@
 
   .key {
     color: $dove-grey;
+  }
+}
+
+.alert-details-title {
+  font-size: 15px;
+}
+
+.editable-text {
+  border-bottom: 1px dashed $piction-blue;
+}
+
+.input-group-addon {
+  height: 35px;
+  background: #333333;
+  border: 1px solid #4D4D4D;
+  i {
+    font-size: 15px;
+    color: #999999;
   }
 }

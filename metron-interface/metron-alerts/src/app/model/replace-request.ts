@@ -15,17 +15,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-@import "../../../../variables.scss";
 
-.table-wrapper {
-  min-height: calc(100vh - 320px);
-}
-
-.configure-table-icon {
-  font-size: 16px;
-  cursor: pointer;
-}
-
-.fa-chain-broken {
-  color: $piction-blue;
+export class ReplaceRequest {
+  replacement: {[key: string]: any};
+  guid: string;
+  sensorType: string;
+  index: string;
 }

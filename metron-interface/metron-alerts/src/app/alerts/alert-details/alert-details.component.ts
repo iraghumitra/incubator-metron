@@ -22,6 +22,8 @@ import {UpdateService} from '../../service/update.service';
 import {Alert} from '../../model/alert';
 import {AlertsService} from '../../service/alerts.service';
 import {AlertSource} from '../../model/alert-source';
+import {PatchRequest} from '../../model/patch-request';
+import {Patch} from '../../model/patch';
 
 export enum AlertState {
   NEW, OPEN, ESCALATE, DISMISS, RESOLVE
@@ -35,11 +37,13 @@ export enum AlertState {
 export class AlertDetailsComponent implements OnInit {
 
   alertId = '';
+  alertName = '';
   alertSourceType = '';
+  showEditor = false;
   alertState = AlertState;
   selectedAlertState: AlertState = AlertState.NEW;
   alertSource: AlertSource = new AlertSource();
-  alertFields: string[] = [];
+  alertSources = [];
 
   constructor(private router: Router,
               private activatedRoute: ActivatedRoute,
@@ -54,8 +58,13 @@ export class AlertDetailsComponent implements OnInit {
 
   getData() {
     this.searchService.getAlert(this.alertSourceType, this.alertId).subscribe(alert => {
+      if (alert.alert && alert.alert.length > 0) {
+        this.alertSources = alert.alert;
+      } else {
+        this.alertSources.push(alert);
+      }
+
       this.alertSource = alert;
-      this.alertFields = Object.keys(alert).filter(field => !field.includes(':ts') && field !== 'original_string').sort();
       this.selectedAlertState = this.getAlertState(alert['alert_status']);
     });
   }
@@ -133,6 +142,22 @@ export class AlertDetailsComponent implements OnInit {
     });
   }
 
+  toggleNameEditor() {
+    this.showEditor = !this.showEditor;
+  }
+
+  saveName() {
+    let patchRequest = new PatchRequest();
+    patchRequest.guid = this.alertId;
+    patchRequest.sensorType = 'metaalert';
+    patchRequest.index = 'metaalerts';
+    patchRequest.patch = [new Patch('add', '/name', this.alertName)];
+    // patchRequest.source = {};
+
+    this.updateService.patch(patchRequest).subscribe(rep => {
+      this.toggleNameEditor();
+    });
+  }
 }
 
 

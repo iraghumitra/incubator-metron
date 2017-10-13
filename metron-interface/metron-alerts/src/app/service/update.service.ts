@@ -27,6 +27,7 @@ import {HttpUtil} from '../utils/httpUtil';
 import {Alert} from '../model/alert';
 import {Http} from '@angular/http';
 import {PatchRequest} from '../model/patch-request';
+import {ReplaceRequest} from '../model/replace-request';
 
 @Injectable()
 export class UpdateService {
@@ -46,6 +47,12 @@ export class UpdateService {
       this.alertChangedSource.next(patchRequest);
       return result;
     });
+  }
+
+  public replace(replaceRequest: ReplaceRequest) {
+    let url = '/api/v1/update/replace';
+    return this.http.post(url, replaceRequest, new RequestOptions({headers: new Headers(this.defaultHeaders)}))
+    .catch(HttpUtil.handleError);
   }
 
   public updateAlertState(alerts: Alert[], state: string): Observable<{}> {

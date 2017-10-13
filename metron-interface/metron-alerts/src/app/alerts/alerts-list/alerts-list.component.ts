@@ -40,6 +40,7 @@ import {Filter} from '../../model/filter';
 import {Pagination} from '../../model/pagination';
 import {environment} from '../../../environments/environment';
 import {PatchRequest} from '../../model/patch-request';
+import {META_ALERTS_SENSOR_TYPE} from '../../utils/constants';
 
 @Component({
   selector: 'app-alerts-list',
@@ -322,7 +323,8 @@ export class AlertsListComponent implements OnInit, OnDestroy {
     this.selectedAlerts = [];
     this.selectedAlerts = [alert];
     this.saveRefreshState();
-    this.router.navigateByUrl('/alerts-list(dialog:details/' + alert.source['source:type'] + '/' + alert.source.guid + ')');
+    let sourceType = (alert.source.alert && alert.source.alert.length > 0) ? META_ALERTS_SENSOR_TYPE : alert.source['source:type'];
+    this.router.navigateByUrl('/alerts-list(dialog:details/' + sourceType + '/' + alert.source.guid + ')');
   }
 
   saveRefreshState() {
