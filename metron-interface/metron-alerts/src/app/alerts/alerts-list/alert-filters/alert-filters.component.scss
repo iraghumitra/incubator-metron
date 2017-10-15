@@ -15,19 +15,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { NgModule } from '@angular/core';
-import {routing} from './alerts-details.routing';
-import {SharedModule} from '../../shared/shared.module';
-import {AlertDetailsComponent} from './alert-details.component';
-import {AlertsService} from '../../service/alerts.service';
-import {UpdateService} from '../../service/update.service';
-import { AlertDetailsKeysPipe } from './alert-details-keys.pipe';
-import {AuthenticationService} from '../../service/authentication.service';
+@import "../../../../variables";
 
-@NgModule ({
-    imports: [ routing,  SharedModule],
-    declarations: [ AlertDetailsComponent, AlertDetailsKeysPipe ],
-    providers: [ AuthenticationService, AlertsService, UpdateService ],
-})
+.filter-container {
+  background: $mine-shaft;
 
-export class AlertDetailsModule { }
+  .title {
+    font-size: 15px;
+    padding: 15px 0px 0px 15px;
+    font-family: 'Roboto-Regular';
+  }
+
+  .facets {
+    padding: 0px 20px;
+  }
+}

@@ -36,6 +36,7 @@ import {MetaAlertCreateRequest} from '../../../model/meta-alert-create-request';
 import {MetaAlertService} from '../../../service/meta-alert.service';
 import {INDEXES} from '../../../utils/constants';
 import {UpdateService} from '../../../service/update.service';
+import {PatchRequest} from '../../../model/patch-request';
 
 @Component({
   selector: 'app-tree-view',
@@ -56,6 +57,12 @@ export class TreeViewComponent extends TableViewComponent implements OnChanges {
               updateService: UpdateService,
               private metaAlertService: MetaAlertService) {
     super(router, searchService, metronDialogBox, updateService);
+  }
+
+  addAlertChangedListner() {
+    this.updateService.alertChanged$.subscribe(patchRequest => {
+      this.updateAlert(patchRequest);
+    });
   }
 
   collapseGroup(groupArray: TreeGroupData[], level: number, index: number) {
@@ -130,6 +137,11 @@ export class TreeViewComponent extends TableViewComponent implements OnChanges {
     this.groupResponse.groupResults.forEach((groupResult: GroupResult) => {
       let treeGroupData = new TreeGroupData(groupResult.key, groupResult.total, groupResult.score, 0, false);
       treeGroupData.isLeafNode = (groupByFields.length === 1);
+
+      if (groupByFields.length === 1) {
+        treeGroupData.groupQueryMap  = this.createTopGroupQueryMap(groupByFields[0], groupResult);
+      }
+
       this.topGroups.push(treeGroupData);
     });
   }
@@ -161,6 +173,10 @@ export class TreeViewComponent extends TableViewComponent implements OnChanges {
     if ((changes['alerts'] && changes['alerts'].currentValue)) {
       this.search();
     }
+  }
+
+  ngOnInit() {
+    this.addAlertChangedListner();
   }
 
   searchGroup(selectedGroup: TreeGroupData, searchRequest: SearchRequest): Subscription {
@@ -293,7 +309,7 @@ export class TreeViewComponent extends TableViewComponent implements OnChanges {
   }
 
   sortTreeSubGroup($event, treeGroup: TreeGroupData) {
-    let sortBy = $event.sortBy === 'id' ? '_uid' : $event.sortBy;
+    let sortBy = $event.sortBy === 'id' ? 'guid' : $event.sortBy;
 
     let sortField = new SortField();
     sortField.field = sortBy;
@@ -355,9 +371,23 @@ export class TreeViewComponent extends TableViewComponent implements OnChanges {
       metaAlert.groups = this.queryBuilder.groupRequest.groups.map(group => group.field);
       metaAlert.guidToIndices = this.createGuidToIndexMap(guidToIndicesMap);
 
-      this.metaAlertService.create(metaAlert).subscribe(() => {});
+      this.metaAlertService.create(metaAlert).subscribe(() => {
+      });
     });
 
     console.log(group);
+  }
+
+  updateAlert(patchRequest: PatchRequest) {
+    this.searchService.getAlert(patchRequest.sensorType, patchRequest.guid).subscribe(alertSource => {
+
+      Object.keys(this.treeGroupSubscriptionMap).forEach(key => {
+        let group = this.treeGroupSubscriptionMap[key].group;
+        if(group.response && group.response.results && group.response.results.length > 0) {
+          group.response.results.filter(alert => alert.source.guid === patchRequest.guid)
+          .map(alert => alert.source = alertSource);
+        }
+      });
+    });
   }
 }

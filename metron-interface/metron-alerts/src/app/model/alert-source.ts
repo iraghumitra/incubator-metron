@@ -15,6 +15,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import {AlertComment} from '../alerts/alert-details/alert-comment';
+
 export class AlertSource {
   msg: string;
   sig_rev: number;
@@ -43,6 +45,7 @@ export class AlertSource {
   sig_id: number;
   sig_generator: number;
   alert: AlertSource[] = [];
+  comments: AlertComment[] = [];
   'threat:triage:score': number;
   'threatinteljoinbolt:joiner:ts': number;
   'enrichmentsplitterbolt:splitter:begin:ts': number;

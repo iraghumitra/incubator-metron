@@ -189,10 +189,14 @@ export class MetronAlertsPage {
     return element(by.css('.ace_line')).getText();
   }
 
+  isCommentIconPresentInTable() {
+    return element.all(by.css('app-table-view .fa.fa-comments-o')).count();
+  }
+
   getRecentSearchOptions() {
     browser.sleep(1000);
     let map = {};
-    let recentSearches = element.all(by.css('metron-collapse')).get(0);
+    let recentSearches = element.all(by.css('app-saved-searches metron-collapse')).get(0);
     return recentSearches.all(by.css('a')).getText().then(title => {
        return recentSearches.all(by.css('.collapse.show')).getText().then(values => {
          map[title] = values;
@@ -204,7 +208,7 @@ export class MetronAlertsPage {
   getSavedSearchOptions() {
     browser.sleep(1000);
     let map = {};
-    let recentSearches = element.all(by.css('metron-collapse')).get(1);
+    let recentSearches = element.all(by.css('app-saved-searches metron-collapse')).get(1);
     return recentSearches.all(by.css('a')).getText().then(title => {
       return recentSearches.all(by.css('.collapse.show')).getText().then(values => {
         map[title] = values;

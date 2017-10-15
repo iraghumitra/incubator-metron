@@ -99,7 +99,7 @@ export class TableViewComponent implements OnChanges {
 
   onSort(sortEvent: SortEvent) {
     let sortOrder = (sortEvent.sortOrder === Sort.ASC ? 'asc' : 'desc');
-    let sortBy = sortEvent.sortBy === 'id' ? '_uid' : sortEvent.sortBy;
+    let sortBy = sortEvent.sortBy === 'id' ? 'guid' : sortEvent.sortBy;
     this.queryBuilder.setSort(sortBy, sortOrder);
     this.onRefreshData.emit(true);
   }
@@ -181,7 +181,7 @@ export class TableViewComponent implements OnChanges {
   }
 
   addFilter(field: string, value: string) {
-    field = (field === 'id') ? '_uid' : field;
+    field = (field === 'id') ? 'guid' : field;
     this.onAddFilter.emit(new Filter(field, value));
   }
 

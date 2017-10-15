@@ -12,7 +12,7 @@
     "pathRewrite": {"^/search" : ""},
     "secure": false
   },
-  "/_cluster": {query
+  "/_cluster": {
     "target": "http://node1:9200",
     "secure": false
   }

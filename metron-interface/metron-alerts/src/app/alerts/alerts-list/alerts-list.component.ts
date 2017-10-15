@@ -38,7 +38,6 @@ import {ElasticsearchUtils} from '../../utils/elasticsearch-utils';
 import {TableViewComponent} from './table-view/table-view.component';
 import {Filter} from '../../model/filter';
 import {Pagination} from '../../model/pagination';
-import {environment} from '../../../environments/environment';
 import {PatchRequest} from '../../model/patch-request';
 import {META_ALERTS_SENSOR_TYPE} from '../../utils/constants';
 
@@ -113,7 +112,7 @@ export class AlertsListComponent implements OnInit, OnDestroy {
   }
 
   calcColumnsToDisplay() {
-    let availableWidth = document.documentElement.clientWidth - (200 + (15 * 3)); /* screenwidth - (navPaneWidth + (paddings))*/
+    let availableWidth = document.documentElement.clientWidth - (200 + (15 * 4)); /* screenwidth - (navPaneWidth + (paddings))*/
     availableWidth = availableWidth - (55 + 25 + 25); /* availableWidth - (score + colunSelectIcon +selectCheckbox )*/
     let tWidth = 0;
     this.alertsColumnsToDisplay =  this.alertsColumns.filter(colMetaData => {
@@ -168,6 +167,10 @@ export class AlertsListComponent implements OnInit, OnDestroy {
     this.search();
 
     return false;
+  }
+
+  onAddFacetFilter($event) {
+    this.onAddFilter(new Filter($event.name, $event.key));
   }
 
   onRefreshData($event) {
@@ -320,11 +323,13 @@ export class AlertsListComponent implements OnInit, OnDestroy {
   }
 
   showDetails(alert: Alert) {
+
     this.selectedAlerts = [];
     this.selectedAlerts = [alert];
     this.saveRefreshState();
     let sourceType = (alert.source.alert && alert.source.alert.length > 0) ? META_ALERTS_SENSOR_TYPE : alert.source['source:type'];
-    this.router.navigateByUrl('/alerts-list(dialog:details/' + sourceType + '/' + alert.source.guid + ')');
+    let url = '/alerts-list(dialog:details/' + sourceType + '/' + alert.source.guid + '/' + alert.index + ')';
+    this.router.navigateByUrl(url);
   }
 
   saveRefreshState() {
@@ -374,7 +379,7 @@ export class AlertsListComponent implements OnInit, OnDestroy {
 
   updateAlert(patchRequest: PatchRequest) {
     this.searchService.getAlert(patchRequest.sensorType, patchRequest.guid).subscribe(alertSource => {
-      this.alerts.filter(alert => alert.source.guid == patchRequest.guid)
+      this.alerts.filter(alert => alert.source.guid === patchRequest.guid)
       .map(alert => alert.source = alertSource);
     });
   }
