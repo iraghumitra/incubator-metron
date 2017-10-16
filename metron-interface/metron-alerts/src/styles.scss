@@ -21,6 +21,7 @@
 @import "slider.scss";
 @import "metron-dialog.scss";
 @import "hexagon";
+@import "../node_modules/pikaday-time/scss/pikaday.scss";
 
 body,
 button {
@@ -316,4 +317,12 @@ $background_color_3: #2196F3;
     }
   }
 }
-/**********************/
+
+.pika-select  {
+  height: 20px;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  padding: 0px 15px;
+}
+

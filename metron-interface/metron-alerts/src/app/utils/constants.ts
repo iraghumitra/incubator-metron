@@ -32,3 +32,8 @@ export let DEFAULT_FACETS = ['source:type', 'ip_src_addr', 'ip_dst_addr', 'host'
 export let DEFAULT_GROUPS = ['source:type', 'ip_src_addr', 'ip_dst_addr', 'host', 'enrichments:geo:ip_dst_addr:country'];
 export let INDEXES =  environment.indices ? environment.indices.split(',') : ['websphere', 'snort', 'asa', 'bro', 'yaf',  'metaalerts'];
 
+export let THREAT_SCORE_FIELD_NAME = 'threat:triage:score';
+export let TIMESTAMP_FIELD_NAME = 'timestamp';
+
+export let DEFAULT_TIMESTAMP_FORMAT = 'YYYY-MM-DD H:m:s';
+export let CUSTOMM_DATE_RANGE_LABEL = 'Date Range';

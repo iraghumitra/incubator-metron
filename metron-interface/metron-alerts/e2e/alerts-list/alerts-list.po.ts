@@ -17,7 +17,7 @@
  */
 
 import {browser, element, by, protractor} from 'protractor';
-import {waitForElementVisibility, waitForElementPresence} from '../utils/e2e_util';
+import {waitForElementVisibility, waitForElementPresence, waitForElementInVisibility} from '../utils/e2e_util';
 
 export class MetronAlertsPage {
   navigateTo() {
@@ -124,7 +124,7 @@ export class MetronAlertsPage {
   }
 
   getSettingsLabels() {
-    return element.all(by.css('form label:not(.switch)')).getText();
+    return element.all(by.css('app-configure-rows  form label:not(.switch)')).getText();
   }
 
   getRefreshRateOptions() {
@@ -288,8 +288,69 @@ export class MetronAlertsPage {
     });
   }
 
+<<<<<<< HEAD
   getAlertStatusById(id: string) {
     return element(by.css('a[title="' + id +'"]'))
           .element(by.xpath('../..')).all(by.css('td a')).get(8).getText();
+=======
+  clickDateSettings() {
+    element(by.css('app-time-range button.btn-search')).click();
+    browser.sleep(2000);
+  }
+
+  getTimeRangeTitles() {
+    return element.all(by.css('.title')).getText();
+  }
+  
+  getQuickTimeRanges() {
+    return element.all(by.css('app-time-range .quick-ranges span')).getText();
+  }
+
+  getValueForManualTimeRange() {
+    return element.all(by.css('app-time-range input.form-control')). getAttribute('value');
+  }
+
+  isManulaTimeRangeApplyButtonPresent() {
+    return element.all(by.css('app-time-range')).all(by.buttonText('APPLY')).count().then(count => count === 1);
+  }
+
+  selectQuickTimeRange(quickRange: string) {
+    element(by.cssContainingText('.quick-ranges span', quickRange)).click();
+    browser.sleep(1000);
+  }
+  
+  getTimeRangeButtonText() {
+    return element.all(by.css('app-time-range button.btn-search span')).get(0).getText();
+  }
+
+  setDate(index: number, year: string, month: string, day: string, hour: string, min: string, sec: string) {
+    element.all(by.css('app-time-range .calendar')).get(index).click()
+    .then(() => element.all(by.css('.pika-select.pika-select-hour')).get(index).click())
+    .then(() => element.all(by.css('.pika-select.pika-select-hour')).get(index).element(by.cssContainingText('option', hour)).click())
+    .then(() => element.all(by.css('.pika-select.pika-select-minute')).get(index).click())
+    .then(() => element.all(by.css('.pika-select.pika-select-minute')).get(index).element(by.cssContainingText('option', min)).click())
+    .then(() => element.all(by.css('.pika-select.pika-select-second')).get(index).click())
+    .then(() => element.all(by.css('.pika-select.pika-select-second')).get(index).element(by.cssContainingText('option', sec)).click())
+    .then(() => element.all(by.css('.pika-select.pika-select-year')).get(index).click())
+    .then(() => element.all(by.css('.pika-select.pika-select-year')).get(index).element(by.cssContainingText('option', year)).click())
+    .then(() => element.all(by.css('.pika-select.pika-select-month')).get(index).click())
+    .then(() => element.all(by.css('.pika-select.pika-select-month')).get(index).element(by.cssContainingText('option', month)).click())
+    .then(() => element.all(by.css('.pika-table')).get(index).element(by.buttonText(day)).click())
+    .then(() => waitForElementInVisibility(element.all(by.css('.pika-single')).get(index)));
+
+    browser.sleep(1000);
+  }
+
+  selectTimeRangeApplyButton() {
+    return element(by.css('app-time-range')).element(by.buttonText('APPLY')).click();
+  }
+
+  getChangesAlertTableTitle(previousText: string) {
+    // browser.pause();
+    let title = element(by.css('.col-form-label-lg'));
+    return this.waitForTextChange(title, previousText).then(() => {
+      return title.getText();
+    });
+>>>>>>> METRON-1224
   }
 }

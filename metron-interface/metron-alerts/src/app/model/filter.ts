@@ -16,14 +16,17 @@
  * limitations under the License.
  */
 import {Utils} from '../utils/utils';
+import {ElasticsearchUtils} from '../utils/elasticsearch-utils';
 
 export class Filter {
   field: string;
   value: string;
+  display: boolean;
 
-  constructor(field: string, value: string) {
+  constructor(field: string, value: string, display = true) {
     this.field = field;
     this.value = value;
+    this.display = display;
   }
 
   getQueryString(): string {
@@ -34,6 +37,27 @@ export class Filter {
     }
 
     return '(' + Utils.escapeESField(this.field) + ':' +  Utils.escapeESValue(this.value)  + ' OR ' +
-                Utils.escapeESField('alert.' + this.field) + ':' +  Utils.escapeESValue(this.value) + ')';
+        Utils.escapeESField('alert.' + this.field) + ':' +  Utils.escapeESValue(this.value) + ')';
+  }
+}
+
+export class RangeFilter extends Filter {
+  gte: number;
+  lte: number;
+
+  constructor(field:string, gte:number, lte:number, display = true) {
+    super(field, '', display);
+    this.gte = gte;
+    this.lte = lte;
+    this.value = this.getFilterValue();
+  }
+
+  getQueryString(): string {
+    return '(' + ElasticsearchUtils.escapeESField(this.field) + ':' +  this.getFilterValue() + ' OR ' +
+                  ElasticsearchUtils.escapeESField('alert.' + this.field) + ':' +  this.getFilterValue() + ')';
+  }
+
+  getFilterValue() {
+    return '(>=' + this.gte + ' AND ' + ' <=' + this.lte + ')';
   }
 }
