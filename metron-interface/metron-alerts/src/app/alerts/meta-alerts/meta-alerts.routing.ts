@@ -15,12 +15,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {Patch} from './patch';
+import { ModuleWithProviders }  from '@angular/core';
+import { RouterModule } from '@angular/router';
+import { MetaAlertsComponent } from './meta-alerts.component';
 
-export class PatchRequest {
-  guid: string;
-  sensorType: string;
-  index: string;
-  patch: Patch[] = [];
-  // source: {};
-}
+export const routing: ModuleWithProviders = RouterModule.forChild([
+    { path: 'add-to-meta-alert', component: MetaAlertsComponent, outlet: 'dialog'}
+]);

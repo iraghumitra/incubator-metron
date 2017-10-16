@@ -30,10 +30,18 @@ import {MetaAlertCreateRequest} from '../model/meta-alert-create-request';
 
 @Injectable()
 export class MetaAlertService {
-
+  private _selectedAlerts: Alert[];
   defaultHeaders = {'Content-Type': 'application/json', 'X-Requested-With': 'XMLHttpRequest'};
 
   constructor(private http:Http) {}
+
+  get selectedAlerts(): Alert[] {
+    return this._selectedAlerts;
+  }
+
+  set selectedAlerts(value: Alert[]) {
+    this._selectedAlerts = value;
+  }
 
   public create(metaAlertCreateRequest:MetaAlertCreateRequest):Observable<{}> {
     let url = '/api/v1/metaalert/create';

@@ -29,6 +29,7 @@ import {Patch} from '../../model/patch';
 import {AlertComment} from './alert-comment';
 import {AuthenticationService} from '../../service/authentication.service';
 import {MetronDialogBox} from '../../shared/metron-dialog-box';
+import {Utils} from '../../utils/utils';
 
 export enum AlertState {
   NEW, OPEN, ESCALATE, DISMISS, RESOLVE
@@ -68,6 +69,7 @@ export class AlertDetailsComponent implements OnInit {
   alertSources = [];
   alertFields: string[] = [];
   alertCommentStr = '';
+  selectedAlertSource = new AlertSource();
   alertCommentsWrapper: AlertCommentWrapper[] = [];
 
   constructor(private router: Router,
@@ -85,9 +87,10 @@ export class AlertDetailsComponent implements OnInit {
     return false;
   }
 
-  getData() {
+  getData(fireToggleEditor = false) {
     this.alertCommentStr = '';
     this.searchService.getAlert(this.alertSourceType, this.alertId).subscribe(alert => {
+      this.selectedAlertSource = alert;
       if (alert.alert && alert.alert.length > 0) {
         this.alertSources = alert.alert;
       } else {
@@ -97,6 +100,10 @@ export class AlertDetailsComponent implements OnInit {
       this.alertSource = alert;
       this.selectedAlertState = this.getAlertState(alert['alert_status']);
       this.setComments(alert);
+
+      if (fireToggleEditor) {
+        this.toggleNameEditor();
+      }
     });
   }
 
@@ -181,7 +188,9 @@ export class AlertDetailsComponent implements OnInit {
   }
 
   toggleNameEditor() {
-    this.showEditor = !this.showEditor;
+    if (this.alertSources.length > 1) {
+      this.showEditor = !this.showEditor;
+    }
   }
 
   saveName() {
@@ -190,10 +199,9 @@ export class AlertDetailsComponent implements OnInit {
     patchRequest.sensorType = 'metaalert';
     patchRequest.index = 'metaalerts';
     patchRequest.patch = [new Patch('add', '/name', this.alertName)];
-    // patchRequest.source = {};
 
     this.updateService.patch(patchRequest).subscribe(rep => {
-      this.toggleNameEditor();
+      this.getData(true);
     });
   }
 

@@ -30,7 +30,6 @@ import {ConfigureRowsModule} from '../configure-rows/configure-rows.module';
 import {GroupByModule} from '../../shared/group-by/group-by.module';
 import {TableViewComponent} from './table-view/table-view.component';
 import {TreeViewComponent} from './tree-view/tree-view.component';
-import {MetaAlertService} from '../../service/meta-alert.service';
 import {AlertFiltersComponent} from './alert-filters/alert-filters.component';
 
 @NgModule({
@@ -38,7 +37,7 @@ import {AlertFiltersComponent} from './alert-filters/alert-filters.component';
                 ListGroupModule, CollapseModule, GroupByModule],
     exports: [AlertsListComponent],
     declarations: [AlertsListComponent, TableViewComponent, TreeViewComponent, AlertFiltersComponent],
-    providers: [DecimalPipe, SearchService, MetaAlertService]
+    providers: [DecimalPipe, SearchService]
 })
 export class AlertsListModule {
 }

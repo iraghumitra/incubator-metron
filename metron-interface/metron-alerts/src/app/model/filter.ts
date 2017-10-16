@@ -15,7 +15,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {ElasticsearchUtils} from '../utils/elasticsearch-utils';
+import {Utils} from '../utils/utils';
 
 export class Filter {
   field: string;
@@ -28,9 +28,12 @@ export class Filter {
 
   getQueryString(): string {
     if (this.field === 'guid') {
-      return ElasticsearchUtils.escapeESField(this.field) + ':' + '\"' + this.value + '\"';
+      let valueWithQuote = '\"' + this.value + '\"';
+      return '(' + Utils.escapeESField(this.field) + ':' + valueWithQuote + ' OR ' +
+          Utils.escapeESField('alert.' + this.field) + ':' +  valueWithQuote + ')';
     }
 
-    return ElasticsearchUtils.escapeESField(this.field) + ':' +  ElasticsearchUtils.escapeESValue(this.value);
+    return '(' + Utils.escapeESField(this.field) + ':' +  Utils.escapeESValue(this.value)  + ' OR ' +
+                Utils.escapeESField('alert.' + this.field) + ':' +  Utils.escapeESValue(this.value) + ')';
   }
 }

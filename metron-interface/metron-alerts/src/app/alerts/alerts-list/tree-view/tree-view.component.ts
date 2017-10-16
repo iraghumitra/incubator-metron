@@ -19,6 +19,7 @@
 import { Component, Input, OnChanges, SimpleChanges } from '@angular/core';
 import {Router} from '@angular/router';
 import {Subscription, Observable} from 'rxjs/Rx';
+import 'rxjs/add/observable/forkJoin';
 
 import {TableViewComponent} from '../table-view/table-view.component';
 import {SearchResponse} from '../../../model/search-response';
@@ -26,7 +27,6 @@ import {SearchService} from '../../../service/search.service';
 import {TreeGroupData, TreeAlertsSubscription} from './tree-group-data';
 import {GroupResponse} from '../../../model/group-response';
 import {GroupResult} from '../../../model/group-result';
-import {Group} from '../../../model/group';
 import {SortField} from '../../../model/sort-field';
 import {Sort} from '../../../utils/enums';
 import {MetronDialogBox, DialogType} from '../../../shared/metron-dialog-box';
@@ -310,10 +310,8 @@ export class TreeViewComponent extends TableViewComponent implements OnChanges {
 
   sortTreeSubGroup($event, treeGroup: TreeGroupData) {
     let sortBy = $event.sortBy === 'id' ? 'guid' : $event.sortBy;
-
-    let sortField = new SortField();
-    sortField.field = sortBy;
-    sortField.sortOrder = $event.sortOrder === Sort.ASC ? 'asc' : 'desc';
+    let sortOrder = $event.sortOrder === Sort.ASC ? 'asc' : 'desc';
+    let sortField = new SortField(sortBy, sortOrder);
 
     treeGroup.sortEvent = $event;
     treeGroup.sortField = sortField;
@@ -346,33 +344,58 @@ export class TreeViewComponent extends TableViewComponent implements OnChanges {
     });
   }
 
-  getGUIDForAlertsInGroup(group: TreeGroupData): Observable<SearchResponse> {
+  createGuidToIndexMap(allAlertsInGroup: SearchResponse[]): any {
+    let map = {};
+    allAlertsInGroup.map(alert => alert.results.forEach((alert, index) => {
+      //TODO: Rally bad hack can we change hbase.client.keyvalue.maxsize ?
+      if (index < 1000) {
+        map[alert.source.guid] = alert.index;
+      }
+    }));
+    return map;
+  }
 
+  doCreateMetaAlert(group: TreeGroupData) {
+    this.getAllAlertsForSlectedGroup(group).subscribe(guidToIndicesMap => {
+      let metaAlert = new MetaAlertCreateRequest();
+      metaAlert.guidToIndices = this.createGuidToIndexMap(guidToIndicesMap);
+      metaAlert.groups = this.queryBuilder.groupRequest.groups.map(group => group.field);
+      this.metaAlertService.create(metaAlert).subscribe(() => {
+        this.search();
+        console.log('Meta alert created successfully');
+      });
+    });
+  }
+
+  createQueryForGettingAllAlerts(group: TreeGroupData, index: number): Observable<SearchResponse>  {
     let dashRowKey = Object.keys(group.groupQueryMap);
     let searchRequest = new SearchRequest();
     searchRequest.fields = [dashRowKey[0], 'guid'];
-    searchRequest.from = 0;
+    searchRequest.from = (index * 999);
     searchRequest.indices = INDEXES;
     searchRequest.query = this.createQuery(group);
-    searchRequest.size = group.total;
+    searchRequest.size =  999;
 
     return this.searchService.search(searchRequest);
   }
 
-  createGuidToIndexMap(guidToIndicesMap: SearchResponse): any {
-    let map = {};
-    guidToIndicesMap.results.forEach(alert => map[alert.source.guid] = alert.index);
-    return map;
+  //TODO: Add comment for this obfuscated code
+  getAllAlertsForSlectedGroup(group: TreeGroupData): Observable<any> {
+    let observablesList = [];
+    let groupsizeToNearestThousands = Math.ceil(group.total/999);
+    Array(groupsizeToNearestThousands).fill('').forEach((val, index) => {
+      observablesList.push(this.createQueryForGettingAllAlerts(group, index));
+    });
+    return Observable.forkJoin(observablesList);
   }
 
   createMetaAlert(group: TreeGroupData) {
-    this.getGUIDForAlertsInGroup(group).subscribe(guidToIndicesMap => {
-      let metaAlert = new MetaAlertCreateRequest();
-      metaAlert.groups = this.queryBuilder.groupRequest.groups.map(group => group.field);
-      metaAlert.guidToIndices = this.createGuidToIndexMap(guidToIndicesMap);
-
-      this.metaAlertService.create(metaAlert).subscribe(() => {
-      });
+    
+    let confirmationMsg = 'Do you wish to create a meta alert with with selected ' + group.total + 'alerts';
+    this.metronDialogBox.showConfirmationMessage(confirmationMsg).subscribe((response) => {
+      if (response) {
+        this.doCreateMetaAlert(group);
+      }
     });
 
     console.log(group);

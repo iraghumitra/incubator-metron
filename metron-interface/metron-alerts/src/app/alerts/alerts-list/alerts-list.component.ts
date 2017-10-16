@@ -40,6 +40,9 @@ import {Filter} from '../../model/filter';
 import {Pagination} from '../../model/pagination';
 import {PatchRequest} from '../../model/patch-request';
 import {META_ALERTS_SENSOR_TYPE} from '../../utils/constants';
+import {MetaAlertService} from '../../service/meta-alert.service';
+import {SearchRequest} from '../../model/search-request';
+import {Utils} from '../../utils/utils';
 
 @Component({
   selector: 'app-alerts-list',
@@ -59,6 +62,7 @@ export class AlertsListComponent implements OnInit, OnDestroy {
   refreshTimer: Subscription;
   pauseRefresh = false;
   lastPauseRefreshValue = false;
+  isMetaAlertPresentInSelectedAlerts = false;
   threatScoreFieldName = 'threat:triage:score';
 
   @ViewChild('table') table: ElementRef;
@@ -77,7 +81,7 @@ export class AlertsListComponent implements OnInit, OnDestroy {
               private clusterMetaDataService: ClusterMetaDataService,
               private saveSearchService: SaveSearchService,
               private metronDialogBox: MetronDialogBox,
-              private changeDetector: ChangeDetectorRef) {
+              private metaAlertsService: MetaAlertService) {
     router.events.subscribe(event => {
       if (event instanceof NavigationStart && event.url === '/alerts-list') {
         this.selectedAlerts = [];
@@ -179,6 +183,8 @@ export class AlertsListComponent implements OnInit, OnDestroy {
 
   onSelectedAlertsChange(selectedAlerts) {
     this.selectedAlerts = selectedAlerts;
+    this.isMetaAlertPresentInSelectedAlerts = this.selectedAlerts.some(alert => (alert.source.alert && alert.source.alert.length > 0));
+
     if (selectedAlerts.length > 0) {
       this.pause();
     } else {
@@ -232,19 +238,19 @@ export class AlertsListComponent implements OnInit, OnDestroy {
   }
 
   processEscalate() {
-    this.updateService.updateAlertState(this.selectedAlerts, 'ESCALATE').subscribe(results => {
+    this.updateService.updateAlertState(this.selectedAlerts, 'ESCALATE', false).subscribe(results => {
       this.updateSelectedAlertStatus('ESCALATE');
     });
   }
 
   processDismiss() {
-    this.updateService.updateAlertState(this.selectedAlerts, 'DISMISS').subscribe(results => {
+    this.updateService.updateAlertState(this.selectedAlerts, 'DISMISS', false).subscribe(results => {
       this.updateSelectedAlertStatus('DISMISS');
     });
   }
 
   processOpen() {
-    this.updateService.updateAlertState(this.selectedAlerts, 'OPEN').subscribe(results => {
+    this.updateService.updateAlertState(this.selectedAlerts, 'OPEN', false).subscribe(results => {
       this.updateSelectedAlertStatus('OPEN');
     });
   }
@@ -253,6 +259,11 @@ export class AlertsListComponent implements OnInit, OnDestroy {
     this.updateService.updateAlertState(this.selectedAlerts, 'RESOLVE').subscribe(results => {
       this.updateSelectedAlertStatus('RESOLVE');
     });
+  }
+
+  processAddToAlert() {
+    this.metaAlertsService.selectedAlerts = this.selectedAlerts;
+    this.router.navigateByUrl('/alerts-list(dialog:add-to-meta-alert)');
   }
 
   removeFilter(field: string) {
@@ -323,7 +334,6 @@ export class AlertsListComponent implements OnInit, OnDestroy {
   }
 
   showDetails(alert: Alert) {
-
     this.selectedAlerts = [];
     this.selectedAlerts = [alert];
     this.saveRefreshState();
@@ -380,9 +390,21 @@ export class AlertsListComponent implements OnInit, OnDestroy {
   updateAlert(patchRequest: PatchRequest) {
     this.searchService.getAlert(patchRequest.sensorType, patchRequest.guid).subscribe(alertSource => {
       this.alerts.filter(alert => alert.source.guid === patchRequest.guid)
-      .map(alert => alert.source = alertSource);
+      .map(alert =>  alert.source = alertSource);
+      // this.alerts = this.alerts.slice();
     });
   }
+
+  // updateAlert(patchRequest: PatchRequest) {
+  //   let searchRequest = Utils.createSearchRequest(patchRequest.index, patchRequest.guid);
+  //   this.searchService.search(searchRequest).subscribe((searchResponse: SearchResponse) => {
+  //     let index = this.alerts.findIndex(alert => alert.source.guid === patchRequest.guid);
+  //     if (index !== -1) {
+  //       this.alerts[index] = searchResponse.results[0];
+  //       this.alerts = this.alerts.slice();
+  //     }
+  //   });
+  // }
   
   updateSelectedAlertStatus(status: string) {
     for (let selectedAlert of this.selectedAlerts) {

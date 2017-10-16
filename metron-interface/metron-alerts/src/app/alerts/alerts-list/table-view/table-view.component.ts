@@ -95,6 +95,11 @@ export class TableViewComponent implements OnChanges {
         }
       });
     }
+    if (changes && changes['selectedAlerts'] && changes['selectedAlerts'].currentValue) {
+      this.selectedMetaAlerts = [];
+      this.selectedAlerts.filter(alert => (alert.source.alert && alert.source.alert.length > 0))
+      .forEach(metaAlert => metaAlert.source.alert.forEach(alertSource => this.selectedMetaAlerts.push(alertSource)));
+    }
   }
 
   onSort(sortEvent: SortEvent) {
@@ -135,6 +140,15 @@ export class TableViewComponent implements OnChanges {
     return returnValue;
   }
 
+  fireSelectedAlertsChanged() {
+    let selectedAlerts = [...this.selectedAlerts, ...this.selectedMetaAlerts.map(alertSource => {
+      let alert = new Alert();
+      alert.source = alertSource;
+      return alert;
+    })];
+    this.onSelectedAlertsChange.emit(selectedAlerts);
+  }
+
   formatValue(column: ColumnMetadata, returnValue: string) {
     try {
       if (column.name.endsWith(':ts') || column.name.endsWith('timestamp')) {
@@ -150,30 +164,49 @@ export class TableViewComponent implements OnChanges {
     this.onRefreshData.emit(false);
   }
 
-  selectMetaAlertRow($event, metaAlert: AlertSource) {
-    let tAlert = new Alert();
-    tAlert.source = metaAlert;
+  processAlertsInMetaAlert() {
+    this.selectedAlerts.filter(alert => (alert.source.alert && alert.source.alert.length > 0))
+    .forEach(metaAlert => metaAlert.source.alert.forEach(alertSource => this.selectMetaAlertRow(null, alertSource)));
+  }
 
-    this.selectRow($event, tAlert);
+  selectMetaAlertRow($event, metaAlert: AlertSource) {
+    if ($event.target.checked) {
+      this.selectedMetaAlerts.push(metaAlert);
+    } else {
+      this.selectedMetaAlerts.splice(this.selectedMetaAlerts.indexOf(metaAlert), 1);
+    }
+    this.fireSelectedAlertsChanged();
   }
 
   selectRow($event, alert: Alert) {
     if ($event.target.checked) {
       this.selectedAlerts.push(alert);
+      if (alert.source.alert && alert.source.alert.length > 0) {
+        alert.source.alert.forEach(alertSource => {
+          this.selectedMetaAlerts.push(alertSource);
+        });
+      }
     } else {
       this.selectedAlerts.splice(this.selectedAlerts.indexOf(alert), 1);
+      if (alert.source.alert && alert.source.alert.length > 0) {
+        alert.source.alert.forEach(alertSource => {
+          this.selectedMetaAlerts.splice(this.selectedMetaAlerts.indexOf(alertSource), 1);
+        });
+      }
     }
-
-    this.onSelectedAlertsChange.emit(this.selectedAlerts);
+    this.fireSelectedAlertsChanged();
   }
 
   selectAllRows($event) {
     this.selectedAlerts = [];
+    this.selectedMetaAlerts = [];
+
     if ($event.target.checked) {
       this.selectedAlerts = this.alerts;
+      this.selectedAlerts.filter(alert => (alert.source.alert && alert.source.alert.length > 0))
+      .forEach(metaAlert => metaAlert.source.alert.forEach(alertSource => this.selectedMetaAlerts.push(alertSource)));
     }
-
-    this.onSelectedAlertsChange.emit(this.selectedAlerts);
+    this.fireSelectedAlertsChanged();
   }
 
   resize() {
@@ -206,27 +239,27 @@ export class TableViewComponent implements OnChanges {
     return false;
   }
 
-  doDeleteMetaAlert($event, alert: Alert, alertIndex: number, metaAlertIndex: number) {
+  deleteOneAlertFromMetaAlert($event, alert: Alert, alertIndex: number, metaAlertIndex: number) {
     this.metronDialogBox.showConfirmationMessage('Do you wish to remove the alert from the meta alert').subscribe(response => {
       if (response) {
-        this.removeAlertFromMetaAlert(alert, alertIndex, metaAlertIndex);
+        this.doDeleteOneAlertFromMetaAlert(alert, alertIndex, metaAlertIndex);
       }
     });
 
     $event.stopPropagation();
   }
 
-  doDeleteAllMetaAlerts($event, alert: Alert, index: number) {
+  deleteMetaAlert($event, alert: Alert, index: number) {
     this.metronDialogBox.showConfirmationMessage('Do you wish to remove all the alerts from meta alert').subscribe(response => {
       if (response) {
-        this.removeAlertsFromMetaAlert(alert, index);
+        this.doDeleteMetaAlert(alert, index);
       }
     });
 
     $event.stopPropagation();
   }
 
-  removeAlertFromMetaAlert(alert, alertIndex, metaAlertIndex) {
+  doDeleteOneAlertFromMetaAlert(alert, alertIndex, metaAlertIndex) {
     let metaAlerts = JSON.parse(JSON.stringify(alert.source.alert));
     metaAlerts.splice(metaAlertIndex, 1);
 
@@ -235,21 +268,19 @@ export class TableViewComponent implements OnChanges {
     patchRequest.sensorType = 'metaalert';
     patchRequest.index = alert.index;
     patchRequest.patch = [new Patch('replace', 'alert', metaAlerts)];
-    patchRequest.source = {};
 
 
     this.updateService.patch(patchRequest).subscribe(rep => {
       alert.source.alert.splice(metaAlertIndex, 1);
     });
   }
-  
-  removeAlertsFromMetaAlert(alert: Alert, index: number) {
+
+  doDeleteMetaAlert(alert: Alert, index: number) {
     let patchRequest = new PatchRequest();
     patchRequest.guid = alert.source.guid;
     patchRequest.sensorType = 'metaalert';
     patchRequest.index = alert.index;
     patchRequest.patch = [new Patch('replace', '/status', 'inactive')];
-    patchRequest.source = {};
 
     this.updateService.patch(patchRequest).subscribe(rep => {
       this.alerts.splice(index, 1);

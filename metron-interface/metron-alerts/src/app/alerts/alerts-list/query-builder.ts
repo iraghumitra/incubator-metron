@@ -57,6 +57,9 @@ export class QueryBuilder {
 
   get searchRequest(): SearchRequest {
     this._searchRequest.query = this.generateSelect();
+    if(!this._searchRequest.sort || this._searchRequest.sort.length === 0 ) {
+      this._searchRequest.sort = [new SortField('threat:triage:score', 'desc'), new SortField('timestamp', 'desc')];
+    }
     return this._searchRequest;
   }
 
@@ -117,10 +120,7 @@ export class QueryBuilder {
   }
 
   setSort(sortBy: string, order: string) {
-    let sortField = new SortField();
-    sortField.field = sortBy;
-    sortField.sortOrder = order;
-
+    let sortField = new SortField(sortBy, order);
     this.searchRequest.sort = [sortField];
   }
 
