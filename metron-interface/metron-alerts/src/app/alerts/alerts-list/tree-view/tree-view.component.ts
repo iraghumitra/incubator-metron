@@ -344,61 +344,55 @@ export class TreeViewComponent extends TableViewComponent implements OnChanges {
     });
   }
 
-  createGuidToIndexMap(allAlertsInGroup: SearchResponse[]): any {
+  createGuidToIndexMap(searchResponse: SearchResponse): any {
     let map = {};
-    allAlertsInGroup.map(alert => alert.results.forEach((alert, index) => {
-      //TODO: Rally bad hack can we change hbase.client.keyvalue.maxsize ?
-      if (index < 1000) {
-        map[alert.source.guid] = alert.index;
-      }
-    }));
+    searchResponse.results.forEach(alert => map[alert.source.guid] = alert.index);
     return map;
   }
 
   doCreateMetaAlert(group: TreeGroupData) {
-    this.getAllAlertsForSlectedGroup(group).subscribe(guidToIndicesMap => {
-      let metaAlert = new MetaAlertCreateRequest();
-      metaAlert.guidToIndices = this.createGuidToIndexMap(guidToIndicesMap);
-      metaAlert.groups = this.queryBuilder.groupRequest.groups.map(group => group.field);
-      this.metaAlertService.create(metaAlert).subscribe(() => {
-        this.search();
-        console.log('Meta alert created successfully');
-      });
+    this.getAllAlertsForSlectedGroup(group).subscribe((searchResponse: SearchResponse) => {
+      if (this.canCreateMetaAlert(searchResponse.total)) {
+        let metaAlert = new MetaAlertCreateRequest();
+        metaAlert.guidToIndices = this.createGuidToIndexMap(searchResponse);
+        metaAlert.groups = this.queryBuilder.groupRequest.groups.map(group => group.field);
+        this.metaAlertService.create(metaAlert).subscribe(() => {
+          this.search();
+          console.log('Meta alert created successfully');
+        });
+      }
     });
   }
 
-  createQueryForGettingAllAlerts(group: TreeGroupData, index: number): Observable<SearchResponse>  {
+  getAllAlertsForSlectedGroup(group: TreeGroupData): Observable<SearchResponse> {
     let dashRowKey = Object.keys(group.groupQueryMap);
     let searchRequest = new SearchRequest();
     searchRequest.fields = [dashRowKey[0], 'guid'];
-    searchRequest.from = (index * 999);
+    searchRequest.from = 0;
     searchRequest.indices = INDEXES;
     searchRequest.query = this.createQuery(group);
     searchRequest.size =  999;
-
     return this.searchService.search(searchRequest);
   }
 
-  //TODO: Add comment for this obfuscated code
-  getAllAlertsForSlectedGroup(group: TreeGroupData): Observable<any> {
-    let observablesList = [];
-    let groupsizeToNearestThousands = Math.ceil(group.total/999);
-    Array(groupsizeToNearestThousands).fill('').forEach((val, index) => {
-      observablesList.push(this.createQueryForGettingAllAlerts(group, index));
-    });
-    return Observable.forkJoin(observablesList);
+  canCreateMetaAlert(count: number) {
+    if (count > 999) {
+      let errorMessage = 'Meta Alert cannot have more than 999 alerts within it';
+      this.metronDialogBox.showConfirmationMessage(errorMessage, DialogType.Error).subscribe((response) => {});
+      return false;
+    }
+    return true;
   }
 
   createMetaAlert(group: TreeGroupData) {
-    
-    let confirmationMsg = 'Do you wish to create a meta alert with with selected ' + group.total + 'alerts';
-    this.metronDialogBox.showConfirmationMessage(confirmationMsg).subscribe((response) => {
-      if (response) {
-        this.doCreateMetaAlert(group);
-      }
-    });
-
-    console.log(group);
+    if (this.canCreateMetaAlert(group.total)) {
+      let confirmationMsg = 'Do you wish to create a meta alert with with selected ' + group.total + 'alerts';
+      this.metronDialogBox.showConfirmationMessage(confirmationMsg).subscribe((response) => {
+        if (response) {
+          this.doCreateMetaAlert(group);
+        }
+      });
+    }
   }
 
   updateAlert(patchRequest: PatchRequest) {

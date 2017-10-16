@@ -54,7 +54,6 @@ export class TableViewComponent implements OnChanges {
   metronDialogBox: MetronDialogBox;
   metaAlertsDisplayState: {[key: string]: MetronAlertDisplayState} = {};
   metronAlertDisplayState = MetronAlertDisplayState;
-  selectedMetaAlerts: AlertSource[] = [];
 
   @Input() alerts: Alert[] = [];
   @Input() queryBuilder: QueryBuilder;
@@ -94,11 +93,6 @@ export class TableViewComponent implements OnChanges {
           this.metaAlertsDisplayState[alert.id] = expandedMetaAlerts.indexOf(alert.id) === -1 ? MetronAlertDisplayState.COLLAPSE : MetronAlertDisplayState.EXPAND;
         }
       });
-    }
-    if (changes && changes['selectedAlerts'] && changes['selectedAlerts'].currentValue) {
-      this.selectedMetaAlerts = [];
-      this.selectedAlerts.filter(alert => (alert.source.alert && alert.source.alert.length > 0))
-      .forEach(metaAlert => metaAlert.source.alert.forEach(alertSource => this.selectedMetaAlerts.push(alertSource)));
     }
   }
 
@@ -141,12 +135,7 @@ export class TableViewComponent implements OnChanges {
   }
 
   fireSelectedAlertsChanged() {
-    let selectedAlerts = [...this.selectedAlerts, ...this.selectedMetaAlerts.map(alertSource => {
-      let alert = new Alert();
-      alert.source = alertSource;
-      return alert;
-    })];
-    this.onSelectedAlertsChange.emit(selectedAlerts);
+    this.onSelectedAlertsChange.emit(this.selectedAlerts);
   }
 
   formatValue(column: ColumnMetadata, returnValue: string) {
@@ -164,47 +153,19 @@ export class TableViewComponent implements OnChanges {
     this.onRefreshData.emit(false);
   }
 
-  processAlertsInMetaAlert() {
-    this.selectedAlerts.filter(alert => (alert.source.alert && alert.source.alert.length > 0))
-    .forEach(metaAlert => metaAlert.source.alert.forEach(alertSource => this.selectMetaAlertRow(null, alertSource)));
-  }
-
-  selectMetaAlertRow($event, metaAlert: AlertSource) {
-    if ($event.target.checked) {
-      this.selectedMetaAlerts.push(metaAlert);
-    } else {
-      this.selectedMetaAlerts.splice(this.selectedMetaAlerts.indexOf(metaAlert), 1);
-    }
-    this.fireSelectedAlertsChanged();
-  }
-
   selectRow($event, alert: Alert) {
     if ($event.target.checked) {
       this.selectedAlerts.push(alert);
-      if (alert.source.alert && alert.source.alert.length > 0) {
-        alert.source.alert.forEach(alertSource => {
-          this.selectedMetaAlerts.push(alertSource);
-        });
-      }
     } else {
       this.selectedAlerts.splice(this.selectedAlerts.indexOf(alert), 1);
-      if (alert.source.alert && alert.source.alert.length > 0) {
-        alert.source.alert.forEach(alertSource => {
-          this.selectedMetaAlerts.splice(this.selectedMetaAlerts.indexOf(alertSource), 1);
-        });
-      }
     }
     this.fireSelectedAlertsChanged();
   }
 
   selectAllRows($event) {
     this.selectedAlerts = [];
-    this.selectedMetaAlerts = [];
-
     if ($event.target.checked) {
       this.selectedAlerts = this.alerts;
-      this.selectedAlerts.filter(alert => (alert.source.alert && alert.source.alert.length > 0))
-      .forEach(metaAlert => metaAlert.source.alert.forEach(alertSource => this.selectedMetaAlerts.push(alertSource)));
     }
     this.fireSelectedAlertsChanged();
   }

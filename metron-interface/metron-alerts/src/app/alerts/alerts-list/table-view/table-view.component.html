@@ -55,9 +55,6 @@
               <a *ngIf="column.name === 'id'" (click)="addFilter('guid', alert.id)" title="alert.source.id" style="color:#689AA9"> {{ (alert.source.name && alert.source.name.length > 0 ? alert.source.name : alert.id) | centerEllipses:20:cell }}</a> <span  *ngIf="column.name === 'id'"> ({{ alert.source.alert.length }})</span>
               <a *ngIf="column.name === 'alert_status'" (click)="addFilter(column.name, getValue(alert, column, false))" title="{{getValue(alert, column, true)}}" style="color:#689AA9">{{ getValue(alert, column, true) | centerEllipses:20:cell }}</a>
             </td>
-            <!--<td [attr.colspan]="alertsColumnsToDisplay.length">-->
-              <!--<a (click)="addFilter('guid', alert.id)" title="alert.source.id" style="color:#689AA9"> {{ (alert.source.name && alert.source.name.length > 0 ? alert.source.name : alert.id) | centerEllipses:20:cell }}</a> <span> ({{ alert.source.alert.length }})</span>-->
-            <!--</td>-->
             <td (click)="deleteMetaAlert($event, alert, alertIndex)"> <i class="fa fa-chain-broken" aria-hidden="true"></i> </td>
             <td>
               <input id="{{ alert.id }}" class="fontawesome-checkbox" type="checkbox" name="{{alert.id}}" (click)="selectRow($event, alert)" [checked]="selectedAlerts.indexOf(alert) != -1"><label attr.for="{{ alert.id }}"></label>
@@ -69,11 +66,12 @@
               <div appAlertSeverity [severity]="metaAlerts[threatScoreFieldName]"> <a> {{ metaAlerts[threatScoreFieldName] ? metaAlerts[threatScoreFieldName] : '-' }} </a> </div>
             </td>
             <td *ngFor="let column of alertsColumnsToDisplay" #cell>
-              <a (click)="addFilter(column.name, getValueFromSource(metaAlerts, column, false))" title="{{getValueFromSource(metaAlerts, column, true)}}" style="color:#689AA9">{{ getValueFromSource(metaAlerts, column, true) | centerEllipses:20:cell }}</a>
+              <a  *ngIf="column.name !== 'alert_status'" (click)="addFilter(column.name, getValueFromSource(metaAlerts, column, false))" title="{{getValueFromSource(metaAlerts, column, true)}}" style="color:#689AA9">{{ getValueFromSource(metaAlerts, column, true) | centerEllipses:20:cell }}</a>
+              <a *ngIf="column.name === 'alert_status'" (click)="addFilter(column.name, getValue(alert, column, false))" title="{{getValue(alert, column, true)}}" style="color:#689AA9">{{ getValue(alert, column, true) | centerEllipses:20:cell }}</a>
             </td>
             <td (click)="deleteOneAlertFromMetaAlert($event, alert, alertIndex, metaAlertIndex)"> <i class="fa fa-chain-broken" aria-hidden="true"></i> </td>
             <td>
-              <input id="{{ metaAlerts.id }}" class="fontawesome-checkbox" type="checkbox" name="{{metaAlerts.id}}" (click)="selectMetaAlertRow($event, metaAlerts)" [checked]="selectedMetaAlerts.indexOf(metaAlerts) != -1"><label attr.for="{{ metaAlerts.id }}"></label>
+              <!--<input id="{{ metaAlerts.id }}" class="fontawesome-checkbox" type="checkbox" name="{{metaAlerts.id}}" (click)="selectMetaAlertRow($event, metaAlerts)" [checked]="selectedMetaAlerts.indexOf(metaAlerts) != -1"><label attr.for="{{ metaAlerts.id }}"></label>-->
             </td>
           </tr>
         </ng-container>
