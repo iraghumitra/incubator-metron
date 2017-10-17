@@ -391,7 +391,6 @@ export class AlertsListComponent implements OnInit, OnDestroy {
     this.searchService.getAlert(patchRequest.sensorType, patchRequest.guid).subscribe(alertSource => {
       this.alerts.filter(alert => alert.source.guid === patchRequest.guid)
       .map(alert =>  alert.source = alertSource);
-      // this.alerts = this.alerts.slice();
     });
   }
 

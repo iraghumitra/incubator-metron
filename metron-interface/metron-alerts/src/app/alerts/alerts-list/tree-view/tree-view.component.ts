@@ -350,14 +350,15 @@ export class TreeViewComponent extends TableViewComponent implements OnChanges {
     return map;
   }
 
-  doCreateMetaAlert(group: TreeGroupData) {
+  doCreateMetaAlert(group: TreeGroupData, index: number) {
     this.getAllAlertsForSlectedGroup(group).subscribe((searchResponse: SearchResponse) => {
       if (this.canCreateMetaAlert(searchResponse.total)) {
         let metaAlert = new MetaAlertCreateRequest();
         metaAlert.guidToIndices = this.createGuidToIndexMap(searchResponse);
         metaAlert.groups = this.queryBuilder.groupRequest.groups.map(group => group.field);
         this.metaAlertService.create(metaAlert).subscribe(() => {
-          this.search();
+          this.topGroups.splice(index, 1)
+          // this.search();
           console.log('Meta alert created successfully');
         });
       }
@@ -384,12 +385,12 @@ export class TreeViewComponent extends TableViewComponent implements OnChanges {
     return true;
   }
 
-  createMetaAlert(group: TreeGroupData) {
+  createMetaAlert(group: TreeGroupData, index: number) {
     if (this.canCreateMetaAlert(group.total)) {
       let confirmationMsg = 'Do you wish to create a meta alert with with selected ' + group.total + 'alerts';
       this.metronDialogBox.showConfirmationMessage(confirmationMsg).subscribe((response) => {
         if (response) {
-          this.doCreateMetaAlert(group);
+          this.doCreateMetaAlert(group, index);
         }
       });
     }

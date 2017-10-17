@@ -54,12 +54,6 @@ export class UpdateService {
     });
   }
 
-  public replace(replaceRequest: ReplaceRequest) {
-    let url = '/api/v1/update/replace';
-    return this.http.post(url, replaceRequest, new RequestOptions({headers: new Headers(this.defaultHeaders)}))
-    .catch(HttpUtil.handleError);
-  }
-
   public updateAlertState(alerts: Alert[], state: string, fireChangeListner = true): Observable<{}> {
     let patchRequests: PatchRequest[] = alerts.map(alert => {
       let patchRequest = new PatchRequest();
@@ -73,9 +67,7 @@ export class UpdateService {
     });
     let patchObservables = [];
     for (let patchRequest of patchRequests) {
-      // if (patchRequest.sensorType !== META_ALERTS_SENSOR_TYPE) {
-        patchObservables.push(this.patch(patchRequest, fireChangeListner));
-      // }
+      patchObservables.push(this.patch(patchRequest));
     }
     return Observable.forkJoin(patchObservables);
   }

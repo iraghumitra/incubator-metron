@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 export class Patch {
-  op: 'add' | 'remove' | 'replace';
+  op: 'add' | 'remove';
   path: string;
   value: any;
 
