@@ -21,6 +21,14 @@
   min-height: calc(100vh - 320px);
 }
 
+table {
+  background-color: $table-bg;
+
+  a {
+    color: $gothic;
+  }
+}
+
 .configure-table-icon {
   font-size: 16px;
   cursor: pointer;

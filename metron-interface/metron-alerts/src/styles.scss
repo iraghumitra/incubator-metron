@@ -267,3 +267,28 @@ hr {
   margin: 0.3rem 0;
   padding: 0;
 }
+
+.background-mine-shaft-2 {
+  background: $mine-shaft-2;
+}
+
+table {
+  a.highlight {
+    background-color: $eden-1;
+    border: 1px solid $blue-mine;
+  }
+
+  thead {
+    color: $table-header-text-color;
+  }
+
+  tbody {
+    color: $table-data-text-color;
+  }
+}
+
+.group-transit {
+  background-color: $eden-1;
+  border: 1px solid $blue-mine;
+  text-align: center;
+}

@@ -35,7 +35,7 @@ export class MetronTableDirective implements AfterViewInit {
   @Input() data: any[] = [];
   @Input() cellSelectable = false;
   rowhighlightColor = '#333333';
-  highlightColor = '#0F4450';
+  highlightColor = '#32ABDF'; //'#0F4450';
   border = '1px solid #1B596C';
 
   onSortColumnChange = new EventEmitter<SortEvent>();
@@ -60,13 +60,15 @@ export class MetronTableDirective implements AfterViewInit {
     }
 
     if (this.cellSelectable && $event.target.nodeName === 'A') {
-        $event.target.style.backgroundColor = this.highlightColor;
-        $event.target.style.border = this.border;
+        // $event.target.style.backgroundColor = this.highlightColor;
+        // $event.target.style.border = this.border;
+        $event.target.classList.add('highlight');
 
     } else {
         let parent = this.getParentTR($event.target);
         if (!parent.classList.contains('no-hover')) {
-          parent.style.backgroundColor = this.rowhighlightColor;
+          // parent.style.backgroundColor = this.rowhighlightColor;
+          parent.classList.add('background-mine-shaft-2');
         }
     }
   }
@@ -77,11 +79,13 @@ export class MetronTableDirective implements AfterViewInit {
     }
 
     if (this.cellSelectable && $event.target.nodeName === 'A') {
-      $event.target.style.border = '';
-      $event.target.style.backgroundColor = '';
+      // $event.target.style.border = '';
+      // $event.target.style.backgroundColor = '';
+      $event.target.classList.remove('highlight');
     } else {
       let parent = this.getParentTR($event.target);
-      parent.style.backgroundColor = '';
+      // parent.style.backgroundColor = '';
+      parent.classList.remove('background-mine-shaft-2');
     }
   }
 

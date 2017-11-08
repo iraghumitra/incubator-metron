@@ -65,19 +65,21 @@ export class GroupByComponent implements OnInit, OnChanges {
 
   private setTransitStyle() {
     this.dragulaService.drag.subscribe(value => {
-      value[1].style.background = this.backgroundColor;
-      value[1].style.border = this.border;
-      value[1].style.textAlign = 'Center';
+      // value[1].style.background = this.backgroundColor;
+      // value[1].style.border = this.border;
+      // value[1].style.textAlign = 'Center';
 
+      value[1].classList.add('group-transit');
       value[1].querySelector('.count').style.fontSize = '20px';
       value[1].querySelector('.name').style.fontSize = '12px';
 
     });
 
     this.dragulaService.dragend.subscribe(value => {
-      value[1].style.background = '';
-      value[1].style.border = '';
-      value[1].style.textAlign = '';
+      // value[1].style.background = '';
+      // value[1].style.border = '';
+      // value[1].style.textAlign = '';
+      value[1].classList.remove('group-transit');
     });
 
     this.dragulaService.dropModel.subscribe(value => {

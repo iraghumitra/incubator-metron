@@ -27,7 +27,7 @@
         <div appAlertSeverity [severity]="alert.source[threatScoreFieldName]"> <a> {{ alert.source[threatScoreFieldName] ? alert.source[threatScoreFieldName] : '-' }} </a> </div>
       </td>
       <td *ngFor="let column of alertsColumnsToDisplay" #cell>
-        <a (click)="addFilter(column.name, getValue(alert, column, false))" title="{{getValue(alert, column, true)}}" style="color:#689AA9">{{ getValue(alert, column, true) | centerEllipses:20:cell }}</a>
+        <a (click)="addFilter(column.name, getValue(alert, column, false))" title="{{getValue(alert, column, true)}}">{{ getValue(alert, column, true) | centerEllipses:20:cell }}</a>
       </td>
       <td> <i class="fa fa-comments-o" aria-hidden="true" *ngIf="alert.source.comments && alert.source.comments.length > 0"></i> </td>
       <td><input id="{{ alert.id }}" class="fontawesome-checkbox" type="checkbox" name="{{alert.id}}" (click)="selectRow($event, alert)" [checked]="selectedAlerts.indexOf(alert) != -1"><label attr.for="{{ alert.id }}"></label></td>
