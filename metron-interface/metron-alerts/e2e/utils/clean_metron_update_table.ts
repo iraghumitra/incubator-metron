@@ -6,8 +6,7 @@ var errorMsg = '';
 export function cleanMetronUpdateTable() {
   return  new Promise(
       function (resolve, reject) {
-        resolve();
-        // cleanupTable(resolve, reject);
+        cleanupTable(resolve, reject);
       }
   );
 }

@@ -38,7 +38,7 @@ import {ElasticsearchUtils} from '../../utils/elasticsearch-utils';
 import {Filter} from '../../model/filter';
 import {
   THREAT_SCORE_FIELD_NAME, TIMESTAMP_FIELD_NAME, ALL_TIME,
-  DISABLE_POLLING
+  POLLING_DEFAULT_STATE
 } from '../../utils/constants';
 import {TableViewComponent} from './table-view/table-view.component';
 import {Pagination} from '../../model/pagination';
@@ -62,7 +62,7 @@ export class AlertsListComponent implements OnInit, OnDestroy {
   colNumberTimerId: number;
   refreshInterval = RefreshInterval.ONE_MIN;
   refreshTimer: Subscription;
-  pauseRefresh = DISABLE_POLLING;
+  pauseRefresh = POLLING_DEFAULT_STATE;
   lastPauseRefreshValue = false;
   isMetaAlertPresentInSelectedAlerts = false;
   timeStampfilterPresent = false;

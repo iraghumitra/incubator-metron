@@ -133,8 +133,6 @@ The application will be available at http://host:4201 assuming the port is set t
 
 1. E2E tests deletes all the data in HBase table 'metron_update' and Elastic search index 'meta_alerts_index' for testing against its test data
 
-1. E2E test do not poll for alerts. The polling is disabled by setting the variable DISABLE_POLLING to true in e2e environment.
-
 An expressjs server is available for accessing the rest api.
 
 1. Run e2e webserver :
