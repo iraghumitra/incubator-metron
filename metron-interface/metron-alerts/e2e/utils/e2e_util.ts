@@ -141,6 +141,15 @@ export function loadTestData() {
   return deleteIndex().then(() => createTemplate()).then(() => loadData());
 }
 
+export function reduce_for_get_all() {
+  return  (acc, elem) => {
+    return elem.getText().then(function(text) {
+      acc.push(text);
+      return acc;
+    });
+  };
+}
+
 export function deleteTestData() {
   request.delete('http://node1:9200/alerts_ui_e2e_index*');
 }

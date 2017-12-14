@@ -20,19 +20,20 @@ import {browser, element, by, protractor} from 'protractor';
 import * as moment from 'moment/moment';
 import {
   waitForElementVisibility, waitForElementPresence, waitForElementInVisibility,
-  waitForText, waitForCssClass, waitForCssClassNotToBePresent, waitForTextChange, waitForStalenessOf
+  waitForText, waitForCssClass, waitForCssClassNotToBePresent, waitForTextChange,
+  waitForStalenessOf, reduce_for_get_all
 } from '../utils/e2e_util';
 
 export class MetronAlertsPage {
   private EC = protractor.ExpectedConditions;
 
   navigateTo() {
-    browser.waitForAngularEnabled(false);
-    return browser.get('/alerts-list');
+    return browser.waitForAngularEnabled(false)
+    .then(() => browser.get('/alerts-list'));
   }
 
   clearLocalStorage() {
-    browser.executeScript('window.localStorage.clear();');
+    return browser.executeScript('window.localStorage.clear();');
   }
 
   isMetronLogoPresent() {
@@ -77,23 +78,23 @@ export class MetronAlertsPage {
 
   clickActionDropdown() {
     let actionsDropDown = element(by.buttonText('ACTIONS'));
-    browser.actions().mouseMove(actionsDropDown).perform();
-    return actionsDropDown.click();
+    return browser.actions().mouseMove(actionsDropDown).perform()
+    .then(() => actionsDropDown.click());
   }
 
   clickActionDropdownOption(option: string) {
-    this.clickActionDropdown().then(() => {
-      element(by.cssContainingText('.dropdown-menu span', option)).click();
-      browser.sleep(2000);
-    });
+    this.clickActionDropdown()
+    .then(() => element(by.cssContainingText('.dropdown-menu span', option)).click())
+    .then(() => waitForCssClassNotToBePresent(element(by.css('#table-actions')), 'show'));
   }
 
   getActionDropdownItems() {
-    return this.clickActionDropdown().then(() => element.all(by.css('.dropdown-menu .dropdown-item.disabled')).getText());
+    return this.clickActionDropdown()
+    .then(() => element.all(by.css('.dropdown-menu .dropdown-item.disabled')).reduce(reduce_for_get_all(), []));
   }
 
   getTableColumnNames() {
-    return element.all(by.css('app-alerts-list .table th')).getText();
+    return element.all(by.css('app-alerts-list .table th')).reduce(reduce_for_get_all(), []);
   }
 
   getChangedPaginationText(previousText: string) {
@@ -138,23 +139,23 @@ export class MetronAlertsPage {
   }
 
   getSettingsLabels() {
-    return element.all(by.css('app-configure-rows  form label:not(.switch)')).getText();
+    return element.all(by.css('app-configure-rows  form label:not(.switch)')).reduce(reduce_for_get_all() ,[]);
   }
 
   getRefreshRateOptions() {
-    return element.all(by.css('.preset-row.refresh-interval .preset-cell')).getText();
+    return element.all(by.css('.preset-row.refresh-interval .preset-cell')).reduce(reduce_for_get_all() ,[]);
   }
 
   getRefreshRateSelectedOption() {
-    return element.all(by.css('.preset-row.refresh-interval .preset-cell.is-active')).getText();
+    return element.all(by.css('.preset-row.refresh-interval .preset-cell.is-active')).reduce(reduce_for_get_all() ,[]);
   }
 
   getPageSizeOptions() {
-    return element.all(by.css('.preset-row.page-size .preset-cell')).getText();
+    return element.all(by.css('.preset-row.page-size .preset-cell')).reduce(reduce_for_get_all() ,[]);
   }
 
   getPageSizeSelectedOption() {
-    return element.all(by.css('.preset-row.page-size .preset-cell.is-active')).getText();
+    return element.all(by.css('.preset-row.page-size .preset-cell.is-active')).reduce(reduce_for_get_all() ,[]);
   }
 
   clickRefreshInterval(intervalText: string) {
@@ -167,8 +168,9 @@ export class MetronAlertsPage {
 
   clickConfigureTable() {
     let gearIcon = element(by.css('app-alerts-list .fa.fa-cog.configure-table-icon'));
-    waitForElementVisibility(gearIcon).then(() => gearIcon.click());
-    browser.sleep(1000);
+    return waitForElementVisibility(gearIcon)
+    .then(() => gearIcon.click())
+    .then(() => browser.sleep(1000));
   }
 
   clickCloseSavedSearch() {
@@ -202,7 +204,7 @@ export class MetronAlertsPage {
   }
 
   clickClearSearch(alertCount = '169') {
-    element(by.css('.btn-search-clear')).click()
+    return element(by.css('.btn-search-clear')).click()
     .then(() => waitForText('.ace_line', '*'))
     .then(() => waitForText('.col-form-label-lg', `Alerts (${alertCount})`));
   }
@@ -240,16 +242,23 @@ export class MetronAlertsPage {
   }
 
   getSelectedColumnNames() {
-    return element.all(by.css('app-configure-table input[type="checkbox"]:checked')).map(ele => {
-      return ele.getAttribute('id').then(id => id.replace(/select-deselect-/, ''));
-    });
+    return element.all(by.css('app-configure-table input[type="checkbox"]:checked')).reduce((acc, ele) => {
+      return ele.getAttribute('id').then(id => {
+        acc.push(id.replace(/select-deselect-/, ''));
+        return acc;
+      })
+    }, []);
+
+    // return element.all(by.css('app-configure-table input[type="checkbox"]:checked')).map(ele => {
+    //   return ele.getAttribute('id').then(id => id.replace(/select-deselect-/, ''));
+    // });
   }
 
   toggleSelectCol(name: string, scrollTo = '') {
     scrollTo = scrollTo === '' ? name : scrollTo;
     let ele = element(by.css('app-configure-table label[for="select-deselect-' + name + '"]'));
     let scrollToEle = element(by.css('app-configure-table label[for="select-deselect-' + scrollTo + '"]'));
-    browser.actions().mouseMove(scrollToEle).perform().then(() => ele.click());
+    return browser.actions().mouseMove(scrollToEle).perform().then(() => ele.click());
   }
 
   saveSearch(name: string) {
@@ -258,7 +267,7 @@ export class MetronAlertsPage {
   }
 
   saveConfigureColumns() {
-    element(by.css('app-configure-table')).element(by.buttonText('SAVE')).click();
+    return element(by.css('app-configure-table')).element(by.buttonText('SAVE')).click();
   }
 
   clickRemoveSearchChipAndGetSearchText(expectedSearchText: string) {
@@ -281,10 +290,10 @@ export class MetronAlertsPage {
   }
 
   setSearchText(search: string,  alertCount = '169') {
-    this.clickClearSearch(alertCount);
-    element(by.css('app-alerts-list .ace_text-input')).sendKeys(protractor.Key.BACK_SPACE);
-    element(by.css('app-alerts-list .ace_text-input')).sendKeys(search);
-    element(by.css('app-alerts-list .ace_text-input')).sendKeys(protractor.Key.ENTER);
+    return this.clickClearSearch(alertCount)
+    .then(() => element(by.css('app-alerts-list .ace_text-input')).sendKeys(protractor.Key.BACK_SPACE))
+    .then(() => element(by.css('app-alerts-list .ace_text-input')).sendKeys(search))
+    .then(() => element(by.css('app-alerts-list .ace_text-input')).sendKeys(protractor.Key.ENTER))
   }
 
   waitForElementPresence (element ) {
@@ -311,6 +320,7 @@ export class MetronAlertsPage {
     let row = element.all(by.css('app-alerts-list tbody tr')).get(rowIndex);
     let column = row.all(by.css('td a')).get(colIndex);
     return this.waitForTextChange(column, previousText).then(() => {
+      browser.sleep(500);
       return column.getText();
     });
   }
@@ -326,7 +336,7 @@ export class MetronAlertsPage {
   }
 
   clickDateSettings() {
-    element(by.css('app-time-range button.btn-search')).click()
+    return element(by.css('app-time-range button.btn-search')).click()
     .then(() => waitForCssClass(element(by.css('app-time-range #time-range')), 'show'));
   }
 
@@ -337,15 +347,21 @@ export class MetronAlertsPage {
   }
 
   getTimeRangeTitles() {
-    return element.all(by.css('app-time-range .title')).getText();
+    return element.all(by.css('app-time-range .title')).reduce(reduce_for_get_all(), []);
   }
 
   getQuickTimeRanges() {
-    return element.all(by.css('app-time-range .quick-ranges span')).getText();
+    return element.all(by.css('app-time-range .quick-ranges span')).reduce(reduce_for_get_all(), []);
   }
 
   getValueForManualTimeRange() {
-    return element.all(by.css('app-time-range input.form-control')). getAttribute('value');
+    return element.all(by.css('app-time-range input.form-control')).reduce((acc, ele) => {
+      return ele.getAttribute('value').then(value => {
+        acc.push(value);
+        return acc;
+      });
+    }, []);
+    // return element.all(by.css('app-time-range input.form-control')).getAttribute('value');
   }
 
   isManulaTimeRangeApplyButtonPresent() {
@@ -384,7 +400,7 @@ export class MetronAlertsPage {
   }
 
   setDate(index: number, year: string, month: string, day: string, hour: string, min: string, sec: string) {
-    element.all(by.css('app-time-range .calendar')).get(index).click()
+    return element.all(by.css('app-time-range .calendar')).get(index).click()
     .then(() => element.all(by.css('.pika-select.pika-select-hour')).get(index).click())
     .then(() => element.all(by.css('.pika-select.pika-select-hour')).get(index).element(by.cssContainingText('option', hour)).click())
     .then(() => element.all(by.css('.pika-select.pika-select-minute')).get(index).click())
@@ -398,7 +414,7 @@ export class MetronAlertsPage {
     .then(() => element.all(by.css('.pika-table')).get(index).element(by.buttonText(day)).click())
     .then(() => waitForElementInVisibility(element.all(by.css('.pika-single')).get(index)));
 
-    browser.sleep(1000);
+    // browser.sleep(1000);
   }
 
   selectTimeRangeApplyButton() {
@@ -407,9 +423,8 @@ export class MetronAlertsPage {
 
   getChangesAlertTableTitle(previousText: string) {
     let title = element(by.css('.col-form-label-lg'));
-    return waitForTextChange(title, previousText).then(() => {
-      return title.getText();
-    });
+    return waitForTextChange(title, previousText)
+    .then(() => title.getText());
   }
 
   getAlertStatusById(id: string) {
@@ -462,7 +477,7 @@ export class MetronAlertsPage {
   }
 
   getTimeRangeButtonTextForNow() {
-    return element.all(by.css('app-time-range button span')).getText();
+    return element.all(by.css('app-time-range button span')).reduce(reduce_for_get_all(), []);
   }
 
   getTimeRangeButtonAndSubText() {
@@ -483,7 +498,7 @@ export class MetronAlertsPage {
   }
 
   renameColumn(name: string, value: string) {
-    element(by.cssContainingText('app-configure-table span', name))
+    return element(by.cssContainingText('app-configure-table span', name))
     .element(by.xpath('../..'))
     .element(by.css('.input')).sendKeys(value);
   }
