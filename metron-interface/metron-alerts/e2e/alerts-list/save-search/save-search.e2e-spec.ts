@@ -27,13 +27,13 @@ describe('Test spec for search and save search', function() {
 
   beforeAll(async function() : Promise<any> {
     loginPage = new LoginPage();
-    loginPage.login();
+    await loginPage.login();
 
     await loadTestData();
   });
 
   afterAll(async function() : Promise<any> {
-    loginPage.logout();
+    await loginPage.logout();
     await deleteTestData();
   });
 
@@ -42,16 +42,16 @@ describe('Test spec for search and save search', function() {
     jasmine.addMatchers(customMatchers);
   });
 
-  it('should display all the default values for saved searches', () => {
-    page.clearLocalStorage();
-    page.navigateTo();
+  it('should display all the default values for saved searches', async function() : Promise<any> {
+    await page.clearLocalStorage();
+    await page.navigateTo();
 
-    page.clickSavedSearch();
-    expect(page.getSavedSearchTitle()).toEqualBcoz('Searches', 'for saved searches title');
-    expect(page.getRecentSearchOptions()).toEqualBcoz([], 'for recent search options');
-    expect(page.getSavedSearchOptions()).toEqualBcoz([], 'for saved search options');
-    expect(page.getDefaultRecentSearchValue()).toEqualBcoz([ 'No Recent Searches' ], 'for recent search default value');
-    expect(page.getDefaultSavedSearchValue()).toEqualBcoz([ 'No Saved Searches' ], 'for saved search default value');
+    await page.clickSavedSearch();
+    expect(await page.getSavedSearchTitle()).toEqualBcoz('Searches', 'for saved searches title');
+    expect(await page.getRecentSearchOptions()).toEqualBcoz([], 'for recent search options');
+    expect(await page.getSavedSearchOptions()).toEqualBcoz([], 'for saved search options');
+    expect(await page.getDefaultRecentSearchValue()).toEqualBcoz([ 'No Recent Searches' ], 'for recent search default value');
+    expect(await page.getDefaultSavedSearchValue()).toEqualBcoz([ 'No Saved Searches' ], 'for saved search default value');
     page.clickCloseSavedSearch();
 
   });

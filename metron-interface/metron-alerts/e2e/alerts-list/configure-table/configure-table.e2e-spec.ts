@@ -29,13 +29,13 @@ describe('Test spec for table column configuration', function() {
 
   beforeAll(async function() : Promise<any> {
     loginPage = new LoginPage();
-    loginPage.login();
+    await loginPage.login();
 
     await loadTestData();
   });
 
   afterAll(async function() : Promise<any> {
-    loginPage.logout();
+    await loginPage.logout();
     await deleteTestData();
   });
 
@@ -44,39 +44,39 @@ describe('Test spec for table column configuration', function() {
     jasmine.addMatchers(customMatchers);
   });
 
-  it('should select columns from table configuration', () => {
+  it('should select columns from table configuration', async function() : Promise<any> {
     let newColNamesColumnConfig = [ 'score', 'timestamp', 'source:type', 'ip_src_addr', 'enrichments:geo:ip_dst_addr:country',
       'ip_dst_addr', 'host', 'alert_status', 'guid' ];
 
-    page.clearLocalStorage();
-    page.navigateTo();
+    await page.clearLocalStorage();
+    await page.navigateTo();
 
-    page.clickConfigureTable();
-    expect(page.getSelectedColumnNames()).toEqualBcoz(colNamesColumnConfig, 'for default selected column names');
-    page.toggleSelectCol('id');
-    page.toggleSelectCol('guid', 'method');
-    expect(page.getSelectedColumnNames()).toEqualBcoz(newColNamesColumnConfig, 'for guid added to selected column names');
-    page.saveConfigureColumns();
+    await  page.clickConfigureTable();
+    expect(await  page.getSelectedColumnNames()).toEqualBcoz(colNamesColumnConfig, 'for default selected column names');
+    await page.toggleSelectCol('id');
+    await page.toggleSelectCol('guid', 'method');
+    expect(await page.getSelectedColumnNames()).toEqualBcoz(newColNamesColumnConfig, 'for guid added to selected column names');
+    await page.saveConfigureColumns();
   });
 
-  it('should rename columns from table configuration', () => {
-    page.clearLocalStorage();
-    page.navigateTo();
+  it('should rename columns from table configuration', async function() : Promise<any> {
+    await page.clearLocalStorage();
+    await page.navigateTo();
 
-    page.clickConfigureTable();
-    page.renameColumn('enrichments:geo:ip_dst_addr:country', 'Country');
-    page.saveConfigureColumns();
+    await page.clickConfigureTable();
+    await page.renameColumn('enrichments:geo:ip_dst_addr:country', 'Country');
+    await page.saveConfigureColumns();
 
-    expect(page.clickTableTextAndGetSearchText('FR', 'Country:FR')).toEqual('Country:FR');
-    expect(page.getChangesAlertTableTitle('Alerts (169)')).toEqual('Alerts (25)');
-    page.clickClearSearch();
+    expect(await page.clickTableTextAndGetSearchText('FR', 'Country:FR')).toEqual('Country:FR');
+    expect(await page.getChangesAlertTableTitle('Alerts (169)')).toEqual('Alerts (25)');
+    await page.clickClearSearch();
 
-    expect(page.getChangesAlertTableTitle('Alerts (25)')).toEqual('Alerts (169)');
-    page.setSearchText('Country:FR');
-    expect(page.getChangesAlertTableTitle('Alerts (169)')).toEqual('Alerts (25)');
-    page.clickClearSearch();
+    expect(await page.getChangesAlertTableTitle('Alerts (25)')).toEqual('Alerts (169)');
+    await page.setSearchText('Country:FR');
+    expect(await page.getChangesAlertTableTitle('Alerts (169)')).toEqual('Alerts (25)');
+    await page.clickClearSearch();
 
-    expect(page.getTableColumnNames()).toContain('Country', 'for renamed column names for alert list table');
+    expect(await page.getTableColumnNames()).toContain('Country', 'for renamed column names for alert list table');
 
   });
 

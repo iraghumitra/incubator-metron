@@ -24,11 +24,11 @@ export class LoginPage {
     }
 
     login() {
-        this.navigateToLogin();
-        this.setUserNameAndPassword('admin', 'password');
-        this.submitLoginForm();
-        browser.waitForAngularEnabled(false);
-        browser.wait(function() {return element(by.css('.logout')).isPresent(); });
+        return this.navigateToLogin()
+        .then(() => this.setUserNameAndPassword('admin', 'password'))
+        .then(() => this.submitLoginForm())
+        .then(() => browser.waitForAngularEnabled(false))
+        .then(() => browser.wait(function() {return element(by.css('.logout')).isPresent(); }))
     }
 
     logout() {
@@ -41,7 +41,9 @@ export class LoginPage {
     setUserNameAndPassword(userName: string, password: string) {
         return waitForElementVisibility(element(by.css('[name=user]')))
         .then(() => waitForElementVisibility(element(by.css('[name=password]'))))
+        .then(() => element(by.css('[name=user]')).clear())
         .then(() => element(by.css('[name=user]')).sendKeys(userName))
+        .then(() => element(by.css('[name=password]')).clear())
         .then(() => element(by.css('[name=password]')).sendKeys(password));
     }
 
@@ -62,8 +64,6 @@ export class LoginPage {
     }
 
     getLocation() {
-        return browser.getCurrentUrl().then(url => {
-            return url;
-        });
+        return browser.getCurrentUrl();
     }
 }
