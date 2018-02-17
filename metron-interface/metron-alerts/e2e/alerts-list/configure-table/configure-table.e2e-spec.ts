@@ -29,9 +29,9 @@ describe('Test spec for table column configuration', function() {
 
   beforeAll(async function() : Promise<any> {
     loginPage = new LoginPage();
-    await loginPage.login();
 
     await loadTestData();
+    await loginPage.login();
   });
 
   afterAll(async function() : Promise<any> {
@@ -54,7 +54,7 @@ describe('Test spec for table column configuration', function() {
     await  page.clickConfigureTable();
     expect(await  page.getSelectedColumnNames()).toEqualBcoz(colNamesColumnConfig, 'for default selected column names');
     await page.toggleSelectCol('id');
-    await page.toggleSelectCol('guid', 'method');
+    await page.toggleSelectCol('guid');
     expect(await page.getSelectedColumnNames()).toEqualBcoz(newColNamesColumnConfig, 'for guid added to selected column names');
     await page.saveConfigureColumns();
   });

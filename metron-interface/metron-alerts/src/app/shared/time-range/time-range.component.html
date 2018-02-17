@@ -38,16 +38,16 @@
           <div class="title"> Quick Ranges </div> <br>
           <div class="row no-gutters">
             <div class="col-3">
-              <span *ngFor="let key of timeRangeMappingCol1 | mapKeys" (click)="selectTimeRange($event, timeRangeMappingCol1[key])">  {{ key }} </span> <br>
+              <span *ngFor="let key of timeRangeMappingCol1 | mapKeys" (click)="selectTimeRange($event, timeRangeMappingCol1[key])" [attr.id]="timeRangeMappingCol1[key]">  {{ key }} </span> <br>
             </div>
             <div class="col-3">
-              <span *ngFor="let key of timeRangeMappingCol2 | mapKeys" (click)="selectTimeRange($event, timeRangeMappingCol2[key])">  {{ key }} </span> <br>
+              <span *ngFor="let key of timeRangeMappingCol2 | mapKeys" (click)="selectTimeRange($event, timeRangeMappingCol2[key])" [attr.id]="timeRangeMappingCol2[key]">  {{ key }} </span> <br>
             </div>
             <div class="col-3">
-              <span *ngFor="let key of timeRangeMappingCol3 | mapKeys" (click)="selectTimeRange($event, timeRangeMappingCol3[key])">  {{ key }} </span> <br>
+              <span *ngFor="let key of timeRangeMappingCol3 | mapKeys" (click)="selectTimeRange($event, timeRangeMappingCol3[key])" [attr.id]="timeRangeMappingCol3[key]">  {{ key }} </span> <br>
             </div>
             <div class="col-3">
-              <span *ngFor="let key of timeRangeMappingCol4 | mapKeys" (click)="selectTimeRange($event, timeRangeMappingCol4[key])">  {{ key }} </span> <br>
+              <span *ngFor="let key of timeRangeMappingCol4 | mapKeys" (click)="selectTimeRange($event, timeRangeMappingCol4[key])" [attr.id]="timeRangeMappingCol4[key]">  {{ key }} </span> <br>
             </div>
           </div>
         </div>

@@ -16,12 +16,18 @@
  * limitations under the License.
  */
 import { LoginPage } from './login.po';
+import {deleteTestData, loadTestData} from '../utils/e2e_util';
 
 describe('Test spec for login page', function() {
     let page: LoginPage;
 
-    beforeEach(() => {
-        page = new LoginPage();
+    beforeAll(async function() : Promise<any> {
+      page = new LoginPage();
+      await loadTestData();
+    });
+
+    afterAll(async function() : Promise<any> {
+        await deleteTestData();
     });
 
     it('should display error message for invalid credentials', async function() : Promise<any> {

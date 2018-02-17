@@ -30,18 +30,17 @@ describe('Test spec for metron details page', function() {
   let loginPage: LoginPage;
 
   beforeAll(async function() : Promise<any> {
-
     loginPage = new LoginPage();
     listPage = new MetronAlertsPage();
     treePage = new TreeViewPage();
-    loginPage.login();
 
     await loadTestData();
+    await loginPage.login();
   });
 
   afterAll(async function() : Promise<any> {
     new MetronAlertsPage().navigateTo();
-    loginPage.logout();
+    await loginPage.logout();
     await deleteTestData();
   });
 
@@ -50,23 +49,23 @@ describe('Test spec for metron details page', function() {
     jasmine.addMatchers(customMatchers);
   });
 
-  it('should change alert statuses', async function() : Promise<any> {
+  xit('should change alert statuses', async function() : Promise<any> {
     let alertId = '2cc174d7-c049-aaf4-d0d6-138073777309';
 
     await page.navigateTo(alertId);
-    expect(page.getAlertStatus('ANY')).toEqual('NEW');
+    expect(await page.getAlertStatus('ANY')).toEqual('NEW');
     await page.clickOpen();
-    expect(page.getAlertStatus('NEW')).toEqual('OPEN');
-    expect(listPage.getAlertStatusById(alertId)).toEqual('OPEN');
+    expect(await page.getAlertStatus('NEW')).toEqual('OPEN');
+    expect(await listPage.getAlertStatusById(alertId)).toEqual('OPEN');
     await page.clickDismiss();
-    expect(page.getAlertStatus('OPEN')).toEqual('DISMISS');
-    expect(listPage.getAlertStatusById(alertId)).toEqual('DISMISS');
+    expect(await page.getAlertStatus('OPEN')).toEqual('DISMISS');
+    expect(await listPage.getAlertStatusById(alertId)).toEqual('DISMISS');
     await page.clickEscalate();
-    expect(page.getAlertStatus('DISMISS')).toEqual('ESCALATE');
-    expect(listPage.getAlertStatusById(alertId)).toEqual('ESCALATE');
+    expect(await page.getAlertStatus('DISMISS')).toEqual('ESCALATE');
+    expect(await listPage.getAlertStatusById(alertId)).toEqual('ESCALATE');
     await page.clickResolve();
-    expect(page.getAlertStatus('ESCALATE')).toEqual('RESOLVE');
-    expect(listPage.getAlertStatusById(alertId)).toEqual('RESOLVE');
+    expect(await page.getAlertStatus('ESCALATE')).toEqual('RESOLVE');
+    expect(await listPage.getAlertStatusById(alertId)).toEqual('RESOLVE');
     await page.clickNew();
   });
 
@@ -74,9 +73,12 @@ describe('Test spec for metron details page', function() {
     let comment1 = 'This is a sample comment';
     let comment2 = 'This is a sample comment again';
     let userNameAndTimestamp = '- admin - a few seconds ago';
+    let alertId = '2cc174d7-c049-aaf4-d0d6-138073777309';
+
+    await page.navigateTo(alertId);
 
     await page.clickCommentsInSideNav();
-    page.addCommentAndSave(comment1, 0);
+    await page.addCommentAndSave(comment1, 0);
 
     expect(page.getCommentsText()).toEqual([comment1]);
     expect(page.getCommentsUserNameAndTimeStamp()).toEqual([userNameAndTimestamp]);
@@ -102,7 +104,7 @@ describe('Test spec for metron details page', function() {
     page.closeDetailPane();
   });
 
-  it('should add comments for tree view', () => {
+  xit('should add comments for tree view', () => {
     let comment1 = 'This is a sample comment';
     let comment2 = 'This is a sample comment again';
     let userNameAndTimestamp = '- admin - a few seconds ago';

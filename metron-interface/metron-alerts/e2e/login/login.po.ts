@@ -28,13 +28,17 @@ export class LoginPage {
         .then(() => this.setUserNameAndPassword('admin', 'password'))
         .then(() => this.submitLoginForm())
         .then(() => browser.waitForAngularEnabled(false))
-        .then(() => browser.wait(function() {return element(by.css('.logout')).isPresent(); }))
+        .then(() => waitForElementVisibility(element(by.css('.logout-link'))))
+        .then(() => browser.executeScript("document.body.className += ' notransition';"));
+
+        // .then(() => browser.wait(function() {return element(by.css('.logout-link')).isPresent(); }))
     }
 
     logout() {
+      // .then(() => element.all(by.css('.alert .close')).click())
         return browser.waitForAngularEnabled(false)
-        .then(() => element.all(by.css('.alert .close')).click())
-        .then(() => element.all(by.css('.logout-link')).click())
+        .then(() => waitForElementVisibility(element(by.css('.logout-link'))))
+        .then(() => element(by.css('.logout-link')).click())
         .then(() => waitForURL('http://localhost:4200/login'));
     }
 
@@ -48,7 +52,7 @@ export class LoginPage {
     }
 
     submitLoginForm() {
-        return element.all(by.buttonText('LOG IN')).click();
+        return element(by.buttonText('LOG IN')).click();
     }
 
     getErrorMessage() {
