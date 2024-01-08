@@ -88,7 +88,7 @@
         <global_caffeine_version>2.6.2</global_caffeine_version>
         <global_antlr_version>4.5</global_antlr_version>
         <global_opencsv_version>3.7</global_opencsv_version>
-        <global_curator_version>2.7.1</global_curator_version>
+        <global_curator_version>5.6.0</global_curator_version>
         <global_classindex_version>3.3</global_classindex_version>
         <global_storm_version>1.0.3</global_storm_version>
         <global_storm_kafka_version>1.1.0</global_storm_kafka_version>
@@ -262,7 +262,7 @@
                 <artifactId>cobertura-maven-plugin</artifactId>
                 <version>2.7</version>
                 <configuration>
-                    <check />
+                    <check/>
                     <formats>
                         <format>html</format>
                     </formats>
