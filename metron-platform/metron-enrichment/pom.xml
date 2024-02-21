@@ -28,7 +28,7 @@
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <slf4j.version>1.7.7</slf4j.version>
         <storm.hdfs.version>0.1.2</storm.hdfs.version>
-        <commons-compress.version>1.13</commons-compress.version>
+        <commons-compress.version>1.26.0</commons-compress.version>
         <geoip.version>2.8.0</geoip.version>
         <guava.version>${global_hbase_guava_version}</guava.version>
     </properties>
@@ -385,8 +385,7 @@
                             </artifactSet>
                             <transformers>
                                 <transformer implementation="org.atteo.classindex.ClassIndexTransformer"/>
-                                <transformer
-                                  implementation="org.apache.maven.plugins.shade.resource.DontIncludeResourceTransformer">
+                                <transformer implementation="org.apache.maven.plugins.shade.resource.DontIncludeResourceTransformer">
                                      <resources>
                                         <resource>.yaml</resource>
                                         <resource>LICENSE.txt</resource>
@@ -399,11 +398,9 @@
                                     <addHeader>false</addHeader>
                                     <projectName>${project.name}</projectName>
                                 </transformer-->
-                                <transformer
-                                        implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer" />
-                                <transformer
-                                        implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
-                                    <mainClass></mainClass>
+                                <transformer implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer"/>
+                                <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+                                    <mainClass/>
                                 </transformer>
                             </transformers>
                         </configuration>
