@@ -96,7 +96,7 @@
         <global_pcap_version>1.7.1</global_pcap_version>
         <global_kafka_version>0.10.0.1</global_kafka_version>
         <global_hadoop_version>${base_hadoop_version}</global_hadoop_version>
-        <global_hbase_version>${base_hbase_version}</global_hbase_version>
+        <global_hbase_version>2.0.0</global_hbase_version>
         <global_flume_version>${base_flume_version}</global_flume_version>
         <global_elasticsearch_version>5.6.2</global_elasticsearch_version>
         <global_json_simple_version>1.1.1</global_json_simple_version>
@@ -117,7 +117,7 @@
         <global_surefire_version>2.18</global_surefire_version>
         <global_maven_version>[3.3.1,)</global_maven_version>
         <global_kryo_version>3.0.3</global_kryo_version>
-        <global_kryo_serializers_version>0.38</global_kryo_serializers_version>
+        <global_kryo_serializers_version>0.39</global_kryo_serializers_version>
         <global_reflections_version>0.9.10</global_reflections_version>
         <global_checkstyle_version>8.0</global_checkstyle_version>
         <global_log4j_core_version>2.1</global_log4j_core_version>
@@ -262,7 +262,7 @@
                 <artifactId>cobertura-maven-plugin</artifactId>
                 <version>2.7</version>
                 <configuration>
-                    <check />
+                    <check/>
                     <formats>
                         <format>html</format>
                     </formats>
