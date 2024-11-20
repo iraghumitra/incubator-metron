@@ -15,7 +15,7 @@
 #  limitations under the License.
 #
 
-FROM ubuntu:trusty
+FROM ubuntu:trusty-20190425
 
 # install prerequisites
 RUN apt-get update && apt-get install -y \
