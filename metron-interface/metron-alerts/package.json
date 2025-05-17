@@ -23,7 +23,7 @@
     "@angular/router": "^4.0.0",
     "@types/moment": "^2.13.0",
     "ace-builds": "^1.2.6",
-    "bootstrap": "4.0.0-alpha.6",
+    "bootstrap": "4.0.0",
     "core-js": "^2.4.1",
     "font-awesome": "^4.7.0",
     "moment": "^2.18.1",
