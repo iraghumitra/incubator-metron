@@ -300,7 +300,7 @@
         <dependency>
             <groupId>commons-validator</groupId>
             <artifactId>commons-validator</artifactId>
-            <version>1.4.0</version>
+            <version>1.10.0</version>
         </dependency>
         <dependency>
             <groupId>org.apache.metron</groupId>
@@ -385,8 +385,7 @@
                             </artifactSet>
                             <transformers>
                                 <transformer implementation="org.atteo.classindex.ClassIndexTransformer"/>
-                                <transformer
-                                  implementation="org.apache.maven.plugins.shade.resource.DontIncludeResourceTransformer">
+                                <transformer implementation="org.apache.maven.plugins.shade.resource.DontIncludeResourceTransformer">
                                      <resources>
                                         <resource>.yaml</resource>
                                         <resource>LICENSE.txt</resource>
@@ -399,11 +398,9 @@
                                     <addHeader>false</addHeader>
                                     <projectName>${project.name}</projectName>
                                 </transformer-->
-                                <transformer
-                                        implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer" />
-                                <transformer
-                                        implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
-                                    <mainClass></mainClass>
+                                <transformer implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer"/>
+                                <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+                                    <mainClass/>
                                 </transformer>
                             </transformers>
                         </configuration>
