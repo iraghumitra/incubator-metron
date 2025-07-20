@@ -4,7 +4,7 @@
   "description": "Metron alerts ui web server",
   "main": "server.js",
   "dependencies": {
-    "compression": "1.6.2",
+    "compression": "1.8.1",
     "express": "4.15.2",
     "http-proxy-middleware": "0.17.4",
     "optimist": "0.6.1",
